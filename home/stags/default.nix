@@ -53,6 +53,9 @@
     "org/gnome/shell" = {
       enabled-extensions = [ "appindicatorsupport@rgcjonas.gmail.com" ];
     };
+    "org/gnome/desktop/wm/preferences" = {
+      button-layout = "appmenu:minimize,maximize,close";
+    };
   };
 
   home.stateVersion = "25.11";
