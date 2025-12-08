@@ -86,7 +86,7 @@
   services.fwupd.enable = true;
   services.printing.enable = false;
   hardware.bluetooth.enable = true;
-  services.blueman.enable = true;
+  services.blueman.enable = false;
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "client";
