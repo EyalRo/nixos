@@ -30,6 +30,8 @@
     };
   };
   xdg.configFile."fish/config.fish".force = true;
+  xdg.configFile."autostart/tailscale-systray.desktop".source =
+    "${pkgs.tailscale-systray}/share/applications/tailscale-systray.desktop";
   programs.starship = {
     enable = true;
     enableFishIntegration = true;
