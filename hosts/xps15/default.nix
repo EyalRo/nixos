@@ -118,6 +118,7 @@
     firefox
     git
     gnome-tweaks
+    gnomeExtensions.appindicator
     gnomeExtensions.caffeine
     gnome-browser-connector
   ];
