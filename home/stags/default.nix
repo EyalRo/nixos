@@ -48,6 +48,9 @@
     "org/gnome/shell/extensions/caffeine" = {
       user-enabled = true;
     };
+    "org/gnome/shell" = {
+      enabled-extensions = [ "appindicatorsupport@rgcjonas.gmail.com" ];
+    };
   };
 
   home.stateVersion = "25.11";
