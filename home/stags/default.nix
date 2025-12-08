@@ -30,8 +30,15 @@
     };
   };
   xdg.configFile."fish/config.fish".force = true;
-  xdg.configFile."autostart/tailscale-systray.desktop".source =
-    "${pkgs.tailscale-systray}/share/applications/tailscale-systray.desktop";
+  systemd.user.services.tailscale-systray = {
+    Unit = {
+      Description = "Tailscale system tray";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service.ExecStart = "${pkgs.tailscale-systray}/bin/tailscale-systray";
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
   programs.starship = {
     enable = true;
     enableFishIntegration = true;
@@ -49,6 +56,7 @@
     };
     "org/gnome/shell/extensions/caffeine" = {
       user-enabled = true;
+      toggle-state = true;
     };
     "org/gnome/shell" = {
       enabled-extensions = [ "appindicatorsupport@rgcjonas.gmail.com" ];
