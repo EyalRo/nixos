@@ -15,6 +15,7 @@
     nix-direnv
     telegram-desktop
     protonvpn-gui
+    tailscale-systray
   ];
 
   programs.home-manager.enable = true;
