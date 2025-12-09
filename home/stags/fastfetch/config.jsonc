@@ -5,22 +5,12 @@
     "padding": {
       "right": 5
     },
-    "color": [
-      "cyan",
-      "blue"
-    ]
-  },
-  "display": {
-    "separator": " •",
-    "color": "distro",
-    "underline": true,
-    "underlineChar": "─"
+    "color": {
+      "1": "cyan",
+      "2": "blue"
+    }
   },
   "modules": [
-    {
-      "type": "title",
-      "key": ""
-    },
     {
       "type": "kernel",
       "key": " ",
@@ -38,7 +28,9 @@
       "type": "packages",
       "key": " ",
       "keyColor": "blue",
-      "managers": "all"
+      "managers": [
+        "all"
+      ]
     },
     {
       "type": "wm",
