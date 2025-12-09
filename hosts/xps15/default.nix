@@ -1,6 +1,12 @@
 { config, pkgs, lib, ... }:
 
-{
+let
+  gdmWallpaper = builtins.toPath "${../../home/stags/wallpaper}/Dinosaur Picnic on a Sunny Hill.png";
+  gdmWallpaperBlurred = pkgs.runCommandLocal "dinosaur-picnic-blur" { buildInputs = [ pkgs.imagemagick ]; } ''
+    mkdir -p $out/share/backgrounds
+    ${pkgs.imagemagick}/bin/convert "${gdmWallpaper}" -blur 0x20 "$out/share/backgrounds/dinosaur-picnic-blur.png"
+  '';
+in {
   imports = [
     ./hardware-configuration.nix
   ];
@@ -140,12 +146,30 @@
   };
 
   environment.etc."machine-id".source = "/persist/etc/machine-id";
+  environment.etc."dconf/profile/gdm".text = ''
+    user-db:user
+    system-db:gdm
+  '';
+  environment.etc."dconf/db/gdm.d/00-background".text = ''
+    [org/gnome/desktop/background]
+    picture-uri='file://${gdmWallpaperBlurred}/share/backgrounds/dinosaur-picnic-blur.png'
+    picture-uri-dark='file://${gdmWallpaperBlurred}/share/backgrounds/dinosaur-picnic-blur.png'
+    picture-options='scaled'
+
+    [org/gnome/desktop/screensaver]
+    picture-uri='file://${gdmWallpaperBlurred}/share/backgrounds/dinosaur-picnic-blur.png'
+    picture-options='scaled'
+  '';
 
   systemd.tmpfiles.rules = [
     "d /persist 0755 root root -"
     "d /persist/home 0755 root root -"
     "d /persist/etc 0755 root root -"
   ];
+
+  system.activationScripts.gdmBackground = ''
+    ${pkgs.dconf}/bin/dconf update
+  '';
 
   age.identityPaths = [ "/home/stags/.config/age/keys.txt" ];
   age.secrets."smb-credentials-nas" = {
