@@ -45,6 +45,7 @@
     enableFishIntegration = true;
   };
   xdg.configFile."starship.toml".source = ./gruvbox-rainbow.toml;
+  xdg.configFile."fastfetch/afpp-ascii.txt".source = ./fastfetch/afpp-ascii.txt;
   xdg.configFile."fastfetch/config.jsonc".source = ./fastfetch/config.jsonc;
 
   xdg.configFile."ghostty/config".text = ''
