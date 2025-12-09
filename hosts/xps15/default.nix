@@ -1,6 +1,32 @@
 { config, pkgs, lib, ... }:
 
 {
+  nixpkgs.overlays = [
+    (final: prev: {
+      gdmSolidOverlay = prev.runCommand "gdm-solid-overlay" {
+        buildInputs = [ prev.glib.dev ];
+      } ''
+        set -euo pipefail
+        dest=$out/org/gnome/shell/theme
+        mkdir -p "$dest"
+        # Extract stock shell CSS and append a solid background override.
+        ${prev.glib.dev}/bin/gresource extract \
+          ${prev.gnome-shell}/share/gnome-shell/gnome-shell-theme.gresource \
+          /org/gnome/shell/theme/gnome-shell.css > "$dest/gnome-shell.css"
+        cat >> "$dest/gnome-shell.css" <<'EOF'
+
+/* Solid greeter background */
+stage {
+  background: #182317;
+  color: #ffffff;
+}
+#lockDialogGroup {
+  background-color: #182317;
+}
+EOF
+      '';
+    })
+  ];
   imports = [
     ./hardware-configuration.nix
   ];
@@ -146,6 +172,8 @@
     "d /persist/home 0755 root root -"
     "d /persist/etc 0755 root root -"
   ];
+  systemd.services.display-manager.environment.G_RESOURCE_OVERLAYS =
+    "/org/gnome/shell/theme=${pkgs.gdmSolidOverlay}/org/gnome/shell/theme";
 
   age.identityPaths = [ "/home/stags/.config/age/keys.txt" ];
   age.secrets."smb-credentials-nas" = {
