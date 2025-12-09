@@ -16,6 +16,7 @@
     telegram-desktop
     protonvpn-gui
     tailscale-systray
+    fastfetch
   ];
 
   programs.home-manager.enable = true;
@@ -44,6 +45,7 @@
     enableFishIntegration = true;
   };
   xdg.configFile."starship.toml".source = ./gruvbox-rainbow.toml;
+  xdg.configFile."fastfetch/config.jsonc".source = ./fastfetch/config.jsonc;
 
   xdg.configFile."ghostty/config".text = ''
     font-family = FiraCode Nerd Font
