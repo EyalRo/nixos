@@ -147,6 +147,15 @@
     "d /persist/etc 0755 root root -"
   ];
 
+  age.identityPaths = [ "/home/stags/.config/age/keys.txt" ];
+  age.secrets."smb-credentials-nas" = {
+    file = ../../secrets/smb-credentials-nas.age;
+    path = "/persist/etc/smb-credentials-nas";
+    mode = "0600";
+    owner = "root";
+    group = "root";
+  };
+
   fileSystems."/home/stags/NAS" = {
     device = "//nas.isdino.com/home";
     fsType = "cifs";
