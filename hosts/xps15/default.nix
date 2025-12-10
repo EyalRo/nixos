@@ -1,7 +1,12 @@
 { config, pkgs, lib, ... }:
 
 {
-  # Package the wallpaper and a background-properties entry so GNOME lists it.
+  imports = [
+    ./hardware-configuration.nix
+    ../../modules/dinOS
+  ];
+
+  # Package the wallpaper and add it to the GNOME background list.
   environment.systemPackages = let
     dinoWallpaper = pkgs.runCommandLocal "wallpaper-dinosaur-picnic" { } ''
       set -euo pipefail
@@ -19,19 +24,7 @@
       </wallpapers>
       EOF
     '';
-  in
-    with pkgs; [
-      firefox
-      git
-      gnome-tweaks
-      gnomeExtensions.appindicator
-      gnomeExtensions.caffeine
-      gnome-browser-connector
-      dinoWallpaper
-    ];
-  imports = [
-    ./hardware-configuration.nix
-  ];
+  in [ dinoWallpaper ];
 
   nixpkgs.config.allowUnfree = true;
 
@@ -68,53 +61,12 @@
   services.xserver.enable = true;
   services.xserver.xkb.layout = "us,il";
   services.xserver.videoDrivers = [ "nvidia" "intel" ];
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
-  services.xserver.desktopManager.xterm.enable = false;
-  services.xserver.excludePackages = [ pkgs.xterm ];
-  environment.gnome.excludePackages = with pkgs; [
-    decibels
-    epiphany # GNOME Web
-    geary
-    gnome-calendar
-    gnome-calculator
-    gnome-clocks
-    gnome-contacts
-    gnome-maps
-    gnome-music
-    gnome-weather
-    gnome-connections
-    rhythmbox
-    simple-scan
-    showtime
-    totem
-    yelp
-    cheese
-    gnome-tour
-  ];
-
-  programs.firefox = {
-    enable = true;
-    nativeMessagingHosts.packages = [ pkgs.gnome-browser-connector ];
-  };
   # Add bus IDs for PRIME offloading if needed:
   # hardware.nvidia.prime = {
   #   intelBusId = "PCI:0:2:0";
   #   nvidiaBusId = "PCI:1:0:0";
   # };
 
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-  };
-  services.pulseaudio.enable = false;
-
-  services.fwupd.enable = true;
-  services.printing.enable = false;
-  hardware.bluetooth.enable = true;
-  services.blueman.enable = false;
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "client";
@@ -135,12 +87,6 @@
   };
 
   programs.fish.enable = true;
-
-  fonts = {
-    packages = with pkgs; [
-      nerd-fonts.fira-code
-    ];
-  };
 
   # Persist mutable state under /persist while keeping the system itself immutable.
   environment.persistence."/persist" = {
