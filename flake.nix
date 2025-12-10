@@ -14,7 +14,7 @@
       system = "x86_64-linux";
       lib = nixpkgs.lib;
       hostDirs = lib.filterAttrs (_: v: v == "directory") (builtins.readDir ./hosts);
-      mkHost = { name, includeStagsUser ? false }: lib.nixosSystem {
+      mkHost = { name }: lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
         modules =
@@ -27,6 +27,8 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
             }
+            self.nixosModules.users-stags
+            agenix.nixosModules.default
             {
               networking.hostName = lib.mkDefault name;
               time.timeZone = "America/Los_Angeles";
@@ -34,10 +36,6 @@
               hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
               system.stateVersion = "25.11";
             }
-          ]
-          ++ lib.optionals includeStagsUser [
-            self.nixosModules.users-stags
-            agenix.nixosModules.default
           ];
       };
     in {
@@ -105,9 +103,8 @@
       };
 
       nixosConfigurations =
-        # Per-host outputs: plain (OS only) and "-stags" variant (OS + stags user).
-        lib.mapAttrs (name: _: mkHost { inherit name; includeStagsUser = false; }) hostDirs
-        // lib.listToAttrs (map (name: { name = "${name}-stags"; value = mkHost { inherit name; includeStagsUser = true; }; }) (builtins.attrNames hostDirs))
+        # Per-host outputs (include stags user).
+        lib.mapAttrs (name: _: mkHost { inherit name; }) hostDirs
         # Device-agnostic base profiles.
         // self.baseConfigurations;
     };
