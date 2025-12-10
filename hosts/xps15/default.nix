@@ -6,8 +6,9 @@
     dinoWallpaper = pkgs.runCommandLocal "wallpaper-dinosaur-picnic" { } ''
       set -euo pipefail
       install -Dm644 "${../../home/stags/wallpaper}/Dinosaur Picnic on a Sunny Hill.png" \
-        $out/share/backgrounds/dinosaur-picnic.png
-      cat > $out/share/gnome-background-properties/dinosaur-picnic.xml <<EOF
+        "$out/share/backgrounds/dinosaur-picnic.png"
+      mkdir -p "$out/share/gnome-background-properties"
+      cat > "$out/share/gnome-background-properties/dinosaur-picnic.xml" <<EOF
       <wallpapers>
         <wallpaper deleted="false">
           <name>Dinosaur Picnic</name>
