@@ -1,13 +1,15 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `flake.nix`: entrypoint defining inputs (nixpkgs, home-manager, impermanence) and the `xps15` NixOS configuration.
-- `hosts/xps15/`: system configuration (`default.nix`) plus hardware specifics.
-- `home/stags/`: user-level configuration referenced by the flake.
-- Persisted state is mounted under `/persist`; avoid adding mutable paths elsewhere.
+- `flake.nix`: entrypoint defining inputs (nixpkgs, home-manager, impermanence, agenix) and flake outputs for the layers.
+- `modules/dinOS/`: OS layer (GNOME, fish/starship, fastfetch, shared packages, wallpaper, persistence defaults, Nix settings, unfree allowance).
+- `modules/users/`: user layers (e.g., `stags.nix` adds the user, tailscale, NAS secret/mount, per-user persistence).
+- `hosts/xps15/`: host-specific configuration (hardware, bootloader, graphics, machine-id binding).
+- Home config lives in `home/stags/` and is wired via Home Manager from the user layer.
+- Persisted state mounts under `/persist`; add mutable paths there only.
 
 ## Build, Test, and Development Commands
-- Dry-run the full system: `nixos-rebuild dry-run --flake .#xps15` (checks evaluation and shows downloads). Do not use `sudo`.
+- Dry-run the full system: `nixos-rebuild dry-run --flake .#xps15` (or the desired output). Do not use `sudo`.
 - Apply system changes is handled by maintainers; agents must not run privileged commands.
 - Inspect flake outputs: `nix flake show`.
 - Validate options quickly: `nixos-option services.xserver.xkb.layout` or other paths to confirm effective values.
@@ -15,7 +17,7 @@
 ## Coding Style & Naming Conventions
 - Nix files use 2-space indentation; keep attribute sets alphabetized when it improves readability (e.g., package lists).
 - Prefer concise comments only where intent is non-obvious; avoid redundant narration.
-- Follow existing patterns: system settings live in `hosts/xps15/default.nix`; user-level packages and settings in `home/stags/default.nix`.
+- Follow existing patterns: shared system defaults in `modules/dinOS`; user additions in `modules/users/`; host-specific wiring in `hosts/xps15`.
 - Keep identifiers lowercase with hyphens or dots matching existing Nix module naming.
 
 ## Testing Guidelines

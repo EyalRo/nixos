@@ -3,6 +3,30 @@
 {
   programs.fish.enable = true;
   users.defaultUserShell = pkgs.fish;
+  home-manager.sharedModules = [ ./home-manager.nix ];
+
+  nix.package = pkgs.nixVersions.latest;
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.auto-optimise-store = true;
+  nixpkgs.config.allowUnfree = true;
+
+  # Persist baseline system state under /persist (impermanence).
+  environment.persistence."/persist" = {
+    hideMounts = true;
+    directories = [
+      "/etc/ssh"
+      "/var/lib/NetworkManager"
+      "/var/lib/fprint"
+      "/var/lib/nixos"
+      "/var/log"
+    ];
+  };
+
+  systemd.tmpfiles.rules = [
+    "d /persist 0755 root root -"
+    "d /persist/home 0755 root root -"
+    "d /persist/etc 0755 root root -"
+  ];
 
   # Shared wallpaper registered in GNOME backgrounds list.
   environment.systemPackages = let

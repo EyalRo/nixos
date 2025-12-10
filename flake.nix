@@ -19,6 +19,12 @@
         modules = [
           ./modules/dinOS
           ./hosts/xps15/hardware-configuration.nix
+          impermanence.nixosModules.impermanence
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
           {
             boot.loader.systemd-boot.enable = true;
             boot.loader.efi.canTouchEfiVariables = true;
@@ -55,6 +61,7 @@
             hardware.cpu.intel.updateMicrocode = nixpkgs.lib.mkDefault true;
             system.stateVersion = "25.11";
           }
+          impermanence.nixosModules.impermanence
           agenix.nixosModules.default
           home-manager.nixosModules.home-manager
           {

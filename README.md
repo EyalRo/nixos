@@ -2,9 +2,9 @@
 
 dinOS is a layered NixOS configuration. It’s organized in three tiers:
 
-- **OS layer (`dinOS`)**: Shared system and GNOME settings (no user, no host specifics).
-- **OS + user (`dinOS-stags`)**: Adds the `stags` user and Home Manager configuration on top of the OS layer.
-- **OS + user + host (`xps15`)**: Full stack for the xps15 hardware (drivers, mounts, secrets, wallpaper, user).
+- **OS layer (`dinOS`)**: Shared desktop defaults (GNOME, fish + aliases, starship prompt, fastfetch, common apps, wallpaper, persistence defaults, Nix settings).
+- **OS + user (`dinOS-stags`)**: Adds the `stags` user, Home Manager hook, tailscale client, and NAS mount/secret on top of the OS layer.
+- **OS + user + host (`xps15`)**: Full stack for the xps15 hardware (boot/graphics, hostname/timezone, fprintd, machine-id bind).
 
 ## Switching configurations
 
