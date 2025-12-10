@@ -47,7 +47,7 @@ else
 fi
 
 info "Switching to flake output $target..."
-sudo nix_rebuild switch --flake .#"${target}"
+sudo nix_rebuild switch --refresh --flake .#"${target}"
 
 if [[ -z "$PROFILE" ]]; then
   info "Done. Adjust hosts/$HOST/default.nix or modules/users/stags.nix as needed, then rerun nixos-rebuild."
