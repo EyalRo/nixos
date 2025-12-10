@@ -79,19 +79,4 @@
   services.printing.enable = false;
   hardware.bluetooth.enable = true;
   services.blueman.enable = false;
-
-  fonts = {
-    packages = with pkgs; [
-      nerd-fonts.fira-code
-    ];
-  };
-
-  environment.systemPackages = with pkgs; [
-    firefox
-    git
-    gnome-tweaks
-    gnomeExtensions.appindicator
-    gnomeExtensions.caffeine
-    gnome-browser-connector
-  ];
 }
