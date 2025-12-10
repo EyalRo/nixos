@@ -5,7 +5,7 @@
   users.defaultUserShell = pkgs.fish;
   home-manager.sharedModules = [ ./home-manager.nix ];
 
-  nix.package = pkgs.nixVersions.latest;
+  nix.package = lib.mkDefault pkgs.nixVersions.latest;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.settings.auto-optimise-store = true;
   nixpkgs.config.allowUnfree = true;
