@@ -47,8 +47,6 @@
   xdg.configFile."starship.toml".source = ./gruvbox-rainbow.toml;
   xdg.configFile."fastfetch/afpp-ascii.txt".source = ./fastfetch/afpp-ascii.txt;
   xdg.configFile."fastfetch/config.jsonc".source = ./fastfetch/config.jsonc;
-  xdg.dataFile."backgrounds/dinosaur-picnic.png".source =
-    builtins.toPath "${./wallpaper}/Dinosaur Picnic on a Sunny Hill.png";
 
   xdg.configFile."ghostty/config".text = ''
     font-family = FiraCode Nerd Font
@@ -60,8 +58,8 @@
       clock-format = "24h";
     };
     "org/gnome/desktop/background" = {
-      picture-uri = "file://${config.xdg.dataHome}/backgrounds/dinosaur-picnic.png";
-      picture-uri-dark = "file://${config.xdg.dataHome}/backgrounds/dinosaur-picnic.png";
+      picture-uri = "file:///run/current-system/sw/share/backgrounds/dinosaur-picnic.png";
+      picture-uri-dark = "file:///run/current-system/sw/share/backgrounds/dinosaur-picnic.png";
       picture-options = "scaled";
       primary-color = "#000000";
       secondary-color = "#000000";

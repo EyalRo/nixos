@@ -1,6 +1,33 @@
 { config, pkgs, lib, ... }:
 
 {
+  # Package the wallpaper and a background-properties entry so GNOME lists it.
+  environment.systemPackages = let
+    dinoWallpaper = pkgs.runCommandLocal "wallpaper-dinosaur-picnic" { } ''
+      set -euo pipefail
+      install -Dm644 "${../../home/stags/wallpaper}/Dinosaur Picnic on a Sunny Hill.png" \
+        $out/share/backgrounds/dinosaur-picnic.png
+      cat > $out/share/gnome-background-properties/dinosaur-picnic.xml <<EOF
+      <wallpapers>
+        <wallpaper deleted="false">
+          <name>Dinosaur Picnic</name>
+          <filename>${"$"}{out}/share/backgrounds/dinosaur-picnic.png</filename>
+          <filename-dark>${"$"}{out}/share/backgrounds/dinosaur-picnic.png</filename-dark>
+          <options>scaled</options>
+        </wallpaper>
+      </wallpapers>
+      EOF
+    '';
+  in
+    with pkgs; [
+      firefox
+      git
+      gnome-tweaks
+      gnomeExtensions.appindicator
+      gnomeExtensions.caffeine
+      gnome-browser-connector
+      dinoWallpaper
+    ];
   imports = [
     ./hardware-configuration.nix
   ];
@@ -113,15 +140,6 @@
       nerd-fonts.fira-code
     ];
   };
-
-  environment.systemPackages = with pkgs; [
-    firefox
-    git
-    gnome-tweaks
-    gnomeExtensions.appindicator
-    gnomeExtensions.caffeine
-    gnome-browser-connector
-  ];
 
   # Persist mutable state under /persist while keeping the system itself immutable.
   environment.persistence."/persist" = {
