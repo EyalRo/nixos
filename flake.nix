@@ -29,7 +29,6 @@
             boot.loader.systemd-boot.enable = true;
             boot.loader.efi.canTouchEfiVariables = true;
             nixpkgs.config.allowUnfree = true;
-            nix.package = nixpkgs.legacyPackages.${system}.nixVersions.latest;
             nix.settings.experimental-features = [ "nix-command" "flakes" ];
             nix.settings.auto-optimise-store = true;
             networking.hostName = "dinOS";
@@ -52,7 +51,6 @@
             boot.loader.systemd-boot.enable = true;
             boot.loader.efi.canTouchEfiVariables = true;
             nixpkgs.config.allowUnfree = true;
-            nix.package = nixpkgs.legacyPackages.${system}.nixVersions.latest;
             nix.settings.experimental-features = [ "nix-command" "flakes" ];
             nix.settings.auto-optimise-store = true;
             networking.hostName = "dinOS-stags";
