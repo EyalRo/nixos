@@ -14,31 +14,33 @@
       system = "x86_64-linux";
       lib = nixpkgs.lib;
       hostDirs = lib.filterAttrs (_: v: v == "directory") (builtins.readDir ./hosts);
-      mkHost = name: _: lib.nixosSystem {
+      mkHost = { name, includeStagsUser ? false }: lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
-        modules = [
-          (./hosts + "/${name}")
-          self.nixosModules.dinOS
-          self.nixosModules.users-stags
-          impermanence.nixosModules.impermanence
-          agenix.nixosModules.default
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
-          {
-            networking.hostName = lib.mkDefault name;
-            time.timeZone = "America/Los_Angeles";
-            hardware.enableRedistributableFirmware = true;
-            hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
-            system.stateVersion = "25.11";
-          }
-        ];
+        modules =
+          [
+            (./hosts + "/${name}")
+            self.nixosModules.dinOS
+            impermanence.nixosModules.impermanence
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+            }
+            {
+              networking.hostName = lib.mkDefault name;
+              time.timeZone = "America/Los_Angeles";
+              hardware.enableRedistributableFirmware = true;
+              hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
+              system.stateVersion = "25.11";
+            }
+          ]
+          ++ lib.optionals includeStagsUser [
+            self.nixosModules.users-stags
+            agenix.nixosModules.default
+          ];
       };
-    in
-    {
+    in {
       nixosModules.dinOS = ./modules/dinOS;
       nixosModules.users-stags = ./modules/users/stags.nix;
 
@@ -102,6 +104,11 @@
         ];
       };
 
-      nixosConfigurations = lib.mapAttrs mkHost hostDirs // self.baseConfigurations;
+      nixosConfigurations =
+        # Per-host outputs: plain (OS only) and "-stags" variant (OS + stags user).
+        lib.mapAttrs (name: _: mkHost { inherit name; includeStagsUser = false; }) hostDirs
+        // lib.listToAttrs (map (name: { name = "${name}-stags"; value = mkHost { inherit name; includeStagsUser = true; }; }) (builtins.attrNames hostDirs))
+        # Device-agnostic base profiles.
+        // self.baseConfigurations;
     };
 }

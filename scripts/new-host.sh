@@ -46,5 +46,6 @@ cat > "$host_dir/default.nix" <<'EOF'
 EOF
 
 echo "Created host skeleton under $host_dir."
-echo "Add any host-specific overrides to default.nix, then run:"
-echo "  nixos-rebuild dry-run --flake .#$host"
+echo "Add any host-specific overrides to default.nix, then run one of:"
+echo "  nixos-rebuild dry-run --flake .#$host           # OS only (no stags user)"
+echo "  nixos-rebuild dry-run --flake .#$host-stags     # OS + stags user"
