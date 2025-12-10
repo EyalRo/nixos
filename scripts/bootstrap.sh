@@ -6,6 +6,9 @@ PROFILE="${PROFILE:-dinOS}" # set to dinOS or dinOS-stags for base outputs; empt
 REPO="${REPO:-https://github.com/EyalRo/nixos.git}"
 CHECKOUT="${CHECKOUT:-$HOME/nixos}"
 
+# Ensure nix-command/flakes are enabled even on minimal installs.
+export NIX_CONFIG="${NIX_CONFIG:-extra-experimental-features = nix-command flakes}"
+
 info() { echo "==> $*"; }
 
 # Ensure nix-command/flakes are available even on minimal installs.
