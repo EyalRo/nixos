@@ -11,10 +11,8 @@ export NIX_CONFIG="${NIX_CONFIG:-extra-experimental-features = nix-command flake
 
 info() { echo "==> $*"; }
 
-# Ensure nix-command/flakes are available even on minimal installs.
 NIX_FLAGS=(--extra-experimental-features 'nix-command flakes')
 nix_run() { nix "${NIX_FLAGS[@]}" run "$@"; }
-nix_rebuild() { nix "${NIX_FLAGS[@]}" run nixpkgs#nixos-rebuild -- "$@"; }
 
 case "$PROFILE" in
   dinOS|dinOS-stags) target="$PROFILE" ;;
@@ -40,7 +38,7 @@ cd "$CHECKOUT"
 if [[ -z "$PROFILE" ]]; then
   if [[ $EUID -ne 0 ]]; then
     info "Generating hardware config for host '$HOST' (sudo)..."
-    sudo nix_run nixpkgs#bash -- ./scripts/new-host.sh "$HOST"
+    sudo env "NIX_CONFIG=$NIX_CONFIG" nix "${NIX_FLAGS[@]}" run nixpkgs#bash -- ./scripts/new-host.sh "$HOST"
   else
     info "Generating hardware config for host '$HOST'..."
     nix_run nixpkgs#bash -- ./scripts/new-host.sh "$HOST"
@@ -50,7 +48,7 @@ else
 fi
 
 info "Switching to flake output $target..."
-sudo nix_rebuild switch --refresh --flake .#"${target}"
+sudo env "NIX_CONFIG=$NIX_CONFIG" nix "${NIX_FLAGS[@]}" run nixpkgs#nixos-rebuild -- switch --refresh --flake .#"${target}"
 
 if [[ -z "$PROFILE" ]]; then
   info "Done. Adjust hosts/$HOST/default.nix or modules/users/stags.nix as needed, then rerun nixos-rebuild."
