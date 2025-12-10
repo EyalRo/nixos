@@ -79,15 +79,6 @@
 
   security.sudo.enable = true;
 
-  users.users.stags = {
-    isNormalUser = true;
-    description = "stags";
-    extraGroups = [ "wheel" "networkmanager" ];
-    shell = pkgs.fish;
-  };
-
-  programs.fish.enable = true;
-
   # Persist mutable state under /persist while keeping the system itself immutable.
   environment.persistence."/persist" = {
     hideMounts = true;

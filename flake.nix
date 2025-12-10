@@ -17,13 +17,14 @@
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
+          ./modules/dinOS
+          ./modules/users/stags
           ./hosts/xps15
           agenix.nixosModules.default
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.stags = import ./home/stags;
           }
           impermanence.nixosModules.impermanence
         ];
