@@ -12,7 +12,6 @@ export NIX_CONFIG="${NIX_CONFIG:-extra-experimental-features = nix-command flake
 info() { echo "==> $*"; }
 
 NIX_FLAGS=(--extra-experimental-features 'nix-command flakes')
-nix_run() { nix "${NIX_FLAGS[@]}" run "$@"; }
 
 case "$PROFILE" in
   dinOS|dinOS-stags) target="$PROFILE" ;;
@@ -31,7 +30,7 @@ if [[ -e "$CHECKOUT" ]]; then
 fi
 
 info "Cloning $REPO to $CHECKOUT"
-nix_run nixpkgs#git -- clone --depth 1 "$REPO" "$CHECKOUT"
+nix "${NIX_FLAGS[@]}" run nixpkgs#git -- clone --depth 1 "$REPO" "$CHECKOUT"
 
 cd "$CHECKOUT"
 
@@ -41,7 +40,7 @@ if [[ -z "$PROFILE" ]]; then
     sudo env "NIX_CONFIG=$NIX_CONFIG" nix "${NIX_FLAGS[@]}" run nixpkgs#bash -- ./scripts/new-host.sh "$HOST"
   else
     info "Generating hardware config for host '$HOST'..."
-    nix_run nixpkgs#bash -- ./scripts/new-host.sh "$HOST"
+    nix "${NIX_FLAGS[@]}" run nixpkgs#bash -- ./scripts/new-host.sh "$HOST"
   fi
 else
   info "Using base profile $PROFILE (no host generation)."
