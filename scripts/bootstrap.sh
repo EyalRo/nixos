@@ -1,24 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HOST="${HOST:-${1:-my-laptop}}"
-PROFILE="${PROFILE:-}" # set to dinOS or dinOS-stags to use base outputs
+HOST="${HOST:-${1:-dinOS}}"
+PROFILE="${PROFILE:-dinOS}" # set to dinOS or dinOS-stags for base outputs; empty to build a host output
 REPO="${REPO:-https://github.com/EyalRo/nixos.git}"
 CHECKOUT="${CHECKOUT:-$HOME/nixos}"
 
 info() { echo "==> $*"; }
 
-if [[ -n "$PROFILE" ]]; then
-  case "$PROFILE" in
-    dinOS|dinOS-stags) target="$PROFILE" ;;
-    *)
-      echo "Invalid PROFILE: $PROFILE (expected empty, dinOS, or dinOS-stags)" >&2
-      exit 1
-      ;;
-  esac
-else
-  target="$HOST"
-fi
+case "$PROFILE" in
+  dinOS|dinOS-stags) target="$PROFILE" ;;
+  "")
+    target="$HOST"
+    ;;
+  *)
+    echo "Invalid PROFILE: $PROFILE (expected empty, dinOS, or dinOS-stags)" >&2
+    exit 1
+    ;;
+esac
 
 if [[ -e "$CHECKOUT" ]]; then
   echo "Target checkout path already exists: $CHECKOUT" >&2
@@ -39,7 +38,7 @@ if [[ -z "$PROFILE" ]]; then
     nix run nixpkgs#bash -- ./scripts/new-host.sh "$HOST"
   fi
 else
-  info "Skipping hardware config generation (using base profile $PROFILE)"
+  info "Using base profile $PROFILE (no host generation)."
 fi
 
 info "Switching to flake output $target..."
