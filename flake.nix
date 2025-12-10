@@ -12,11 +12,37 @@
   outputs = inputs@{ self, nixpkgs, home-manager, impermanence, agenix, ... }:
     let
       system = "x86_64-linux";
-    in {
+      lib = nixpkgs.lib;
+      hostDirs = lib.filterAttrs (_: v: v == "directory") (builtins.readDir ./hosts);
+      mkHost = name: _: lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = [
+          (./hosts + "/${name}")
+          self.nixosModules.dinOS
+          self.nixosModules.users-stags
+          impermanence.nixosModules.impermanence
+          agenix.nixosModules.default
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+          {
+            networking.hostName = lib.mkDefault name;
+            time.timeZone = "America/Los_Angeles";
+            hardware.enableRedistributableFirmware = true;
+            hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
+            system.stateVersion = "25.11";
+          }
+        ];
+      };
+    in
+    {
       nixosModules.dinOS = ./modules/dinOS;
       nixosModules.users-stags = ./modules/users/stags.nix;
 
-      nixosConfigurations.dinOS = nixpkgs.lib.nixosSystem {
+      baseConfigurations.dinOS = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
@@ -45,7 +71,7 @@
         ];
       };
 
-      nixosConfigurations.dinOS-stags = nixpkgs.lib.nixosSystem {
+      baseConfigurations.dinOS-stags = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [
@@ -76,21 +102,6 @@
         ];
       };
 
-      nixosConfigurations.xps15 = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit inputs; };
-        modules = [
-          ./hosts/xps15
-          self.nixosModules.dinOS
-          self.nixosModules.users-stags
-          agenix.nixosModules.default
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
-          impermanence.nixosModules.impermanence
-        ];
-      };
+      nixosConfigurations = lib.mapAttrs mkHost hostDirs // self.baseConfigurations;
     };
 }
