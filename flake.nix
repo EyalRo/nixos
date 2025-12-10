@@ -40,7 +40,7 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./modules/dinOS
-          ./modules/users/stags
+          ./modules/users/stags.nix
           ./hosts/xps15/hardware-configuration.nix
           {
             boot.loader.systemd-boot.enable = true;
@@ -70,7 +70,7 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./modules/dinOS
-          ./modules/users/stags
+          ./modules/users/stags.nix
           ./hosts/xps15
           agenix.nixosModules.default
           home-manager.nixosModules.home-manager
