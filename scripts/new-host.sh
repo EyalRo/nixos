@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export NIX_CONFIG="${NIX_CONFIG:-extra-experimental-features = nix-command flakes}"
+NIX_FLAGS=(--extra-experimental-features 'nix-command flakes')
+
 if [[ $# -lt 1 ]]; then
   echo "Usage: $0 <host-name>" >&2
   exit 1
@@ -13,7 +16,11 @@ if [[ $EUID -ne 0 ]]; then
   exec sudo "$0" "$host"
 fi
 
-repo_root="$(git rev-parse --show-toplevel)"
+git_cmd() {
+  nix "${NIX_FLAGS[@]}" run nixpkgs#git -- "$@"
+}
+
+repo_root="$(git_cmd rev-parse --show-toplevel)"
 host_dir="$repo_root/hosts/$host"
 
 if [[ -e "$host_dir" ]]; then
