@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HOST="${HOST:-$(hostname)}"
+HOST="${HOST:-dinOS}"
 PROFILE="${PROFILE:-}" # set to dinOS or dinOS-stags to use base outputs; empty to build a host output
 REPO="${REPO:-https://github.com/EyalRo/nixos.git}"
 CHECKOUT="${CHECKOUT:-$HOME/nixos}"
 
 usage() {
   cat <<'EOF'
-Usage: bootstrap.sh [--host NAME] [--profile dinOS|dinOS-stags] [--repo URL] [--checkout PATH]
-Defaults: host=$(hostname), profile=<host output>, repo=https://github.com/EyalRo/nixos.git, checkout=~/nixos
+Usage: bootstrap.sh [--profile dinOS|dinOS-stags] [--repo URL] [--checkout PATH]
+Defaults: host=dinOS, profile=<host output>, repo=https://github.com/EyalRo/nixos.git, checkout=~/nixos
 When profile is set (dinOS or dinOS-stags), the script does a dry-run build only; to switch, generate a host output.
 EOF
 }
