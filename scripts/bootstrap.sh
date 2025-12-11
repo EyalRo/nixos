@@ -1,23 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HOST="${BOOTSTRAP_HOST:-dinOS}"
-PROFILE="${PROFILE:-}" # set to dinOS or dinOS-stags to use base outputs; empty to build a host output
+HOST="dinOS"
 REPO="${REPO:-https://github.com/EyalRo/nixos.git}"
 CHECKOUT="${CHECKOUT:-$HOME/nixos}"
 
 usage() {
   cat <<'EOF'
-Usage: bootstrap.sh [--profile dinOS|dinOS-stags] [--repo URL] [--checkout PATH]
-Defaults: host=dinOS, profile=<host output>, repo=https://github.com/EyalRo/nixos.git, checkout=~/nixos
-When profile is set (dinOS or dinOS-stags), the script does a dry-run build only; to switch, generate a host output.
+Usage: bootstrap.sh [--repo URL] [--checkout PATH]
+Defaults: host=dinOS, repo=https://github.com/EyalRo/nixos.git, checkout=~/nixos
+Clones the repo, generates hardware config for host dinOS, and switches to that output.
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --host) HOST="$2"; shift 2 ;;
-    --profile) PROFILE="$2"; shift 2 ;;
     --repo) REPO="$2"; shift 2 ;;
     --checkout) CHECKOUT="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
@@ -32,17 +29,6 @@ info() { echo "==> $*"; }
 
 NIX_FLAGS=(--extra-experimental-features 'nix-command flakes')
 
-case "$PROFILE" in
-  dinOS|dinOS-stags) target="$PROFILE" ;;
-  "")
-    target="$HOST"
-    ;;
-  *)
-    echo "Invalid PROFILE: $PROFILE (expected empty, dinOS, or dinOS-stags)" >&2
-    exit 1
-    ;;
-esac
-
 if [[ -e "$CHECKOUT" ]]; then
   echo "Target checkout path already exists: $CHECKOUT" >&2
   exit 1
@@ -53,21 +39,45 @@ nix "${NIX_FLAGS[@]}" run nixpkgs#git -- clone --depth 1 "$REPO" "$CHECKOUT"
 
 cd "$CHECKOUT"
 
-if [[ -z "$PROFILE" ]]; then
-  if [[ $EUID -ne 0 ]]; then
-    info "Generating hardware config for host '$HOST' (sudo)..."
-    sudo env "NIX_CONFIG=$NIX_CONFIG" nix "${NIX_FLAGS[@]}" run nixpkgs#bash -- ./scripts/new-host.sh "$HOST"
-  else
-    info "Generating hardware config for host '$HOST'..."
-    nix "${NIX_FLAGS[@]}" run nixpkgs#bash -- ./scripts/new-host.sh "$HOST"
-  fi
+host_dir="$CHECKOUT/hosts/$HOST"
 
-  info "Switching to flake output $target..."
-  sudo env "NIX_CONFIG=$NIX_CONFIG" nix "${NIX_FLAGS[@]}" run nixpkgs#nixos-rebuild -- switch --refresh --flake .#"${target}"
-  info "Done. Adjust hosts/$HOST/default.nix or modules/users/stags.nix as needed, then rerun nixos-rebuild."
-else
-  info "Using base profile $PROFILE (no host generation)."
-  info "Performing dry-run for $target..."
-  nix "${NIX_FLAGS[@]}" run nixpkgs#nixos-rebuild -- dry-run --refresh --flake .#"${target}"
-  info "Base profiles are device-agnostic; generate a host (run without PROFILE) to switch on this machine."
+if [[ -e "$host_dir" ]]; then
+  echo "Host directory already exists: $host_dir" >&2
+  exit 1
 fi
+
+mkdir -p "$host_dir"
+
+info "Generating hardware config for host '$HOST'..."
+generate_hardware_config() {
+  nixos-generate-config --show-hardware-config > "$host_dir/hardware-configuration.nix"
+}
+
+if [[ $EUID -ne 0 ]]; then
+  sudo env "NIX_CONFIG=$NIX_CONFIG" bash -c "$(declare -f generate_hardware_config); generate_hardware_config"
+else
+  generate_hardware_config
+fi
+
+cat > "$host_dir/default.nix" <<'EOF'
+{ config, pkgs, lib, ... }:
+
+{
+  imports = [
+    ./hardware-configuration.nix
+  ];
+
+  # Host-specific tweaks go here. By default, networking.hostName is set from
+  # the flake (see mkHost in flake.nix) and modules/dinOS + modules/users/stags
+  # are composed automatically.
+  #
+  # Example overrides:
+  # networking.hostName = "dinOS";
+  # time.timeZone = "America/Los_Angeles";
+  # system.stateVersion = "25.11";
+}
+EOF
+
+info "Switching to flake output $HOST..."
+sudo env "NIX_CONFIG=$NIX_CONFIG" nix "${NIX_FLAGS[@]}" run nixpkgs#nixos-rebuild -- switch --refresh --flake .#"${HOST}"
+info "Done. Adjust hosts/$HOST/default.nix or modules/users/stags.nix as needed, then rerun nixos-rebuild."

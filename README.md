@@ -8,12 +8,11 @@ A host-specific output (`xps15`) is provided for that machine; other hosts can b
 
 ## Install on a new machine (recommended path)
 
-Run the bootstrap script on the target machine. It will clone the repo, generate hardware config, and switch to the new host output (includes the `stags` user):
+Run the bootstrap script on the target machine. It will clone the repo, generate hardware config for host `dinOS`, and switch to that output (includes the `stags` user):
 
 ```bash
 # on the new machine
-curl -fsSL https://raw.githubusercontent.com/EyalRo/nixos/main/scripts/bootstrap.sh \
-  | bash -s -- --host <your-hostname>
+curl -fsSL https://raw.githubusercontent.com/EyalRo/nixos/main/scripts/bootstrap.sh | bash
 ```
 
-Afterward, tweak `hosts/<your-hostname>/default.nix` or `modules/users/stags.nix` if needed (e.g., `/persist`, NAS mount, age key path) and rerun `nixos-rebuild switch --flake .#<your-hostname>` if you make changes.
+Afterward, tweak `hosts/dinOS/default.nix` or `modules/users/stags.nix` if needed (e.g., `/persist`, NAS mount, age key path) and rerun `nixos-rebuild switch --flake .#dinOS` if you make changes.
