@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HOST="${HOST:-dinOS}"
+HOST="${BOOTSTRAP_HOST:-dinOS}"
 PROFILE="${PROFILE:-}" # set to dinOS or dinOS-stags to use base outputs; empty to build a host output
 REPO="${REPO:-https://github.com/EyalRo/nixos.git}"
 CHECKOUT="${CHECKOUT:-$HOME/nixos}"
