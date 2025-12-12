@@ -1,5 +1,4 @@
 # TODO
 
-- Revisit `scripts/bootstrap.sh`: default `--host dinOS` collides with base output and ignores generated host hardware config.
+- Add a dinOS‑only per‑host output so bootstrap can target generic dinOS without the stags layer.
 - Consider supporting multiple architectures instead of hardcoding `system = "x86_64-linux"` in `flake.nix`.
-

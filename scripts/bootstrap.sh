@@ -6,10 +6,10 @@ REPO="${REPO:-https://github.com/EyalRo/nixos.git}"
 CHECKOUT="${CHECKOUT:-$HOME/nixos}"
 
 usage() {
-  cat <<'EOF'
+  cat <<EOF
 Usage: bootstrap.sh [--host NAME] [--repo URL] [--checkout PATH]
 Defaults: host=dinOS, repo=https://github.com/EyalRo/nixos.git, checkout=~/nixos
-Clones the repo, generates hardware config for the host, and switches to that output.
+Clones the repo, creates a new host using this machine's hardware config, switches to that output, then reboots.
 EOF
 }
 
@@ -49,15 +49,23 @@ fi
 
 mkdir -p "$host_dir"
 
-info "Generating hardware config for host '$HOST'..."
-generate_hardware_config() {
-  nixos-generate-config --show-hardware-config > "$host_dir/hardware-configuration.nix"
-}
-
-if [[ $EUID -ne 0 ]]; then
-  sudo env "NIX_CONFIG=$NIX_CONFIG" bash -c "$(declare -f generate_hardware_config); generate_hardware_config"
+info "Saving hardware config for host '$HOST'..."
+if [[ -f /etc/nixos/hardware-configuration.nix ]]; then
+  if [[ $EUID -ne 0 ]]; then
+    sudo cp /etc/nixos/hardware-configuration.nix "$host_dir/hardware-configuration.nix"
+  else
+    cp /etc/nixos/hardware-configuration.nix "$host_dir/hardware-configuration.nix"
+  fi
 else
-  generate_hardware_config
+  generate_hardware_config() {
+    nixos-generate-config --show-hardware-config > "$host_dir/hardware-configuration.nix"
+  }
+
+  if [[ $EUID -ne 0 ]]; then
+    sudo env "NIX_CONFIG=$NIX_CONFIG" bash -c "$(declare -f generate_hardware_config); generate_hardware_config"
+  else
+    generate_hardware_config
+  fi
 fi
 
 cat > "$host_dir/default.nix" <<'EOF'
@@ -81,4 +89,10 @@ EOF
 
 info "Switching to flake output $HOST..."
 sudo env "NIX_CONFIG=$NIX_CONFIG" nix "${NIX_FLAGS[@]}" run nixpkgs#nixos-rebuild -- switch --refresh --flake .#"${HOST}"
-info "Done. Adjust hosts/$HOST/default.nix or modules/users/stags.nix as needed, then rerun nixos-rebuild."
+
+info "Rebooting into the new configuration..."
+if [[ $EUID -ne 0 ]]; then
+  sudo reboot
+else
+  reboot
+fi
