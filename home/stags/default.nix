@@ -3,6 +3,12 @@
 {
   home.username = "stags";
   home.homeDirectory = "/home/stags";
+
+  home.packages = with pkgs; [
+    protonvpn-gui
+    tailscale-systray
+  ];
+
   systemd.user.services.tailscale-systray = {
     Unit = {
       Description = "Tailscale system tray";

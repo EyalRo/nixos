@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   users.users.stags = {
@@ -6,6 +6,8 @@
     description = "stags";
     extraGroups = [ "docker" "networkmanager" "wheel" ];
   };
+
+  time.timeZone = lib.mkDefault "America/Los_Angeles";
 
   boot.supportedFilesystems = [ "cifs" ];
 

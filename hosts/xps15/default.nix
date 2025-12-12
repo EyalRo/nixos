@@ -9,7 +9,6 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  networking.networkmanager.enable = true;
   hardware.graphics = {
     enable = true;
   };
@@ -36,8 +35,6 @@
     tod.enable = true;
     tod.driver = pkgs.libfprint-2-tod1-goodix;
   };
-
-  security.sudo.enable = true;
 
   environment.etc."machine-id".source = "/persist/etc/machine-id";
 }

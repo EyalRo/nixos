@@ -10,9 +10,10 @@
   nix.settings.auto-optimise-store = true;
   nixpkgs.config.allowUnfree = true;
 
-  time.timeZone = lib.mkDefault "America/Los_Angeles";
+  networking.networkmanager.enable = lib.mkDefault true;
+  security.sudo.enable = lib.mkDefault true;
+
   hardware.enableRedistributableFirmware = lib.mkDefault true;
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
   system.stateVersion = lib.mkDefault "25.11";
 
   # Persist baseline system state under /persist (impermanence).

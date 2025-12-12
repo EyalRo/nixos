@@ -9,8 +9,6 @@
     helix
     lsd
     nix-direnv
-    protonvpn-gui
-    tailscale-systray
     telegram-desktop
   ];
 
