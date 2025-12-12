@@ -3,6 +3,7 @@
 {
   programs.fish.enable = true;
   users.defaultUserShell = pkgs.fish;
+  users.mutableUsers = lib.mkDefault true;
   home-manager.sharedModules = [ ./home-manager.nix ];
 
   nix.package = lib.mkDefault pkgs.nixVersions.latest;

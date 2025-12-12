@@ -61,30 +61,7 @@
             { networking.hostName = lib.mkDefault name; }
           ] ++ modulesForUsers);
 
-      ephemeralRootModule = { lib, ... }: {
-        boot.loader.systemd-boot.enable = true;
-        boot.loader.efi.canTouchEfiVariables = lib.mkDefault false;
-        boot.loader.grub.enable = lib.mkDefault false;
-        fileSystems."/" = {
-          device = "tmpfs";
-          fsType = "tmpfs";
-          options = [ "mode=0755" "size=2G" ];
-        };
-      };
-
       baseConfigurations = {
-        dinOS = mkSystem [
-          ephemeralRootModule
-          { networking.hostName = "dinOS"; }
-        ];
-
-        dinOS-stags = mkSystem [
-          self.nixosModules.users-stags
-          agenix.nixosModules.default
-          ephemeralRootModule
-          { networking.hostName = "dinOS-stags"; }
-        ];
-
         dinOS-installer = mkInstaller [
           ({ modulesPath, ... }: {
             imports = [

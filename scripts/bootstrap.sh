@@ -79,7 +79,7 @@ cat > "$host_dir/default.nix" <<'EOF'
 EOF
 
 info "Switching to flake output $HOST..."
-sudo env "NIX_CONFIG=$NIX_CONFIG" nix "${NIX_FLAGS[@]}" run nixpkgs#nixos-rebuild -- switch --refresh --flake .#"${HOST}"
+sudo env "NIX_CONFIG=$NIX_CONFIG" nix "${NIX_FLAGS[@]}" run nixpkgs#nixos-rebuild -- switch --refresh --flake "path:${CHECKOUT}#${HOST}"
 
 info "Rebooting into the new configuration..."
 if [[ $EUID -ne 0 ]]; then
