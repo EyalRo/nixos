@@ -99,7 +99,7 @@ else
   fi
 fi
 
-cat > "$host_dir/default.nix" <<'EOF'
+cat > "$host_dir/default.nix" <<EOF
 { config, pkgs, lib, ... }:
 
 {
