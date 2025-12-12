@@ -16,6 +16,7 @@
     directories = [
       "/etc/ssh"
       "/var/lib/NetworkManager"
+      "/var/lib/docker"
       "/var/lib/fprint"
       "/var/lib/nixos"
       "/var/log"
@@ -48,14 +49,16 @@
     '';
   in
     with pkgs; [
+      dinoWallpaper
+      distrobox
+      distroshelf
       firefox
       git
+      gnome-browser-connector
       gnome-tweaks
       gnomeExtensions.appindicator
       gnomeExtensions.caffeine
-      gnome-browser-connector
       nerd-fonts.fira-code
-      dinoWallpaper
     ];
 
   services.xserver.enable = true;
@@ -98,6 +101,8 @@
     pulse.enable = true;
   };
   services.pulseaudio.enable = false;
+
+  virtualisation.docker.enable = true;
 
   services.fwupd.enable = true;
   services.printing.enable = false;

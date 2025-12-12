@@ -4,7 +4,7 @@
   users.users.stags = {
     isNormalUser = true;
     description = "stags";
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [ "docker" "networkmanager" "wheel" ];
   };
 
   boot.supportedFilesystems = [ "cifs" ];

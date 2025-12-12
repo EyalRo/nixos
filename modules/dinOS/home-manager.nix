@@ -24,7 +24,6 @@
     enable = true;
     shellAliases = {
       cat = "bat";
-      ls = "lsd";
     };
   };
   xdg.configFile."fish/config.fish".force = true;
