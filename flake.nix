@@ -34,6 +34,12 @@
         modules = baseModules ++ extraModules;
       };
 
+      mkInstaller = extraModules: lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = extraModules ++ baseModules;
+      };
+
       mkHost = name: mkSystem [
         (./hosts + "/${name}")
         self.nixosModules.users-stags
@@ -64,6 +70,15 @@
           ephemeralRootModule
           { networking.hostName = "dinOS-stags"; }
         ];
+
+        dinOS-installer = mkInstaller [
+          ({ modulesPath, ... }: {
+            imports = [
+              (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix")
+            ];
+          })
+          { networking.hostName = "dinOS-installer"; }
+        ];
       };
     in {
       nixosModules.dinOS = ./modules/dinOS;
@@ -72,9 +87,9 @@
       inherit baseConfigurations;
 
       nixosConfigurations =
-        # Per-host outputs (include stags user).
-        lib.mapAttrs (name: _: mkHost name) hostDirs
         # Device-agnostic base profiles.
-        // baseConfigurations;
+        baseConfigurations
+        # Per-host outputs (include stags user).
+        // lib.mapAttrs (name: _: mkHost name) hostDirs;
     };
 }
