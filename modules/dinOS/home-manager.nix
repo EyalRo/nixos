@@ -4,8 +4,7 @@
   home.packages = with pkgs; [
     bat
     direnv
-    firefox
-    git
+    fastfetch
     ghostty
     helix
     lsd
@@ -13,7 +12,6 @@
     protonvpn-gui
     tailscale-systray
     telegram-desktop
-    fastfetch
   ];
 
   programs.home-manager.enable = true;

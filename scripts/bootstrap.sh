@@ -7,14 +7,15 @@ CHECKOUT="${CHECKOUT:-$HOME/nixos}"
 
 usage() {
   cat <<'EOF'
-Usage: bootstrap.sh [--repo URL] [--checkout PATH]
+Usage: bootstrap.sh [--host NAME] [--repo URL] [--checkout PATH]
 Defaults: host=dinOS, repo=https://github.com/EyalRo/nixos.git, checkout=~/nixos
-Clones the repo, generates hardware config for host dinOS, and switches to that output.
+Clones the repo, generates hardware config for the host, and switches to that output.
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --host) HOST="$2"; shift 2 ;;
     --repo) REPO="$2"; shift 2 ;;
     --checkout) CHECKOUT="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;

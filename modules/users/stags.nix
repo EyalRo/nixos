@@ -33,15 +33,18 @@
     group = "root";
   };
 
-  fileSystems."/home/stags/NAS" = {
-    device = "//nas.isdino.com/home";
-    fsType = "cifs";
-    options = [
-      "credentials=/persist/etc/smb-credentials-nas"
-      "uid=1000"
-      "gid=100"
-      "file_mode=0640"
-      "dir_mode=0750"
+	  fileSystems."/home/stags/NAS" = {
+	    device = "//nas.isdino.com/home";
+	    fsType = "cifs";
+	    options = let
+	      stagsUid = toString config.users.users.stags.uid;
+	      stagsGid = toString config.users.groups.${config.users.users.stags.group}.gid;
+	    in [
+	      "credentials=/persist/etc/smb-credentials-nas"
+	      "uid=${stagsUid}"
+	      "gid=${stagsGid}"
+	      "file_mode=0640"
+	      "dir_mode=0750"
       "vers=3.0"
       "iocharset=utf8"
       "x-systemd.automount"
