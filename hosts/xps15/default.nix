@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
@@ -9,13 +9,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  networking.hostName = "xps15";
   networking.networkmanager.enable = true;
-
-  time.timeZone = lib.mkDefault "America/Los_Angeles";
-
-  hardware.enableRedistributableFirmware = true;
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
   hardware.graphics = {
     enable = true;
   };
@@ -30,8 +24,6 @@
       nvidiaBusId = "PCI:1:0:0";
     };
   };
-  services.xserver.enable = true;
-  services.xserver.xkb.layout = "us,il";
   services.xserver.videoDrivers = [ "nvidia" "intel" ];
   # Add bus IDs for PRIME offloading if needed:
   # hardware.nvidia.prime = {
@@ -48,6 +40,4 @@
   security.sudo.enable = true;
 
   environment.etc."machine-id".source = "/persist/etc/machine-id";
-
-  system.stateVersion = "25.11";
 }

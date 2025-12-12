@@ -13,99 +13,75 @@
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
-      hostDirs = lib.filterAttrs (_: v: v == "directory") (builtins.readDir ./hosts);
-      mkHost = { name }: lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit inputs; };
-        modules =
-          [
-            (./hosts + "/${name}")
-            self.nixosModules.dinOS
-            impermanence.nixosModules.impermanence
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-            }
-            self.nixosModules.users-stags
-            agenix.nixosModules.default
-            {
-              networking.hostName = lib.mkDefault name;
-              time.timeZone = "America/Los_Angeles";
-              hardware.enableRedistributableFirmware = true;
-              hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
-              system.stateVersion = "25.11";
-            }
-          ];
-      };
-    in {
-      nixosModules.dinOS = ./modules/dinOS;
-      nixosModules.users-stags = ./modules/users/stags.nix;
 
-      baseConfigurations.dinOS = nixpkgs.lib.nixosSystem {
+      hostDirs = lib.filterAttrs (_: v: v == "directory") (builtins.readDir ./hosts);
+
+      hmDefaults = {
+        home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
+      };
+
+      baseModules = [
+        self.nixosModules.dinOS
+        impermanence.nixosModules.impermanence
+        home-manager.nixosModules.home-manager
+        hmDefaults
+      ];
+
+      mkSystem = extraModules: lib.nixosSystem {
         inherit system;
         specialArgs = { inherit inputs; };
-        modules = [
-          self.nixosModules.dinOS
-          impermanence.nixosModules.impermanence
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
+        modules = baseModules ++ extraModules;
+      };
+
+      mkHost = name: mkSystem [
+        (./hosts + "/${name}")
+        self.nixosModules.users-stags
+        agenix.nixosModules.default
+        { networking.hostName = lib.mkDefault name; }
+      ];
+
+      baseConfigurations = {
+        dinOS = mkSystem [
           {
             boot.loader.systemd-boot.enable = true;
-            boot.loader.efi.canTouchEfiVariables = nixpkgs.lib.mkDefault false;
-            boot.loader.grub.enable = nixpkgs.lib.mkDefault false;
+            boot.loader.efi.canTouchEfiVariables = lib.mkDefault false;
+            boot.loader.grub.enable = lib.mkDefault false;
             fileSystems."/" = {
               device = "tmpfs";
               fsType = "tmpfs";
               options = [ "mode=0755" "size=2G" ];
             };
             networking.hostName = "dinOS";
-            time.timeZone = "America/Los_Angeles";
-            hardware.enableRedistributableFirmware = true;
-            hardware.cpu.intel.updateMicrocode = nixpkgs.lib.mkDefault true;
-            system.stateVersion = "25.11";
           }
         ];
-      };
 
-      baseConfigurations.dinOS-stags = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit inputs; };
-        modules = [
-          self.nixosModules.dinOS
+        dinOS-stags = mkSystem [
           self.nixosModules.users-stags
-          impermanence.nixosModules.impermanence
           agenix.nixosModules.default
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
           {
             boot.loader.systemd-boot.enable = true;
-            boot.loader.efi.canTouchEfiVariables = nixpkgs.lib.mkDefault false;
-            boot.loader.grub.enable = nixpkgs.lib.mkDefault false;
+            boot.loader.efi.canTouchEfiVariables = lib.mkDefault false;
+            boot.loader.grub.enable = lib.mkDefault false;
             fileSystems."/" = {
               device = "tmpfs";
               fsType = "tmpfs";
               options = [ "mode=0755" "size=2G" ];
             };
             networking.hostName = "dinOS-stags";
-            time.timeZone = "America/Los_Angeles";
-            hardware.enableRedistributableFirmware = true;
-            hardware.cpu.intel.updateMicrocode = nixpkgs.lib.mkDefault true;
-            system.stateVersion = "25.11";
           }
         ];
       };
+    in {
+      nixosModules.dinOS = ./modules/dinOS;
+      nixosModules.users-stags = ./modules/users/stags.nix;
+
+      inherit baseConfigurations;
 
       nixosConfigurations =
         # Per-host outputs (include stags user).
-        lib.mapAttrs (name: _: mkHost { inherit name; }) hostDirs
+        lib.mapAttrs (name: _: mkHost name) hostDirs
         # Device-agnostic base profiles.
-        // self.baseConfigurations;
+        // baseConfigurations;
     };
 }

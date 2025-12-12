@@ -10,6 +10,11 @@
   nix.settings.auto-optimise-store = true;
   nixpkgs.config.allowUnfree = true;
 
+  time.timeZone = lib.mkDefault "America/Los_Angeles";
+  hardware.enableRedistributableFirmware = lib.mkDefault true;
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
+  system.stateVersion = lib.mkDefault "25.11";
+
   # Persist baseline system state under /persist (impermanence).
   environment.persistence."/persist" = {
     hideMounts = true;
@@ -33,7 +38,7 @@
   environment.systemPackages = let
     dinoWallpaper = pkgs.runCommandLocal "wallpaper-dinosaur-picnic" { } ''
       set -euo pipefail
-      install -Dm644 "${../../home/stags/wallpaper}/Dinosaur Picnic on a Sunny Hill.png" \
+      install -Dm644 "${./wallpaper}/Dinosaur Picnic on a Sunny Hill.png" \
         "$out/share/backgrounds/dinosaur-picnic.png"
       mkdir -p "$out/share/gnome-background-properties"
       cat > "$out/share/gnome-background-properties/dinosaur-picnic.xml" <<EOF
@@ -69,24 +74,24 @@
   services.xserver.excludePackages = [ pkgs.xterm ];
 
   environment.gnome.excludePackages = with pkgs; [
+    cheese
     decibels
     epiphany # GNOME Web
     geary
-    gnome-calendar
     gnome-calculator
+    gnome-calendar
     gnome-clocks
+    gnome-connections
     gnome-contacts
     gnome-maps
     gnome-music
+    gnome-tour
     gnome-weather
-    gnome-connections
     rhythmbox
     simple-scan
     showtime
     totem
     yelp
-    cheese
-    gnome-tour
   ];
 
   programs.firefox = {
