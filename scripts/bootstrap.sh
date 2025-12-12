@@ -75,15 +75,6 @@ cat > "$host_dir/default.nix" <<'EOF'
   imports = [
     ./hardware-configuration.nix
   ];
-
-  # Host-specific tweaks go here. By default, networking.hostName is set from
-  # the flake (see mkHost in flake.nix) and modules/dinOS + modules/users/stags
-  # are composed automatically.
-  #
-  # Example overrides:
-  # networking.hostName = "dinOS";
-  # time.timeZone = "America/Los_Angeles";
-  # system.stateVersion = "25.11";
 }
 EOF
 

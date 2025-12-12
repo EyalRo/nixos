@@ -40,12 +40,26 @@
         modules = extraModules ++ baseModules;
       };
 
-      mkHost = name: mkSystem [
-        (./hosts + "/${name}")
-        self.nixosModules.users-stags
-        agenix.nixosModules.default
-        { networking.hostName = lib.mkDefault name; }
-      ];
+      userLayers = {
+        stags = [
+          self.nixosModules.users-stags
+          agenix.nixosModules.default
+        ];
+      };
+
+      hostUsers = {
+        xps15 = [ "stags" ];
+      };
+
+      mkHost = name:
+        let
+          enabledUsers = hostUsers.${name} or [];
+          modulesForUsers = lib.concatMap (user: userLayers.${user} or []) enabledUsers;
+        in
+          mkSystem ([
+            (./hosts + "/${name}")
+            { networking.hostName = lib.mkDefault name; }
+          ] ++ modulesForUsers);
 
       ephemeralRootModule = { lib, ... }: {
         boot.loader.systemd-boot.enable = true;
@@ -89,7 +103,7 @@
       nixosConfigurations =
         # Device-agnostic base profiles.
         baseConfigurations
-        # Per-host outputs (include stags user).
+        # Per-host outputs (dinOS + optional users + host).
         // lib.mapAttrs (name: _: mkHost name) hostDirs;
     };
 }
