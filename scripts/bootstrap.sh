@@ -50,6 +50,37 @@ fi
 mkdir -p "$host_dir"
 
 info "Saving hardware config for host '$HOST'..."
+# Decide boot loader based on firmware type.
+if [[ -d /sys/firmware/efi ]]; then
+  info "Detected EFI firmware; enabling systemd-boot."
+  boot_loader_block=$(cat <<'EOF'
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+EOF
+)
+else
+  root_device=$(findmnt -n -o SOURCE / || true)
+  boot_device=""
+  if [[ -n "$root_device" ]]; then
+    boot_device=$(lsblk -no pkname "$root_device" 2>/dev/null | head -n 1 || true)
+  fi
+
+  if [[ -z "$boot_device" ]]; then
+    cat <<'EOF' >&2
+Could not detect a boot disk for BIOS installs.
+Please set boot.loader.grub.devices manually in hosts/<host>/default.nix.
+EOF
+    exit 1
+  fi
+
+  info "Detected BIOS/legacy boot; enabling GRUB on /dev/${boot_device}."
+  boot_loader_block=$(cat <<EOF
+  boot.loader.grub.enable = true;
+  boot.loader.grub.devices = [ "/dev/${boot_device}" ];
+EOF
+)
+fi
+
 if [[ -f /etc/nixos/hardware-configuration.nix ]]; then
   if [[ $EUID -ne 0 ]]; then
     sudo cp /etc/nixos/hardware-configuration.nix "$host_dir/hardware-configuration.nix"
@@ -75,6 +106,8 @@ cat > "$host_dir/default.nix" <<'EOF'
   imports = [
     ./hardware-configuration.nix
   ];
+
+${boot_loader_block}
 }
 EOF
 

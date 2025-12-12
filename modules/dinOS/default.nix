@@ -15,6 +15,7 @@
   security.sudo.enable = lib.mkDefault true;
 
   hardware.enableRedistributableFirmware = lib.mkDefault true;
+  hardware.bluetooth.enable = lib.mkDefault true;
   system.stateVersion = lib.mkDefault "25.11";
 
   # Persist baseline system state under /persist (impermanence).
@@ -113,6 +114,5 @@
 
   services.fwupd.enable = true;
   services.printing.enable = false;
-  hardware.bluetooth.enable = true;
   services.blueman.enable = false;
 }
