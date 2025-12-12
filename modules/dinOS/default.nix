@@ -36,12 +36,12 @@
 
   # Shared wallpaper registered in GNOME backgrounds list.
   environment.systemPackages = let
-	    dinoWallpaper = pkgs.runCommandLocal "wallpaper-dinosaur-picnic" { } ''
-	      set -euo pipefail
-	      install -Dm644 "${./wallpaper}/Dinosaur Picnic on a Sunny Hill.png" \
-	        "$out/share/backgrounds/dinosaur-picnic.png"
-	      mkdir -p "$out/share/gnome-background-properties"
-	      cat > "$out/share/gnome-background-properties/dinosaur-picnic.xml" <<EOF
+    dinoWallpaper = pkgs.runCommandLocal "wallpaper-dinosaur-picnic" { } ''
+      set -euo pipefail
+      install -Dm644 "${./wallpaper}/Dinosaur Picnic on a Sunny Hill.png" \
+        "$out/share/backgrounds/dinosaur-picnic.png"
+      mkdir -p "$out/share/gnome-background-properties"
+      cat > "$out/share/gnome-background-properties/dinosaur-picnic.xml" <<EOF
       <wallpapers>
         <wallpaper deleted="false">
           <name>Dinosaur Picnic</name>
