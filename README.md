@@ -11,7 +11,7 @@ Opinionated NixOS flake with GNOME and impermanence defaults.
 curl -fsSL https://raw.githubusercontent.com/EyalRo/nixos/main/scripts/bootstrap.sh | bash
 ```
 
-You’ll be prompted for sudo. The script clones this repo to `~/nixos`, creates a `hosts/dinOS/` entry from your hardware config, switches to the flake, and reboots.
+You’ll be prompted for the administrator password. While typing, nothing will be shown (no characters and no `*`), which is normal — just type it and press Enter. The script clones this repo to `~/nixos`, creates a `hosts/dinOS/` entry from your hardware config, switches to the flake, and reboots.
 
 After reboot, edit `~/nixos/hosts/dinOS/default.nix` for host-specific tweaks and rerun:
 
