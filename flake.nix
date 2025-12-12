@@ -48,6 +48,7 @@
       };
 
       hostUsers = {
+        ideapad3 = [ "stags" ];
         xps15 = [ "stags" ];
       };
 
