@@ -14,7 +14,9 @@
       system = "x86_64-linux";
       lib = nixpkgs.lib;
 
-      hostDirs = lib.filterAttrs (_: v: v == "directory") (builtins.readDir ./hosts);
+      hostDirs =
+        lib.filterAttrs (name: v: v == "directory" && name != "dinOS")
+          (builtins.readDir ./hosts);
 
       hmDefaults = {
         home-manager.useGlobalPkgs = true;
@@ -63,6 +65,10 @@
           ] ++ modulesForUsers);
 
       baseConfigurations = {
+        dinOS = mkSystem [
+          ./hosts/dinOS
+          { networking.hostName = "dinOS"; }
+        ];
         dinOS-installer = mkInstaller [
           ({ modulesPath, ... }: {
             imports = [
