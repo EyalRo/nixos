@@ -13,6 +13,11 @@
 
   # Prefer newest kernel available in the pinned channel.
   boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+  boot.loader.systemd-boot = {
+    enable = lib.mkDefault true;
+    configurationLimit = lib.mkDefault 5;
+  };
+  boot.loader.efi.canTouchEfiVariables = lib.mkDefault true;
 
   networking.networkmanager.enable = lib.mkDefault true;
   security.sudo.enable = lib.mkDefault true;
