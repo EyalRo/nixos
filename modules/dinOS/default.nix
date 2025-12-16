@@ -32,6 +32,7 @@
     directories = [
       "/etc/ssh"
       "/var/lib/NetworkManager"
+      "/var/lib/bluetooth"
       "/var/lib/docker"
       "/var/lib/fprint"
       "/var/lib/nixos"
