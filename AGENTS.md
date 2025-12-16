@@ -11,11 +11,15 @@ This flake is intentionally split into three layers with different audiences:
   - Owns: the `stags` user account, personal packages and services (tailscale/NAS/etc), timezone, age/agenix secrets, and per‑user persistence.
   - Should stay device‑agnostic; no hardware‑specific tweaks here.
 
-- `hosts/<name>/`: per‑device configuration for a single machine.
+- `hosts/<name>/`: per-device configuration for a single machine.
   - Owns: `hardware-configuration.nix`, bootloader/disk layout, graphics/drivers, CPU microcode, machine‑id binding, and any quirks unique to that box.
   - Keep minimal to avoid duplicating dinOS or user defaults.
 
 Persisted state mounts under `/persist`; add mutable paths there only.
+
+## GNOME & Wallpapers
+- Wallpaper assets live in `modules/dinOS/wallpaper`. Register backgrounds in dinOS only; do not pin wallpapers via per-user dconf in `home-manager` so user changes persist.
+- Default wallpaper is Friendly Pals (day/night variants) set through system dconf defaults; Dinosaur Picnic remains available in GNOME’s background picker.
 
 ## Build, Test, and Development Commands
 - Dry-run evaluation: `nixos-rebuild dry-run --flake .#xps15` (or another output). Do not use `sudo`.
