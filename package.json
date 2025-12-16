@@ -5,12 +5,6 @@
   "license": "MIT",
   "type": "commonjs",
   "scripts": {
-    "codex": "codex"
-  },
-  "devDependencies": {
-    "codex": "0.2.3"
-  },
-  "overrides": {
-    "stylus": "0.59.0"
+    "codex": "npm exec --yes --package=stylus@0.59.0 --package=codex@0.2.3 codex"
   }
 }
