@@ -15,3 +15,6 @@ Other outputs:
 - `nixosConfigurations.dinOS-installer` – minimal installer ISO profile
 - `nixosConfigurations.ideapad3` – host-specific
 - `nixosConfigurations.xps15` – host-specific
+
+## Development tooling
+- Run `npm run codex` to invoke the local `codex` CLI with `stylus@0.59.0` pinned to avoid circular dependency warnings about `lineno`/`filename`.
