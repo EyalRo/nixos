@@ -41,13 +41,6 @@
     "org/gnome/desktop/interface" = {
       clock-format = "24h";
     };
-    "org/gnome/desktop/background" = {
-      picture-uri = "file:///run/current-system/sw/share/backgrounds/dinosaur-picnic.png";
-      picture-uri-dark = "file:///run/current-system/sw/share/backgrounds/dinosaur-picnic.png";
-      picture-options = "scaled";
-      primary-color = "#000000";
-      secondary-color = "#000000";
-    };
     "org/gnome/shell/extensions/caffeine" = {
       user-enabled = true;
       toggle-state = true;

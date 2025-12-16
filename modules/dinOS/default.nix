@@ -63,9 +63,28 @@
       </wallpapers>
       EOF
     '';
+    friendlyPalsWallpapers = pkgs.runCommandLocal "wallpaper-friendly-pals" { } ''
+      set -euo pipefail
+      install -Dm644 "${./wallpaper}/FriendlyPals-Day.png" \
+        "$out/share/backgrounds/friendly-pals-day.png"
+      install -Dm644 "${./wallpaper}/FriendlyPals-Night.png" \
+        "$out/share/backgrounds/friendly-pals-night.png"
+      mkdir -p "$out/share/gnome-background-properties"
+      cat > "$out/share/gnome-background-properties/friendly-pals.xml" <<EOF
+      <wallpapers>
+        <wallpaper deleted="false">
+          <name>Friendly Pals</name>
+          <filename>${"$"}{out}/share/backgrounds/friendly-pals-day.png</filename>
+          <filename-dark>${"$"}{out}/share/backgrounds/friendly-pals-night.png</filename-dark>
+          <options>scaled</options>
+        </wallpaper>
+      </wallpapers>
+      EOF
+    '';
   in
     with pkgs; [
       dinoWallpaper
+      friendlyPalsWallpapers
       distrobox
       distroshelf
       firefox
@@ -76,6 +95,20 @@
       gnomeExtensions.caffeine
       nerd-fonts.fira-code
     ];
+
+  # Provide a GNOME default wallpaper without forcing user overrides.
+  programs.dconf = {
+    enable = true;
+    profiles.user.databases = [
+      {
+        settings."org/gnome/desktop/background" = {
+          picture-uri = "file:///run/current-system/sw/share/backgrounds/friendly-pals-day.png";
+          picture-uri-dark = "file:///run/current-system/sw/share/backgrounds/friendly-pals-night.png";
+          picture-options = "scaled";
+        };
+      }
+    ];
+  };
 
   services.xserver.enable = true;
   services.xserver.xkb.layout = "us,il";
