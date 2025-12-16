@@ -1,0 +1,16 @@
+{
+  "name": "nixos",
+  "version": "1.0.0",
+  "description": "Development tooling for the dinOS NixOS flake.",
+  "license": "MIT",
+  "type": "commonjs",
+  "scripts": {
+    "codex": "codex"
+  },
+  "devDependencies": {
+    "codex": "0.2.3"
+  },
+  "overrides": {
+    "stylus": "0.59.0"
+  }
+}
