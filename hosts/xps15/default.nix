@@ -36,5 +36,4 @@
     tod.driver = pkgs.libfprint-2-tod1-goodix;
   };
 
-  environment.etc."machine-id".source = "/persist/etc/machine-id";
 }

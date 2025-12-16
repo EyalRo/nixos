@@ -40,6 +40,8 @@
     ];
   };
 
+  environment.etc."machine-id".source = "/persist/etc/machine-id";
+
   systemd.tmpfiles.rules = [
     "d /persist 0755 root root -"
     "d /persist/home 0755 root root -"
@@ -47,6 +49,7 @@
     "d /persist/var 0755 root root -"
     "d /persist/var/lib 0755 root root -"
     "d /persist/var/lib/bluetooth 0755 root root -"
+    "f /persist/etc/machine-id 0444 root root -"
   ];
 
   # Shared wallpaper registered in GNOME backgrounds list.
