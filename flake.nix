@@ -13,6 +13,7 @@
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
+      pkgs = import nixpkgs { inherit system; };
 
       hostDirs = lib.filterAttrs (_: v: v == "directory") (builtins.readDir ./hosts);
 
@@ -116,5 +117,11 @@
         baseConfigurations
         # Per-host outputs (dinOS + optional users + host).
         // lib.mapAttrs (name: _: mkHost name) hostDirs;
+
+      devShells.${system}.default = pkgs.mkShell {
+        packages = [
+          pkgs.nodejs_22
+        ];
+      };
     };
 }
