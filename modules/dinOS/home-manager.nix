@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
-{
+let
+  gruvboxPreset = ./starship/gruvbox-rainbow.toml;
+in {
   home.packages = with pkgs; [
     bat
     direnv
@@ -31,9 +33,12 @@
     enable = true;
     enableFishIntegration = true;
   };
-  xdg.configFile."starship.toml" = {
-    source = ./starship/gruvbox-rainbow.toml;
-    force = true;
+  xdg.configFile = {
+    "starship/gruvbox-rainbow.toml".source = gruvboxPreset;
+    "starship.toml" = {
+      source = gruvboxPreset;
+      force = true;
+    };
   };
 
   xdg.configFile."ghostty/config".text = ''
