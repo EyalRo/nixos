@@ -22,9 +22,6 @@ in {
   programs.direnv.nix-direnv.enable = true;
   programs.fish = {
     enable = true;
-    shellAliases = {
-      cat = "bat";
-    };
     interactiveShellInit = ''
       # Default to the green Tokyo theme unless already set (dev shell overrides).
       if not set -q STARSHIP_CONFIG
