@@ -13,6 +13,7 @@
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
+      pkgs = import nixpkgs { inherit system; };
 
       hostDirs = lib.filterAttrs (_: v: v == "directory") (builtins.readDir ./hosts);
 
@@ -116,5 +117,21 @@
         baseConfigurations
         # Per-host outputs (dinOS + optional users + host).
         // lib.mapAttrs (name: _: mkHost name) hostDirs;
+
+      devShells.${system}.default = pkgs.mkShell {
+        packages = with pkgs; [
+          git
+          nixpkgs-fmt
+          nodejs_20
+          fish
+          starship
+        ];
+
+        shellHook = ''
+          export STARSHIP_CONFIG=${./devshell/starship/tokyo-night.toml}
+          echo "Loaded nix develop shell with git, nixpkgs-fmt, nodejs_20, fish, and starship (tokyo-night)."
+          exec ${pkgs.fish}/bin/fish -C '${pkgs.starship}/bin/starship init fish | source'
+        '';
+      };
     };
 }
