@@ -25,6 +25,12 @@ in {
     shellAliases = {
       cat = "bat";
     };
+    interactiveShellInit = ''
+      # Default to the green Tokyo theme unless already set (dev shell overrides).
+      if not set -q STARSHIP_CONFIG
+        set -gx STARSHIP_CONFIG "${configDir}/starship/default.toml"
+      end
+    '';
   };
   xdg.configFile."fish/config.fish".force = true;
 
