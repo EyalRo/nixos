@@ -1,7 +1,9 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
-  gruvboxPreset = ./starship/gruvbox-rainbow.toml;
+  defaultTheme = ./starship/default.toml;
+  developTheme = ./starship/develop.toml;
+  configDir = config.xdg.configHome;
 in {
   home.packages = with pkgs; [
     bat
@@ -34,12 +36,19 @@ in {
     enableFishIntegration = true;
   };
   xdg.configFile = {
-    "starship/gruvbox-rainbow.toml".source = gruvboxPreset;
+    "starship/default.toml".source = defaultTheme;
+    "starship/develop.toml".source = developTheme;
     "starship.toml" = {
-      source = gruvboxPreset;
       force = true;
+      text = ''
+        # Managed by Nix.
+        # Default theme: ${configDir}/starship/default.toml (set via STARSHIP_CONFIG).
+        # Dev shell overrides STARSHIP_CONFIG to ${configDir}/starship/develop.toml.
+      '';
     };
   };
+
+  home.sessionVariables.STARSHIP_CONFIG = "${configDir}/starship/default.toml";
 
   xdg.configFile."ghostty/config".text = ''
     font-family = FiraCode Nerd Font

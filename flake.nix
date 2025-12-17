@@ -128,8 +128,8 @@
         ];
 
         shellHook = ''
-          export STARSHIP_CONFIG=${./devshell/starship/tokyo-night.toml}
-          echo "Loaded nix develop shell with git, nixpkgs-fmt, nodejs_20, fish, and starship (tokyo-night)."
+          export STARSHIP_CONFIG=${./modules/dinOS/starship/develop.toml}
+          echo "Loaded nix develop shell with git, nixpkgs-fmt, nodejs_20, fish, and starship (develop theme)."
           exec ${pkgs.fish}/bin/fish -C '${pkgs.starship}/bin/starship init fish | source'
         '';
       };
