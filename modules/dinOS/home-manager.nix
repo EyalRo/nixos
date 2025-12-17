@@ -31,7 +31,10 @@
     enable = true;
     enableFishIntegration = true;
   };
-  xdg.configFile."starship.toml".source = ./starship/gruvbox-rainbow.toml;
+  xdg.configFile."starship.toml" = {
+    source = ./starship/gruvbox-rainbow.toml;
+    force = true;
+  };
 
   xdg.configFile."ghostty/config".text = ''
     font-family = FiraCode Nerd Font
