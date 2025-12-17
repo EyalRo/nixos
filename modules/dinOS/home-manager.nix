@@ -37,13 +37,12 @@ in {
   programs.starship = {
     enable = true;
     enableFishIntegration = true;
+    # Point Starship at the default theme file instead of the root starship.toml.
+    configPath = "${configDir}/starship/default.toml";
   };
   xdg.configFile = {
     "starship/default.toml".source = defaultTheme;
     "starship/develop.toml".source = developTheme;
-    # Link the main Starship config to the default theme; dev shell overrides
-    # STARSHIP_CONFIG to the develop theme.
-    "starship.toml".source = defaultTheme;
   };
 
   xdg.configFile."ghostty/config".text = ''
