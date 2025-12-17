@@ -44,14 +44,9 @@ in {
   xdg.configFile = {
     "starship/default.toml".source = defaultTheme;
     "starship/develop.toml".source = developTheme;
-    "starship.toml" = {
-      force = true;
-      text = ''
-        # Managed by Nix.
-        # Default theme: ${configDir}/starship/default.toml (set via STARSHIP_CONFIG).
-        # Dev shell overrides STARSHIP_CONFIG to ${configDir}/starship/develop.toml.
-      '';
-    };
+    # Link the main Starship config to the default theme; dev shell overrides
+    # STARSHIP_CONFIG to the develop theme.
+    "starship.toml".source = defaultTheme;
   };
 
   home.sessionVariables.STARSHIP_CONFIG = "${configDir}/starship/default.toml";
