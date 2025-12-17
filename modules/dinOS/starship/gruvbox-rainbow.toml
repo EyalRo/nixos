@@ -3,7 +3,7 @@
 scan_timeout = 300
 
 format = """
-[🦖 ](fg:color_fg0)\
+[🦕 ](fg:color_fg0)\
 [](color_orange)\
 $os\
 $username\
