@@ -22,6 +22,7 @@ Persisted state mounts under `/persist`; add mutable paths there only.
 - Default wallpaper is Friendly Pals (day/night variants) set through system dconf defaults; Dinosaur Picnic remains available in GNOME’s background picker.
 
 ## Build, Test, and Development Commands
+- Never run `sudo` or any privileged command; maintainers handle privileged switches.
 - Dry-run evaluation: `nixos-rebuild dry-run --flake .#xps15` (or another output). Do not use `sudo`.
 - Privileged switches are handled by maintainers; agents must not run privileged commands.
 - Inspect flake outputs: `nix flake show`.
