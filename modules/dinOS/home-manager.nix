@@ -46,8 +46,6 @@ in {
     "starship.toml".source = defaultTheme;
   };
 
-  home.sessionVariables.STARSHIP_CONFIG = "${configDir}/starship/default.toml";
-
   xdg.configFile."ghostty/config".text = ''
     font-family = FiraCode Nerd Font
   '';
