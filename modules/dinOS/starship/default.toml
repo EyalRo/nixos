@@ -1,0 +1,30 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Tokyo-inspired layout with green shades and sauropod icon.
+format = """
+[░▒▓](#b3f5c0)\
+[ 🦕 ](bg:#b3f5c0 fg:#0c130c)\
+[](bg:#7bdc92 fg:#b3f5c0)\
+$directory\
+[](fg:#7bdc92 bg:#1f402a)\
+$time\
+[ ](fg:#1f402a)\
+\n$character"""
+
+[directory]
+style = "fg:#e8ffe9 bg:#7bdc92"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:#1f402a"
+format = '[[  $time ](fg:#a8e6a3 bg:#1f402a)]($style)'
