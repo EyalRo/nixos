@@ -10,6 +10,7 @@ This flake is intentionally split into three layers with different audiences:
 - `modules/users/stags.nix` + `home/stags/` (stags): personal user layer for stags, intended to work on any of my devices.
   - Owns: the `stags` user account, personal packages and services (tailscale/NAS/etc), timezone, age/agenix secrets, and per‑user persistence.
   - Should stay device‑agnostic; no hardware‑specific tweaks here.
+  - NAS-backed keys live at `/mnt/stags/.config/age/keys.txt` (age) and `/mnt/stags/.ssh/id_ed25519_github` (GitHub SSH).
 
 - `hosts/<name>/`: per-device configuration for a single machine.
   - Owns: `hardware-configuration.nix`, bootloader/disk layout, graphics/drivers, CPU microcode, machine‑id binding, and any quirks unique to that box.

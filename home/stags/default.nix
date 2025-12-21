@@ -19,5 +19,14 @@
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
+  programs.ssh = {
+    enable = true;
+    matchBlocks."github.com" = {
+      user = "git";
+      identityFile = "/mnt/stags/.ssh/id_ed25519_github";
+      identitiesOnly = true;
+    };
+  };
+
   home.stateVersion = "25.11";
 }

@@ -2,6 +2,11 @@
 
 EFI-only NixOS flake with GNOME defaults (Friendly Pals wallpaper), impermanence, and latest kernel from the pinned channel.
 
+## Secrets and keys (stags)
+
+- Age identity lives on the NAS: `/mnt/stags/.config/age/keys.txt`.
+- GitHub SSH key lives on the NAS: `/mnt/stags/.ssh/id_ed25519_github`.
+
 ## Simple installation (EFI)
 
 ```bash
