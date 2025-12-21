@@ -21,6 +21,12 @@
 
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
+    matchBlocks."*" = {
+      hashKnownHosts = true;
+      serverAliveInterval = 60;
+      serverAliveCountMax = 3;
+    };
     matchBlocks."github.com" = {
       user = "git";
       identityFile = "/mnt/stags/.ssh/id_ed25519_github";
