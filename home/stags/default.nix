@@ -23,6 +23,9 @@
     enable = true;
     enableDefaultConfig = false;
     matchBlocks."*" = {
+      addKeysToAgent = "yes";
+      compression = true;
+      forwardAgent = false;
       hashKnownHosts = true;
       serverAliveInterval = 60;
       serverAliveCountMax = 3;
