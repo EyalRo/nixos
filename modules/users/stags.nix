@@ -1,6 +1,10 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
+  imports = [
+    inputs.agenix.nixosModules.default
+  ];
+
   users.users.stags = {
     isNormalUser = true;
     description = "stags";
@@ -22,6 +26,10 @@
       Domain = "localdomain";
     };
   };
+
+  age.identityPaths = [
+    "/mnt/stags/.config/age/keys.txt"
+  ];
 
   fileSystems."/mnt/stags" = {
     device = "nas.dino.home:/volume1/homes/Eyal";
