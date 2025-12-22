@@ -15,8 +15,16 @@ curl -fsSL https://raw.githubusercontent.com/EyalRo/nixos/main/scripts/switch-to
 
 ---
 
-Other outputs:
-- `nixosConfigurations.dinOS-stags` – generic host with my personal user
-- `nixosConfigurations.dinOS-installer` – minimal installer ISO profile
-- `nixosConfigurations.ideapad3` – host-specific
-- `nixosConfigurations.xps15` – host-specific
+Example hosts:
+
+```bash
+nixos-rebuild switch --impure --flake github:EyalRo/nixos#dinOS
+```
+
+```bash
+nixos-rebuild switch --flake github:EyalRo/nixos#ideapad3
+```
+
+```bash
+nixos-rebuild switch --flake github:EyalRo/nixos#xps15
+```
