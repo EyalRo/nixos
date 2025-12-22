@@ -93,7 +93,10 @@
       distrobox
       distroshelf
       firefox
+      fastfetch
+      ghostty
       git
+      helix
       gnome-browser-connector
       gnome-tweaks
       gnomeExtensions.appindicator

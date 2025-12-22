@@ -8,9 +8,6 @@ in {
   home.packages = with pkgs; [
     bat
     direnv
-    fastfetch
-    ghostty
-    helix
     lsd
     nix-direnv
     telegram-desktop
