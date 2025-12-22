@@ -47,7 +47,12 @@ in {
   xdg.configFile."ghostty/config".text = ''
     font-family = FiraCode Nerd Font
     shell-integration-features = ssh-terminfo,ssh-env
+    custom-shader = shaders/gradient.glsl
+    custom-shader = shaders/dither.glsl
   '';
+
+  xdg.configFile."ghostty/shaders/gradient.glsl".source = ./ghostty/gradient.glsl;
+  xdg.configFile."ghostty/shaders/dither.glsl".source = ./ghostty/dither.glsl;
 
   dconf.settings = {
     "org/gnome/desktop/interface" = {
