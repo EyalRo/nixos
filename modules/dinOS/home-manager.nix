@@ -46,6 +46,7 @@ in {
 
   xdg.configFile."ghostty/config".text = ''
     font-family = FiraCode Nerd Font
+    shell-integration-features = ssh-terminfo,ssh-env
   '';
 
   dconf.settings = {
