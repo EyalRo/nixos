@@ -5,6 +5,7 @@
   home.homeDirectory = "/home/stags";
 
   home.packages = with pkgs; [
+    ghostty
     protonvpn-gui
     tailscale-systray
   ];

@@ -13,9 +13,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 
     // Create smooth circular animation
     float angle = iTime * speed;
-    vec3 color1 = vec3(0.1, 0.1, 0.5);
-    vec3 color2 = vec3(0.5, 0.1, 0.1);
-    vec3 color3 = vec3(0.02, 0.12, 0.02);
+    vec3 color1 = vec3(0.02, 0.12, 0.02);
+    vec3 color2 = vec3(0.01, 0.08, 0.03);
+    vec3 color3 = vec3(0.0, 0.0, 0.0);
 
     // Smooth interpolation between colors using multiple mix operations
     vec3 gradientStartColor = mix(
