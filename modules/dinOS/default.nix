@@ -148,7 +148,9 @@
 
   programs.firefox = {
     enable = true;
-    nativeMessagingHosts.packages = [ pkgs.gnome-browser-connector ];
+    package = pkgs.wrapFirefox pkgs.firefox-unwrapped {
+      nativeMessagingHosts = [ pkgs.gnome-browser-connector ];
+    };
   };
 
   services.pipewire = {

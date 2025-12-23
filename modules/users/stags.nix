@@ -44,6 +44,19 @@
     ];
   };
 
+  fileSystems."/mnt/shared" = {
+    device = "nas.dino.home:/volume1/Shared";
+    fsType = "nfs4";
+    options = [
+      "_netdev"
+      "noauto"
+      "x-systemd.automount"
+      "x-systemd.device-timeout=10s"
+      "x-systemd.idle-timeout=600"
+      "x-systemd.mount-timeout=10s"
+    ];
+  };
+
   # Persist tailscale state.
   environment.persistence."/persist" = {
     directories = [
