@@ -94,6 +94,7 @@
       distroshelf
       firefox
       fastfetch
+      myfetch
       ghostty
       git
       helix

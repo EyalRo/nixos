@@ -13,7 +13,15 @@
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
-      pkgs = import nixpkgs { inherit system; };
+      overlays = {
+        default = final: prev: {
+          myfetch = final.callPackage ./pkgs/myfetch { };
+        };
+      };
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ overlays.default ];
+      };
 
       hostDirs = lib.filterAttrs (_: v: v == "directory") (builtins.readDir ./hosts);
 
@@ -23,6 +31,7 @@
       };
 
       baseModules = [
+        { nixpkgs.overlays = [ overlays.default ]; }
         self.nixosModules.dinOS
         impermanence.nixosModules.impermanence
         home-manager.nixosModules.home-manager
@@ -93,6 +102,7 @@
         ];
       };
     in {
+      overlays = overlays;
       nixosModules.dinOS = ./modules/dinOS;
       nixosModules.users-stags = ./modules/users/stags.nix;
 
