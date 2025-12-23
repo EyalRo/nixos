@@ -129,5 +129,7 @@
           exec ${pkgs.fish}/bin/fish -C 'set -g fish_greeting "" ; ${pkgs.starship}/bin/starship init fish | source'
         '';
       };
+
+      packages.${system}.myfetch = pkgs.myfetch;
     };
 }

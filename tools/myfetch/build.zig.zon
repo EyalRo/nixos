@@ -1,5 +1,11 @@
 .{
-  .name = "myfetch",
+  .name = .myfetch,
   .version = "0.1.0",
+  .fingerprint = 0x1feb3a0c51928a0e,
+  .paths = .{
+    "build.zig",
+    "build.zig.zon",
+    "src/main.zig",
+  },
   .dependencies = .{},
 }

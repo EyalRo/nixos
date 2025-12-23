@@ -1,9 +1,9 @@
 const std = @import("std");
 
 pub fn main() !void {
-    const stdout = std.io.getStdOut().writer();
+    const stdout = std.fs.File.stdout();
     const kitty_png_1x1 =
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGD4DwAB"
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGD4DwAB" ++
         "BAEAfbE5WQAAAABJRU5ErkJggg==";
 
     // Kitty graphics protocol: render a tiny image block as a visual accent.

@@ -10,6 +10,8 @@ stdenv.mkDerivation {
 
   buildPhase = ''
     runHook preBuild
+    export ZIG_GLOBAL_CACHE_DIR="$TMPDIR/zig-cache"
+    export ZIG_LOCAL_CACHE_DIR="$TMPDIR/zig-cache"
     zig build -Doptimize=ReleaseSafe
     runHook postBuild
   '';
