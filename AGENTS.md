@@ -24,6 +24,7 @@ Persisted state mounts under `/persist`; add mutable paths there only.
 
 ## Build, Test, and Development Commands
 - Never run `sudo` or any privileged command; maintainers handle privileged switches.
+- Do not run `scripts/switch-to-dinos.sh` (uses `pkexec`) or suggest it to be run by agents.
 - Dry-run evaluation: `nixos-rebuild dry-run --flake .#xps15` (or another output). Do not use `sudo`.
 - Privileged switches are handled by maintainers; agents must not run privileged commands.
 - Inspect flake outputs: `nix flake show`.
@@ -39,6 +40,10 @@ Persisted state mounts under `/persist`; add mutable paths there only.
 - Always run `nixos-rebuild dry-run --flake .#<output>` after changes.
 - After input/layout changes, confirm via `nixos-option` or GNOME Settings.
 - If adding services, ensure required mutable state is persisted under `/persist`.
+
+## Flake Outputs
+- `dinOS`: generic EFI-only base profile that imports `/etc/nixos/hardware-configuration.nix`.
+- `ideapad3`, `xps15`: host-specific profiles that add hardware quirks on top of dinOS and optional user layers.
 
 ## Commit & Pull Request Guidelines
 - Use concise, imperative commit messages.
