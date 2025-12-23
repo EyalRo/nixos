@@ -15,7 +15,7 @@
       lib = nixpkgs.lib;
       overlays = {
         default = final: prev: {
-          myfetch = final.callPackage ./pkgs/myfetch { };
+          dinofetch = final.callPackage ./pkgs/dinofetch { };
         };
       };
       pkgs = import nixpkgs {
@@ -130,6 +130,6 @@
         '';
       };
 
-      packages.${system}.myfetch = pkgs.myfetch;
+      packages.${system}.dinofetch = pkgs.dinofetch;
     };
 }

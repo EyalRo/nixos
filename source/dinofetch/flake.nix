@@ -1,5 +1,5 @@
 {
-  description = "myfetch Zig tool dev shell";
+  description = "dinofetch Zig tool dev shell";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";

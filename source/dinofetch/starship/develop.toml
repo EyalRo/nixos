@@ -1,7 +1,7 @@
 "$schema" = "https://starship.rs/config-schema.json"
 
 format = """
-[myfetch](bold fg:#ffffff bg:#0c1f2e)
+[dinofetch](bold fg:#ffffff bg:#0c1f2e)
 [ $directory ](fg:#bfe9ff bg:#0c1f2e)
 [ $git_branch$git_status ](fg:#8bd2a1 bg:#0c1f2e)
 [ $zig ](fg:#ffd27f bg:#0c1f2e)

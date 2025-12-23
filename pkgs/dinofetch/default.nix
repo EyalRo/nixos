@@ -1,10 +1,10 @@
 { stdenv, zig }:
 
 stdenv.mkDerivation {
-  pname = "myfetch";
+  pname = "dinofetch";
   version = "0.1.0";
 
-  src = ../../tools/myfetch;
+  src = ../../source/dinofetch;
 
   nativeBuildInputs = [ zig ];
 
@@ -18,9 +18,9 @@ stdenv.mkDerivation {
 
   installPhase = ''
     runHook preInstall
-    install -Dm755 zig-out/bin/myfetch $out/bin/myfetch
+    install -Dm755 zig-out/bin/dinofetch $out/bin/dinofetch
     runHook postInstall
   '';
 
-  meta.mainProgram = "myfetch";
+  meta.mainProgram = "dinofetch";
 }

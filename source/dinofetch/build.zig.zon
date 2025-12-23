@@ -1,7 +1,7 @@
 .{
-  .name = .myfetch,
+  .name = .dinofetch,
   .version = "0.1.0",
-  .fingerprint = 0x1feb3a0c51928a0e,
+  .fingerprint = 0x4ec261ff903562c1,
   .paths = .{
     "build.zig",
     "build.zig.zon",
