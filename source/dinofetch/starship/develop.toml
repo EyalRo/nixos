@@ -1,0 +1,32 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+format = """
+[dinofetch](bold fg:#ffffff bg:#0c1f2e)
+[ $directory ](fg:#bfe9ff bg:#0c1f2e)
+[ $git_branch$git_status ](fg:#8bd2a1 bg:#0c1f2e)
+[ $zig ](fg:#ffd27f bg:#0c1f2e)
+[ $time ](fg:#f7b6c2 bg:#0c1f2e)
+\n$character"""
+
+[character]
+success_symbol = ">"
+error_symbol = ">"
+
+[directory]
+truncation_length = 4
+truncate_to_repo = false
+
+[git_branch]
+symbol = "git:"
+
+[git_status]
+format = "($all_status$ahead_behind)"
+
+[zig]
+symbol = "zig:"
+format = "[$symbol $version]($style)"
+style = "fg:#ffd27f"
+
+[time]
+disabled = false
+time_format = "%H:%M"
