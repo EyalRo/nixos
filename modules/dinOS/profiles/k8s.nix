@@ -6,6 +6,7 @@ in
   networking.firewall.allowedTCPPorts = [
     6443
     8888
+    10250
   ];
 
   # Ensure control plane can resolve node names without mDNS.
