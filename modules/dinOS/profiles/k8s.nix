@@ -8,6 +8,12 @@ in
     8888
   ];
 
+  # Ensure control plane can resolve node names without mDNS.
+  networking.extraHosts = ''
+    192.168.1.21 m710q-1
+    192.168.1.22 m710q-2
+  '';
+
   services.kubernetes.addonManager.bootstrapAddons = lib.mkIf rbacEnabled {
     flannel-cr = {
       apiVersion = "rbac.authorization.k8s.io/v1";
