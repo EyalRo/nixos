@@ -19,6 +19,9 @@ in
 
   services.kubernetes.apiserver.allowPrivileged = true;
 
+  virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".sandbox_image =
+    "registry.k8s.io/pause:3.9";
+
   environment.systemPackages = with pkgs; [
     nfs-utils
   ];
