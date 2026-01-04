@@ -23,7 +23,12 @@ in
     "registry.k8s.io/pause:3.9";
 
   environment.systemPackages = with pkgs; [
+    openiscsi
     nfs-utils
+  ];
+
+  systemd.tmpfiles.rules = [
+    "L+ /usr/bin/iscsiadm - - - - /run/current-system/sw/sbin/iscsiadm"
   ];
 
   environment.persistence."/persist".directories = [
