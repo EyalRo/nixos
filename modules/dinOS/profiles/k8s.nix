@@ -17,6 +17,9 @@ in
   services.openiscsi.enable = true;
   services.openiscsi.name = lib.mkDefault "iqn.2024-01.dino:${config.networking.hostName}";
 
+  services.kubernetes.apiserver.allowPrivileged = true;
+  services.kubernetes.kubelet.allowPrivileged = true;
+
   environment.systemPackages = with pkgs; [
     nfs-utils
   ];
