@@ -1,8 +1,35 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   rbacEnabled = lib.elem "RBAC" config.services.kubernetes.apiserver.authorizationMode;
 in
 {
+  boot.kernelModules = [
+    "br_netfilter"
+    "iscsi_tcp"
+    "overlay"
+  ];
+  boot.kernel.sysctl."net.bridge.bridge-nf-call-iptables" = lib.mkDefault 1;
+  boot.kernel.sysctl."net.bridge.bridge-nf-call-ip6tables" = lib.mkDefault 1;
+  boot.kernel.sysctl."net.ipv4.ip_forward" = lib.mkDefault 1;
+
+  swapDevices = lib.mkForce [ ];
+
+  services.openiscsi.enable = true;
+  services.openiscsi.name = lib.mkDefault "iqn.2024-01.dino:${config.networking.hostName}";
+
+  environment.systemPackages = with pkgs; [
+    nfs-utils
+  ];
+
+  environment.persistence."/persist".directories = [
+    "/etc/kubernetes"
+    "/var/lib/cni"
+    "/var/lib/containerd"
+    "/var/lib/iscsi"
+    "/var/lib/kubelet"
+    "/var/lib/longhorn"
+  ];
+
   networking.firewall.allowedTCPPorts = [
     6443
     8888
