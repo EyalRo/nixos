@@ -109,7 +109,6 @@
         m710q-1 = [ "k8s" "headless" ];
         m710q-2 = [ "k8s" "headless" ];
         nuc14 = [ "server" "kodi" ];
-        synology-vm = [ "k8s" "headless" ];
       };
 
       expandProfiles = profiles:
