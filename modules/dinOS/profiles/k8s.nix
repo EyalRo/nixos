@@ -41,9 +41,13 @@ in
   ];
 
   networking.firewall.allowedTCPPorts = [
+    53
     6443
     8888
     10250
+  ];
+  networking.firewall.allowedUDPPorts = [
+    53
   ];
 
   # Ensure control plane can resolve node names without mDNS.
