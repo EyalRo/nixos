@@ -55,6 +55,7 @@ in
   networking.extraHosts = ''
     192.168.1.21 m710q-1
     192.168.1.22 m710q-2
+    192.168.1.240 nfs-share.nfs-share.svc.cluster.local nfs-share
   '';
 
   services.kubernetes.addonManager.bootstrapAddons = lib.mkMerge [
