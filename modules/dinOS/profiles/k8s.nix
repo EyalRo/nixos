@@ -18,7 +18,7 @@ in
   services.openiscsi.name = lib.mkDefault "iqn.2024-01.dino:${config.networking.hostName}";
 
   services.kubernetes.apiserver.allowPrivileged = true;
-  services.kubernetes.kubelet.clusterDNS = "10.0.0.254";
+  services.kubernetes.kubelet.extraOpts = lib.mkAfter "--cluster-dns=10.0.0.254";
 
   virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".sandbox_image =
     "registry.k8s.io/pause:3.9";
