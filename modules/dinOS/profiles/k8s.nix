@@ -57,6 +57,38 @@ in
   '';
 
   services.kubernetes.addonManager.bootstrapAddons = lib.mkIf rbacEnabled {
+    coredns-config = {
+      apiVersion = "v1";
+      kind = "ConfigMap";
+      metadata = {
+        name = "coredns";
+        namespace = "kube-system";
+        labels = {
+          "addonmanager.kubernetes.io/mode" = "EnsureExists";
+          "k8s-app" = "kube-dns";
+          "kubernetes.io/cluster-service" = "true";
+        };
+      };
+      data = {
+        Corefile = ''
+          .:10053 {
+            errors
+            health :10054
+            kubernetes cluster.local in-addr.arpa ip6.arpa {
+              pods insecure
+              fallthrough in-addr.arpa ip6.arpa
+            }
+            prometheus :10055
+            forward . 192.168.1.1
+            cache 30
+            loop
+            reload
+            loadbalance
+          }
+        '';
+      };
+    };
+
     flannel-cr = {
       apiVersion = "rbac.authorization.k8s.io/v1";
       kind = "ClusterRole";
