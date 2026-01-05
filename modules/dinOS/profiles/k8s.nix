@@ -56,85 +56,88 @@ in
     192.168.1.22 m710q-2
   '';
 
-  services.kubernetes.addonManager.bootstrapAddons = lib.mkIf rbacEnabled {
-    coredns-config = {
-      apiVersion = "v1";
-      kind = "ConfigMap";
-      metadata = {
-        name = "coredns";
-        namespace = "kube-system";
-        labels = {
-          "addonmanager.kubernetes.io/mode" = "EnsureExists";
-          "k8s-app" = "kube-dns";
-          "kubernetes.io/cluster-service" = "true";
+  services.kubernetes.addonManager.bootstrapAddons = lib.mkMerge [
+    {
+      coredns-config = {
+        apiVersion = "v1";
+        kind = "ConfigMap";
+        metadata = {
+          name = "coredns";
+          namespace = "kube-system";
+          labels = {
+            "addonmanager.kubernetes.io/mode" = "EnsureExists";
+            "k8s-app" = "kube-dns";
+            "kubernetes.io/cluster-service" = "true";
+          };
+        };
+        data = {
+          Corefile = ''
+            .:10053 {
+              errors
+              health :10054
+              kubernetes cluster.local in-addr.arpa ip6.arpa {
+                pods insecure
+                fallthrough in-addr.arpa ip6.arpa
+              }
+              prometheus :10055
+              forward . 192.168.1.1
+              cache 30
+              loop
+              reload
+              loadbalance
+            }
+          '';
         };
       };
-      data = {
-        Corefile = ''
-          .:10053 {
-            errors
-            health :10054
-            kubernetes cluster.local in-addr.arpa ip6.arpa {
-              pods insecure
-              fallthrough in-addr.arpa ip6.arpa
-            }
-            prometheus :10055
-            forward . 192.168.1.1
-            cache 30
-            loop
-            reload
-            loadbalance
-          }
-        '';
-      };
-    };
-
-    flannel-cr = {
-      apiVersion = "rbac.authorization.k8s.io/v1";
-      kind = "ClusterRole";
-      metadata = {
-        name = "flannel";
-      };
-      rules = lib.mkForce [
-        {
-          apiGroups = [ "" ];
-          resources = [ "pods" ];
-          verbs = [ "get" ];
-        }
-        {
-          apiGroups = [ "" ];
-          resources = [ "nodes" ];
-          verbs = [
-            "get"
-            "list"
-            "watch"
-          ];
-        }
-        {
-          apiGroups = [ "" ];
-          resources = [ "nodes/status" ];
-          verbs = [ "patch" ];
-        }
-      ];
-    };
-
-    flannel-crb = {
-      apiVersion = "rbac.authorization.k8s.io/v1";
-      kind = "ClusterRoleBinding";
-      metadata = {
-        name = "flannel";
-      };
-      roleRef = {
-        apiGroup = "rbac.authorization.k8s.io";
+    }
+    (lib.mkIf rbacEnabled {
+      flannel-cr = {
+        apiVersion = "rbac.authorization.k8s.io/v1";
         kind = "ClusterRole";
-        name = "flannel";
+        metadata = {
+          name = "flannel";
+        };
+        rules = lib.mkForce [
+          {
+            apiGroups = [ "" ];
+            resources = [ "pods" ];
+            verbs = [ "get" ];
+          }
+          {
+            apiGroups = [ "" ];
+            resources = [ "nodes" ];
+            verbs = [
+              "get"
+              "list"
+              "watch"
+            ];
+          }
+          {
+            apiGroups = [ "" ];
+            resources = [ "nodes/status" ];
+            verbs = [ "patch" ];
+          }
+        ];
       };
-      subjects = [
-        {
-          kind = "User";
-          name = "flannel-client";
-        }
-      ];
-    };
-  };
+
+      flannel-crb = {
+        apiVersion = "rbac.authorization.k8s.io/v1";
+        kind = "ClusterRoleBinding";
+        metadata = {
+          name = "flannel";
+        };
+        roleRef = {
+          apiGroup = "rbac.authorization.k8s.io";
+          kind = "ClusterRole";
+          name = "flannel";
+        };
+        subjects = [
+          {
+            kind = "User";
+            name = "flannel-client";
+          }
+        ];
+      };
+    })
+  ];
 }
