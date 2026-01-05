@@ -32,6 +32,6 @@ in
       advertiseAddress = kubeMasterIP;
     };
 
-    addons.dns.enable = true;
+    addons.dns.enable = false;
   };
 }
