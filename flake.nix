@@ -137,19 +137,6 @@
         ];
       };
 
-      k8sConfigurations = {
-        rpi5-k8s =
-          let
-            enabledProfiles = expandProfiles [ "k8s" ];
-            profileUserLayers = lib.concatMap (profile: profileUsers.${profile} or []) enabledProfiles;
-            enabledUsers = lib.unique profileUserLayers;
-            modulesForUsers = lib.concatMap (user: userLayers.${user} or []) enabledUsers;
-            modulesForProfiles = lib.concatMap (profile: [ profileModules.${profile} ]) enabledProfiles;
-          in
-            mkSystemFor "aarch64-linux" ([
-              ./hosts/types/rpi5.nix
-            ] ++ modulesForProfiles ++ modulesForUsers);
-      };
     in {
       overlays = overlays;
       nixosModules.dinOS = ./modules/dinOS;
@@ -160,7 +147,6 @@
       nixosConfigurations =
         # Device-agnostic base profiles.
         baseConfigurations
-        // k8sConfigurations
         # Per-host outputs (dinOS + optional users + host).
         // lib.mapAttrs (name: _: mkHost name) hostDirs;
 
