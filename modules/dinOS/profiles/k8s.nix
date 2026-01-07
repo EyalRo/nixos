@@ -11,6 +11,7 @@ in
   boot.kernel.sysctl."net.bridge.bridge-nf-call-iptables" = lib.mkDefault 1;
   boot.kernel.sysctl."net.bridge.bridge-nf-call-ip6tables" = lib.mkDefault 1;
   boot.kernel.sysctl."net.ipv4.ip_forward" = lib.mkDefault 1;
+  boot.kernel.sysctl."vm.max_map_count" = lib.mkForce 262144;
 
   swapDevices = lib.mkForce [ ];
 
@@ -19,6 +20,9 @@ in
 
   services.kubernetes.apiserver.allowPrivileged = true;
   services.kubernetes.kubelet.extraOpts = lib.mkAfter "--cluster-dns=10.0.0.254";
+  services.kubernetes.kubelet.extraConfig.allowedUnsafeSysctls = [
+    "vm.max_map_count"
+  ];
 
   virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".sandbox_image =
     "registry.k8s.io/pause:3.9";
