@@ -20,9 +20,6 @@ in
 
   services.kubernetes.apiserver.allowPrivileged = true;
   services.kubernetes.kubelet.extraOpts = lib.mkAfter "--cluster-dns=10.0.0.254";
-  services.kubernetes.kubelet.extraConfig.allowedUnsafeSysctls = [
-    "vm.max_map_count"
-  ];
 
   virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".sandbox_image =
     "registry.k8s.io/pause:3.9";
