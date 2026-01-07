@@ -93,6 +93,136 @@ in
           '';
         };
       };
+
+      coredns-deployment = {
+        apiVersion = "apps/v1";
+        kind = "Deployment";
+        metadata = {
+          name = "coredns";
+          namespace = "kube-system";
+          labels = {
+            "addonmanager.kubernetes.io/mode" = "Reconcile";
+            "k8s-app" = "kube-dns";
+            "kubernetes.io/cluster-service" = "true";
+            "kubernetes.io/name" = "CoreDNS";
+          };
+        };
+        spec = {
+          replicas = 2;
+          selector = {
+            matchLabels = {
+              "k8s-app" = "kube-dns";
+            };
+          };
+          strategy = {
+            rollingUpdate = {
+              maxUnavailable = 1;
+            };
+            type = "RollingUpdate";
+          };
+          template = {
+            metadata = {
+              labels = {
+                "k8s-app" = "kube-dns";
+              };
+            };
+            spec = {
+              containers = [
+                {
+                  name = "coredns";
+                  image = "coredns/coredns:1.10.1";
+                  imagePullPolicy = "IfNotPresent";
+                  args = [
+                    "-conf"
+                    "/etc/coredns/Corefile"
+                  ];
+                  livenessProbe = {
+                    failureThreshold = 5;
+                    httpGet = {
+                      path = "/health";
+                      port = 10054;
+                      scheme = "HTTP";
+                    };
+                    initialDelaySeconds = 60;
+                    periodSeconds = 10;
+                    successThreshold = 1;
+                    timeoutSeconds = 5;
+                  };
+                  ports = [
+                    {
+                      containerPort = 10053;
+                      name = "dns";
+                      protocol = "UDP";
+                    }
+                    {
+                      containerPort = 10053;
+                      name = "dns-tcp";
+                      protocol = "TCP";
+                    }
+                    {
+                      containerPort = 10055;
+                      name = "metrics";
+                      protocol = "TCP";
+                    }
+                  ];
+                  resources = {
+                    limits = {
+                      memory = "170Mi";
+                    };
+                    requests = {
+                      cpu = "100m";
+                      memory = "70Mi";
+                    };
+                  };
+                  securityContext = {
+                    allowPrivilegeEscalation = false;
+                    capabilities = {
+                      drop = [ "all" ];
+                    };
+                    readOnlyRootFilesystem = true;
+                  };
+                  volumeMounts = [
+                    {
+                      mountPath = "/etc/coredns";
+                      name = "config-volume";
+                      readOnly = true;
+                    }
+                  ];
+                }
+              ];
+              dnsPolicy = "Default";
+              nodeSelector = {
+                "beta.kubernetes.io/os" = "linux";
+              };
+              serviceAccountName = "coredns";
+              tolerations = [
+                {
+                  effect = "NoSchedule";
+                  key = "node-role.kubernetes.io/master";
+                }
+                {
+                  key = "CriticalAddonsOnly";
+                  operator = "Exists";
+                }
+              ];
+              volumes = [
+                {
+                  name = "config-volume";
+                  configMap = {
+                    name = "coredns";
+                    items = [
+                      {
+                        key = "Corefile";
+                        path = "Corefile";
+                      }
+                    ];
+                  };
+                }
+              ];
+            };
+          };
+        };
+      };
     }
     (lib.mkIf rbacEnabled {
       flannel-cr = {
