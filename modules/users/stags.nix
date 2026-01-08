@@ -58,10 +58,11 @@
   };
 
   fileSystems."/mnt/k8s" = {
-    device = "192.168.1.91:/nfsshare";
+    device = "192.168.1.91:/";
     fsType = "nfs4";
     options = [
       "_netdev"
+      "nfsvers=4"
       "noauto"
       "x-systemd.automount"
       "x-systemd.device-timeout=10s"
