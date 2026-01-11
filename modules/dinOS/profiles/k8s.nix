@@ -19,6 +19,10 @@ in
   services.openiscsi.name = lib.mkDefault "iqn.2024-01.dino:${config.networking.hostName}";
 
   services.kubernetes.apiserver.allowPrivileged = true;
+  services.kubernetes.controllerManager.extraOpts = lib.mkAfter ''
+    --cluster-signing-cert-file=/var/lib/cfssl/ca.pem
+    --cluster-signing-key-file=/var/lib/cfssl/ca-key.pem
+  '';
   services.kubernetes.kubelet.extraOpts = lib.mkAfter "--cluster-dns=10.0.0.254";
 
   virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".sandbox_image =
@@ -31,6 +35,9 @@ in
 
   systemd.tmpfiles.rules = [
     "L+ /usr/bin/iscsiadm - - - - /run/current-system/sw/sbin/iscsiadm"
+    "d /var/lib/cfssl 0750 cfssl kubernetes - -"
+    "f /var/lib/cfssl/ca.pem 0644 cfssl kubernetes - -"
+    "f /var/lib/cfssl/ca-key.pem 0640 cfssl kubernetes - -"
   ];
 
   environment.persistence."/persist".directories = [
