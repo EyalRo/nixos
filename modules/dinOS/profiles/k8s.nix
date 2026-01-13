@@ -35,6 +35,9 @@ in
   '';
   services.kubernetes.kubelet.extraOpts = lib.mkAfter "--cluster-dns=10.0.0.254";
 
+  systemd.services.containerd.serviceConfig.ExecStart = lib.mkForce
+    "${pkgs.containerd}/bin/containerd --config=/etc/containerd/config.toml";
+
   virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".sandbox_image =
     "registry.k8s.io/pause:3.9";
   virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".registry.config_path =
