@@ -19,6 +19,16 @@ in
   services.openiscsi.name = lib.mkDefault "iqn.2024-01.dino:${config.networking.hostName}";
 
   services.kubernetes.apiserver.allowPrivileged = true;
+  services.kubernetes.apiserver.extraSANs = lib.mkDefault [
+    "kubernetes.default"
+  ];
+  services.kubernetes.apiserver.extraOpts = lib.mkAfter ''
+    --requestheader-client-ca-file=/var/lib/cfssl/ca.pem
+    --requestheader-allowed-names=front-proxy-client
+    --requestheader-username-headers=X-Remote-User
+    --requestheader-group-headers=X-Remote-Group
+    --requestheader-extra-headers-prefix=X-Remote-Extra-
+  '';
   services.kubernetes.controllerManager.extraOpts = lib.mkAfter ''
     --cluster-signing-cert-file=/var/lib/cfssl/ca.pem
     --cluster-signing-key-file=/var/lib/cfssl/ca-key.pem
@@ -27,6 +37,15 @@ in
 
   virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".sandbox_image =
     "registry.k8s.io/pause:3.9";
+  virtualisation.containerd.settings.plugins."io.containerd.grpc.v1.cri".registry.config_path =
+    "/etc/containerd/certs.d";
+
+  environment.etc."containerd/certs.d/192.168.1.93:5000/hosts.toml".text = ''
+    server = "http://192.168.1.93:5000"
+
+    [host."http://192.168.1.93:5000"]
+      capabilities = ["pull", "resolve"]
+  '';
 
   environment.systemPackages = with pkgs; [
     openiscsi
