@@ -7,9 +7,10 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
     agenix.url = "github:ryantm/agenix";
+    opencode.url = "github:anomalyco/opencode?ref=dev";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, impermanence, agenix, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, impermanence, agenix, opencode, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
@@ -157,6 +158,7 @@
           nodejs_20
           fish
           starship
+          opencode.packages.${system}.default
         ];
 
         shellHook = ''
