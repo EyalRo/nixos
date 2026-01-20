@@ -8,6 +8,11 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelParams = [
+    "quiet"
+    "loglevel=3"
+    "rd.udev.log_level=3"
+  ];
 
   hardware.graphics = {
     enable = true;
@@ -40,4 +45,9 @@
   };
 
   environment.etc."machine-id".source = "/persist/etc/machine-id";
+
+  # Disable PS/2 mouse driver to prevent elantech errors
+  # Touchpad uses I2C interface instead
+  # Disable MEI to prevent hardware ready errors
+  boot.blacklistedKernelModules = [ "psmouse" "mei_me" "mei_hdcp" "mei_pxp" ];
 }
