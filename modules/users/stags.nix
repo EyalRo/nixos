@@ -12,6 +12,7 @@
     home = "/home/stags";
     uid = 1026;
     createHome = true;
+    face = "/home/stags/Source/nixos/modules/users/stags-avatar.png";
   };
 
   # Avatar configuration for stags
