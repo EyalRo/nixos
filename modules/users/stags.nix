@@ -15,9 +15,11 @@
   };
 
   # Avatar configuration for stags
+  environment.etc."avatars/stags.png".source = ./stags-avatar.png;
   environment.etc."skel/.face".source = ./stags-avatar.png;
   systemd.tmpfiles.rules = [
-    "L+ /home/stags/.face - - - - /home/stags/Source/nixos/modules/users/stags-avatar.png"
+    "L+ /home/stags/.face - - - - /etc/avatars/stags.png"
+    "L+ /var/lib/AccountsService/icons/stags - - - - /etc/avatars/stags.png"
   ];
   
   # Add stags avatar to system faces directory for GNOME avatar picker
@@ -34,7 +36,7 @@
 Language=
 Session=gnome
 XSession=gnome
-Icon=/home/stags/.face
+Icon=/var/lib/AccountsService/icons/stags
 SystemAccount=false
 '';
 
