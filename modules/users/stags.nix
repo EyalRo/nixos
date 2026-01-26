@@ -14,6 +14,12 @@
     createHome = true;
   };
 
+  # Avatar configuration for stags
+  environment.etc."skel/.face".source = ./stags-avatar.png;
+  systemd.tmpfiles.rules = [
+    "L+ /home/stags/.face - - - - /home/stags/Source/nixos/modules/users/stags-avatar.png"
+  ];
+
   time.timeZone = lib.mkDefault "America/Los_Angeles";
 
   services.tailscale = {
