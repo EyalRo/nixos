@@ -20,6 +20,14 @@
     "L+ /home/stags/.face - - - - /home/stags/Source/nixos/modules/users/stags-avatar.png"
   ];
   
+  # Add stags avatar to system faces directory for GNOME avatar picker
+  environment.systemPackages = [
+    (pkgs.runCommand "stags-avatar" {} ''
+      mkdir -p $out/share/pixmaps/faces
+      cp ${./stags-avatar.png} $out/share/pixmaps/faces/stags.png
+    '')
+  ];
+  
   # GDM login screen avatar configuration
   environment.etc."accountsservice/users/stags".text = ''
 [User]
