@@ -12,7 +12,6 @@
     home = "/home/stags";
     uid = 1026;
     createHome = true;
-    face = "/home/stags/Source/nixos/modules/users/stags-avatar.png";
   };
 
   # Avatar configuration for stags
@@ -20,6 +19,16 @@
   systemd.tmpfiles.rules = [
     "L+ /home/stags/.face - - - - /home/stags/Source/nixos/modules/users/stags-avatar.png"
   ];
+  
+  # GDM login screen avatar configuration
+  environment.etc."accountsservice/users/stags".text = ''
+[User]
+Language=
+Session=gnome
+XSession=gnome
+Icon=/home/stags/.face
+SystemAccount=false
+'';
 
   time.timeZone = lib.mkDefault "America/Los_Angeles";
 
