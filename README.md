@@ -13,7 +13,6 @@ dinOS is a NixOS configuration that provides a clean, customizable desktop exper
 - **Profile-based Configurations** for different use cases:
   - `headless` - Server without GUI
   - `kodi` - Media center with Kodi
-  - `k8s` - Kubernetes node
   - `server` - General purpose server
 - **Multi-host Support** - Device-specific configurations
 - **Home-manager Integration** for user environment management
@@ -39,7 +38,6 @@ dinOS is a NixOS configuration that provides a clean, customizable desktop exper
 - `ideapad3` - Lenovo IdeaPad 3 laptop
 - `nuc14` - Intel NUC 14 (server + Kodi profile)
 - `xps15` - Dell XPS 15 laptop
-- `m710q-1`, `m710q-2` - Lenovo ThinkCentre M710q (k8s + headless)
 
 ## Usage
 
@@ -90,11 +88,6 @@ nix build .#nixosConfigurations.<hostname>.config.system.build.toplevel
 - Media center configuration
 - Kodi media player
 - Suitable for home theater PCs
-
-### k8s
-- Kubernetes node setup
-- Container runtime support
-- Networking for cluster communication
 
 ### server
 - General purpose server

@@ -88,12 +88,10 @@
       profileModules = {
         headless = ./modules/dinOS/profiles/headless.nix;
         kodi = ./modules/dinOS/profiles/kodi.nix;
-        k8s = ./modules/dinOS/profiles/k8s.nix;
         server = ./modules/dinOS/profiles/server.nix;
       };
 
       profileDeps = {
-        k8s = [ "server" ];
       };
 
       profileUsers = {
@@ -107,8 +105,6 @@
       };
 
       hostProfiles = {
-        m710q-1 = [ "k8s" "headless" ];
-        m710q-2 = [ "k8s" "headless" ];
         nuc14 = [ "server" "kodi" ];
       };
 

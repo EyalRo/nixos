@@ -83,22 +83,8 @@ SystemAccount=false
     ];
   };
 
-  fileSystems."/mnt/k8s" = {
-    device = "192.168.1.91:/";
-    fsType = "nfs4";
-    options = [
-      "_netdev"
-      "nfsvers=4"
-      "noauto"
-      "x-systemd.automount"
-      "x-systemd.device-timeout=10s"
-      "x-systemd.idle-timeout=600"
-      "x-systemd.mount-timeout=10s"
-    ];
-  };
-
   systemd.services.nfs-mounts-retry = {
-    description = "Retry NFS automounts for /mnt/stags, /mnt/shared, and /mnt/k8s";
+    description = "Retry NFS automounts for /mnt/stags and /mnt/shared";
     serviceConfig = {
       Type = "oneshot";
     };
@@ -108,15 +94,12 @@ SystemAccount=false
     ];
     script = ''
       set -euo pipefail
-      systemctl reset-failed mnt-stags.automount mnt-shared.automount mnt-k8s.automount || true
+      systemctl reset-failed mnt-stags.automount mnt-shared.automount || true
       if ! mountpoint -q /mnt/stags; then
         mount /mnt/stags || true
       fi
       if ! mountpoint -q /mnt/shared; then
         mount /mnt/shared || true
-      fi
-      if ! mountpoint -q /mnt/k8s; then
-        mount /mnt/k8s || true
       fi
     '';
   };
