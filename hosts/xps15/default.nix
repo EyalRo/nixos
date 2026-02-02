@@ -44,6 +44,11 @@
     tod.driver = pkgs.libfprint-2-tod1-goodix;
   };
 
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+
   environment.etc."machine-id".source = "/persist/etc/machine-id";
 
   # Disable PS/2 mouse driver to prevent elantech errors
