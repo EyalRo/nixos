@@ -7,6 +7,61 @@ let
     kodiPkgs.jellyfin
   ]);
 
+  # PipeWire can remember sink volumes. If HDMI comes up quiet (e.g. 40%),
+  # this wrapper forces the sink volume each time Kodi starts.
+  #
+  # Overrides (strings):
+  # - KODI_HDMI_SINK_VOLUME: wpctl volume scalar (1.0 = 100%, 1.5 = 150%)
+  # - KODI_STREAM_VOLUME: same, applied to the "Kodi" stream once it appears
+  kodiWithVolume = pkgs.writeShellScript "kodi-with-volume" ''
+    set -euo pipefail
+
+    sink_vol="''${KODI_HDMI_SINK_VOLUME:-1.0}"
+    stream_vol="''${KODI_STREAM_VOLUME:-1.0}"
+
+    wpctl="${pkgs.wireplumber}/bin/wpctl"
+
+    get_default_sink_id() {
+      # Find the sink line marked with '*' and extract "<id>.".
+      "$wpctl" status 2>/dev/null | sed -nE 's/^[[:space:]]*\\*[[:space:]]+([0-9]+)\\..*/\\1/p' | head -n1
+    }
+
+    get_kodi_stream_id() {
+      # In Streams, Kodi typically shows as: "58. Kodi"
+      "$wpctl" status 2>/dev/null | sed -nE 's/^[[:space:]]*([0-9]+)\\.[[:space:]]+Kodi$/\\1/p' | head -n1
+    }
+
+    # Wait briefly for PipeWire + WirePlumber to enumerate sinks.
+    sink_id=""
+    for _ in $(seq 1 50); do
+      sink_id="$(get_default_sink_id || true)"
+      [ -n "''${sink_id:-}" ] && break
+      sleep 0.1
+    done
+
+    if [ -n "''${sink_id:-}" ]; then
+      "$wpctl" set-volume "$sink_id" "$sink_vol" >/dev/null 2>&1 || true
+    fi
+
+    # Start Kodi, then (optionally) set the stream volume if it comes up low.
+    ${kodiPackage}/bin/kodi-standalone &
+    kodi_pid=$!
+
+    if [ "''${stream_vol:-}" != "" ]; then
+      stream_id=""
+      for _ in $(seq 1 100); do
+        stream_id="$(get_kodi_stream_id || true)"
+        [ -n "''${stream_id:-}" ] && break
+        sleep 0.1
+      done
+      if [ -n "''${stream_id:-}" ]; then
+        "$wpctl" set-volume "$stream_id" "$stream_vol" >/dev/null 2>&1 || true
+      fi
+    fi
+
+    wait "$kodi_pid"
+  '';
+
   # Jellyfin configuration
   jellyfin-config = pkgs.writeText "jellyfin-config.xml" ''
     <advancedsettings>
@@ -71,13 +126,17 @@ in {
   services.cage = {
     enable = true;
     user = "kodi";
-    program = "${kodiPackage}/bin/kodi-standalone";
+    program = "${kodiWithVolume}";
     extraArguments = [
       "-d"  # DRM/GBM backend
     ];
     environment = {
       # Prefer the modern Intel VAAPI driver (intel-media-driver).
       LIBVA_DRIVER_NAME = "iHD";
+      # Enforce a sane default for HDMI volume each start (overrides remembered 40% cases).
+      # You can bump this (e.g. "1.5") in a host config if needed.
+      KODI_HDMI_SINK_VOLUME = "1.0";
+      KODI_STREAM_VOLUME = "1.0";
     };
   };
 
@@ -135,4 +194,7 @@ in {
     "vm.swappiness" = lib.mkDefault 10;
     "vm.vfs_cache_pressure" = lib.mkDefault 50;
   };
+
+  # Removes the RTKit warning in `wpctl status` and improves scheduling for audio.
+  security.rtkit.enable = true;
 }
