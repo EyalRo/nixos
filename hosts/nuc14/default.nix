@@ -76,16 +76,10 @@
     cifs-utils  # For network shares
   ];
 
-  # Enable auto-login for Kodi user
-  services.displayManager.autoLogin = {
-    enable = true;
-    user = "kodi";
-  };
-
   # Time sync for media server communication
   services.timesyncd.enable = true;
 
   # Bluetooth for remote controllers (optional)
   hardware.bluetooth.enable = true;
-  services.blueman.enable = lib.mkDefault true;
+  services.blueman.enable = lib.mkForce false;
 }
