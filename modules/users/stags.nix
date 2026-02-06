@@ -118,7 +118,6 @@ SystemAccount=false
       "/var/lib/tailscale"
     ];
     users.stags = {
-      home = "/home/stags";
       directories = [ "." ];
     };
   };
