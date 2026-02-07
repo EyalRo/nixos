@@ -23,7 +23,10 @@
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.enable = true;
+    # Borrowed from `main` (commit e8bf852): improves PRIME dGPU power gating.
+    powerManagement.finegrained = true;
     open = false;
+    nvidiaPersistenced = true;
     prime.offload.enable = true;
     prime.offload.enableOffloadCmd = true;
     prime = {
