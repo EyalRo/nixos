@@ -110,6 +110,7 @@
       gnome-tweaks
       gnomeExtensions.appindicator
       gnomeExtensions.caffeine
+      gnomeExtensions.tiling-shell
       nerd-fonts.fira-code
     ];
 

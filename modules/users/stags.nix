@@ -28,9 +28,6 @@
       mkdir -p $out/share/pixmaps/faces
       cp ${./stags-avatar.png} $out/share/pixmaps/faces/stags.png
     '')
-
-    # GNOME Shell extension(s) for the stags user layer.
-    pkgs.gnomeExtensions.tiling-shell
   ];
 
   # GDM login screen avatar configuration
