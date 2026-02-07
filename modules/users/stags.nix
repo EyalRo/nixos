@@ -28,6 +28,7 @@
       mkdir -p $out/share/pixmaps/faces
       cp ${./stags-avatar.png} $out/share/pixmaps/faces/stags.png
     '')
+    pkgs.nh
   ];
   
   # GDM login screen avatar configuration
