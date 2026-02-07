@@ -58,42 +58,43 @@
   ];
 
   # Shared wallpaper registered in GNOME backgrounds list.
-  environment.systemPackages = let
-    dinoWallpaper = pkgs.runCommandLocal "wallpaper-dinosaur-picnic" { } ''
-      set -euo pipefail
-      install -Dm644 "${./wallpaper}/Dinosaur Picnic on a Sunny Hill.png" \
-        "$out/share/backgrounds/dinosaur-picnic.png"
-      mkdir -p "$out/share/gnome-background-properties"
-      cat > "$out/share/gnome-background-properties/dinosaur-picnic.xml" <<EOF
-      <wallpapers>
-        <wallpaper deleted="false">
-          <name>Dinosaur Picnic</name>
-          <filename>${"$"}{out}/share/backgrounds/dinosaur-picnic.png</filename>
-          <filename-dark>${"$"}{out}/share/backgrounds/dinosaur-picnic.png</filename-dark>
-          <options>scaled</options>
-        </wallpaper>
-      </wallpapers>
-      EOF
-    '';
-    friendlyPalsWallpapers = pkgs.runCommandLocal "wallpaper-friendly-pals" { } ''
-      set -euo pipefail
-      install -Dm644 "${./wallpaper}/FriendlyPals-Day.png" \
-        "$out/share/backgrounds/friendly-pals-day.png"
-      install -Dm644 "${./wallpaper}/FriendlyPals-Night.png" \
-        "$out/share/backgrounds/friendly-pals-night.png"
-      mkdir -p "$out/share/gnome-background-properties"
-      cat > "$out/share/gnome-background-properties/friendly-pals.xml" <<EOF
-      <wallpapers>
-        <wallpaper deleted="false">
-          <name>Friendly Pals</name>
-          <filename>${"$"}{out}/share/backgrounds/friendly-pals-day.png</filename>
-          <filename-dark>${"$"}{out}/share/backgrounds/friendly-pals-night.png</filename-dark>
-          <options>scaled</options>
-        </wallpaper>
-      </wallpapers>
-      EOF
-    '';
-  in
+  environment.systemPackages =
+    let
+      dinoWallpaper = pkgs.runCommandLocal "wallpaper-dinosaur-picnic" { } ''
+        set -euo pipefail
+        install -Dm644 "${./wallpaper}/Dinosaur Picnic on a Sunny Hill.png" \
+          "$out/share/backgrounds/dinosaur-picnic.png"
+        mkdir -p "$out/share/gnome-background-properties"
+        cat > "$out/share/gnome-background-properties/dinosaur-picnic.xml" <<EOF
+        <wallpapers>
+          <wallpaper deleted="false">
+            <name>Dinosaur Picnic</name>
+            <filename>${"$"}{out}/share/backgrounds/dinosaur-picnic.png</filename>
+            <filename-dark>${"$"}{out}/share/backgrounds/dinosaur-picnic.png</filename-dark>
+            <options>scaled</options>
+          </wallpaper>
+        </wallpapers>
+        EOF
+      '';
+      friendlyPalsWallpapers = pkgs.runCommandLocal "wallpaper-friendly-pals" { } ''
+        set -euo pipefail
+        install -Dm644 "${./wallpaper}/FriendlyPals-Day.png" \
+          "$out/share/backgrounds/friendly-pals-day.png"
+        install -Dm644 "${./wallpaper}/FriendlyPals-Night.png" \
+          "$out/share/backgrounds/friendly-pals-night.png"
+        mkdir -p "$out/share/gnome-background-properties"
+        cat > "$out/share/gnome-background-properties/friendly-pals.xml" <<EOF
+        <wallpapers>
+          <wallpaper deleted="false">
+            <name>Friendly Pals</name>
+            <filename>${"$"}{out}/share/backgrounds/friendly-pals-day.png</filename>
+            <filename-dark>${"$"}{out}/share/backgrounds/friendly-pals-night.png</filename-dark>
+            <options>scaled</options>
+          </wallpaper>
+        </wallpapers>
+        EOF
+      '';
+    in
     with pkgs; [
       dinoWallpaper
       friendlyPalsWallpapers
@@ -159,6 +160,28 @@
     package = pkgs.wrapFirefox pkgs.firefox-unwrapped {
       nativeMessagingHosts = [ pkgs.gnome-browser-connector ];
     };
+  };
+
+  # Make GNOME Shell browser integration work across browsers by ensuring the
+  # native-messaging host manifests are visible in the standard system paths.
+  #
+  # Symptom fixed: https://extensions.gnome.org shows
+  # "No such native application org.gnome.chrome_gnome_shell".
+  environment.etc = {
+    "mozilla/native-messaging-hosts/org.gnome.chrome_gnome_shell.json".source =
+      "${pkgs.gnome-browser-connector}/lib/mozilla/native-messaging-hosts/org.gnome.chrome_gnome_shell.json";
+    "mozilla/native-messaging-hosts/org.gnome.browser_connector.json".source =
+      "${pkgs.gnome-browser-connector}/lib/mozilla/native-messaging-hosts/org.gnome.browser_connector.json";
+
+    "chromium/native-messaging-hosts/org.gnome.chrome_gnome_shell.json".source =
+      "${pkgs.gnome-browser-connector}/etc/chromium/native-messaging-hosts/org.gnome.chrome_gnome_shell.json";
+    "chromium/native-messaging-hosts/org.gnome.browser_connector.json".source =
+      "${pkgs.gnome-browser-connector}/etc/chromium/native-messaging-hosts/org.gnome.browser_connector.json";
+
+    "opt/chrome/native-messaging-hosts/org.gnome.chrome_gnome_shell.json".source =
+      "${pkgs.gnome-browser-connector}/etc/opt/chrome/native-messaging-hosts/org.gnome.chrome_gnome_shell.json";
+    "opt/chrome/native-messaging-hosts/org.gnome.browser_connector.json".source =
+      "${pkgs.gnome-browser-connector}/etc/opt/chrome/native-messaging-hosts/org.gnome.browser_connector.json";
   };
 
   services.pipewire = {

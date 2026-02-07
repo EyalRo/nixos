@@ -21,24 +21,29 @@
     "L+ /home/stags/.face - - - - /etc/avatars/stags.png"
     "L+ /var/lib/AccountsService/icons/stags - - - - /etc/avatars/stags.png"
   ];
-  
+
   # Add stags avatar to system faces directory for GNOME avatar picker
   environment.systemPackages = [
-    (pkgs.runCommand "stags-avatar" {} ''
+    (pkgs.runCommand "stags-avatar" { } ''
       mkdir -p $out/share/pixmaps/faces
       cp ${./stags-avatar.png} $out/share/pixmaps/faces/stags.png
     '')
+
+    # GNOME Shell extension(s) for the stags user layer.
+    pkgs.gnomeExtensions.tiling-shell
   ];
-  
+
   # GDM login screen avatar configuration
-  environment.etc."accountsservice/users/stags".text = ''
-[User]
-Language=
-Session=gnome
-XSession=gnome
-Icon=/var/lib/AccountsService/icons/stags
-SystemAccount=false
-'';
+  # Keep this unindented: leading whitespace can confuse some INI parsers.
+  environment.etc."accountsservice/users/stags".text = builtins.concatStringsSep "\n" [
+    "[User]"
+    "Language="
+    "Session=gnome"
+    "XSession=gnome"
+    "Icon=/var/lib/AccountsService/icons/stags"
+    "SystemAccount=false"
+    ""
+  ];
 
   time.timeZone = lib.mkDefault "America/Los_Angeles";
 

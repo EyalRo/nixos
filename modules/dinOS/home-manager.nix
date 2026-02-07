@@ -4,7 +4,8 @@ let
   defaultTheme = ./starship/default.toml;
   developTheme = ./starship/develop.toml;
   configDir = config.xdg.configHome;
-in {
+in
+{
   home.packages = with pkgs; [
     bat
     direnv
@@ -64,6 +65,7 @@ in {
       enabled-extensions = [
         "appindicatorsupport@rgcjonas.gmail.com"
         "caffeine@patapon.info"
+        "tilingshell@ferrarodomenico.com"
       ];
     };
     "org/gnome/desktop/wm/preferences" = {
