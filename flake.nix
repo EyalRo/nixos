@@ -154,7 +154,7 @@
           nodejs_20
           fish
           starship
-          opencode.packages.${system}.default
+          # opencode.packages.${system}.default
         ];
 
         shellHook = ''
