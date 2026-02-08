@@ -17,7 +17,6 @@
 
   environment.persistence."/persist" = {
     users.kodi = {
-      home = "/home/kodi";
       directories = [ "." ];
     };
   };

@@ -24,6 +24,11 @@
   networking.resolvconf.enable = lib.mkDefault false;
   security.sudo.enable = lib.mkDefault true;
   services.resolved.enable = lib.mkDefault true;
+
+  # nsncd (nscd.service) can get restarted multiple times during activation when
+  # NSS-related targets bounce; don't fail `switch-to-configuration` on start-limit.
+  systemd.services.nscd.unitConfig.StartLimitIntervalSec = 0;
+
   services.avahi = {
     enable = lib.mkDefault true;
     publish = {
@@ -49,13 +54,52 @@
     ];
   };
 
-  systemd.tmpfiles.rules = [
+  # Impermanence bind mounts require the source paths under /persist to exist
+  # before the mount units run. Newer impermanence releases rely more on the
+  # system to ensure these exist (rather than implicitly creating everything).
+  systemd.tmpfiles.rules =
+    let
+      persistRoot = "/persist";
+      mkDir = path: mode: user: group: "d ${path} ${mode} ${user} ${group} -";
+      mkFile = path: mode: user: group: "f ${path} ${mode} ${user} ${group} - -";
+
+      persistCfg = config.environment.persistence.${persistRoot} or {};
+      dirEntries = persistCfg.directories or [];
+      userDirEntries =
+        let
+          usersCfg = persistCfg.users or {};
+        in
+          lib.flatten (map (u: u.directories or [ ]) (lib.attrValues usersCfg));
+
+      normalizeDirPath = p: lib.removeSuffix "/." p;
+
+      mkPersistDir =
+        entry:
+          let
+            e =
+              if builtins.isString entry then {
+                dirPath = entry;
+                persistentStoragePath = persistRoot;
+                user = "root";
+                group = "root";
+                mode = "0755";
+              } else entry;
+            storage = e.persistentStoragePath or persistRoot;
+            dirPath = normalizeDirPath (e.dirPath or e.directory);
+            fullPath = "${storage}${dirPath}";
+            user = e.user or "root";
+            group = if (e.group or null) == null then "root" else e.group;
+            mode = e.mode or "0755";
+          in
+            mkDir fullPath mode user group;
+    in
+    [
     "d /persist 0755 root root -"
-    "d /persist/home 0755 root root -"
     "d /persist/etc 0755 root root -"
-    "f /persist/etc/machine-id 0644 root root - -"
+    (mkFile "/persist/etc/machine-id" "0644" "root" "root")
     "L+ /var/lib/dbus/machine-id - - - - /etc/machine-id"
-  ];
+    ]
+    ++ map mkPersistDir (dirEntries ++ userDirEntries);
 
   # Shared wallpaper registered in GNOME backgrounds list.
   environment.systemPackages = let
