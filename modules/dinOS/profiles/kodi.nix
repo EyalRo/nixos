@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  kodiPackage = pkgs.kodi.withPackages (kodiPkgs: [
+  kodiPackage = pkgs.kodi-gbm.withPackages (kodiPkgs: [
     kodiPkgs.jellyfin
   ]);
 in {
@@ -11,51 +11,59 @@ in {
     home = "/home/kodi";
     createHome = true;
     initialHashedPassword = "";
+    extraGroups = [
+      "audio"
+      "input"
+      "render"
+      "video"
+    ];
   };
 
-  services.displayManager.autoLogin = {
-    enable = true;
-    user = "kodi";
-  };
-
-  systemd.user.services.kodi-autostart = {
-    description = "Autostart Kodi for the kodi user session";
-    after = [ "graphical-session.target" ];
-    wantedBy = [ "graphical-session.target" ];
-    unitConfig = {
-      ConditionUser = "kodi";
-    };
-    serviceConfig = {
-      ExecStart = "${kodiPackage}/bin/kodi";
-      Restart = "on-failure";
-    };
-  };
+  # Reserve tty1 for Kodi (no getty prompt on the "TV" display).
+  systemd.services."getty@tty1".enable = false;
 
   environment.systemPackages = [
-    pkgs.gnomeExtensions.no-overview
+    pkgs.alsa-utils
     kodiPackage
+    pkgs.wireplumber # wpctl for debugging
   ];
 
-  programs.dconf.profiles.user.databases = [
-    {
-      settings."org/gnome/shell" = {
-        enabled-extensions = [
-          "appindicatorsupport@rgcjonas.gmail.com"
-          "caffeine@patapon.info"
-          "no-overview@fthx"
-        ];
-      };
-      settings."org/gnome/desktop/screensaver" = {
-        idle-activation-enabled = false;
-        lock-enabled = false;
-      };
-      settings."org/gnome/desktop/session" = {
-        idle-delay = lib.gvariant.mkUint32 0;
-      };
-      settings."org/gnome/settings-daemon/plugins/power" = {
-        sleep-inactive-ac-type = "nothing";
-        sleep-inactive-battery-type = "nothing";
-      };
-    }
-  ];
+  # Kodi as an appliance: no DE, no greeter, no Xorg; run directly on DRM/GBM.
+  #
+  # The PAM "login" session is important: it creates a proper logind session for
+  # the user, grants device access (DRM/input/sound), and makes user services
+  # like PipeWire / WirePlumber work as expected.
+  systemd.services.kodi = {
+    description = "Kodi (DRM/GBM)";
+    wantedBy = [ "multi-user.target" ];
+    after = [
+      "systemd-user-sessions.service"
+      "network-online.target"
+      "sound.target"
+    ];
+    wants = [ "network-online.target" ];
+    conflicts = [ "getty@tty1.service" ];
+
+    serviceConfig = {
+      Type = "simple";
+      User = "kodi";
+      PAMName = "login";
+
+      WorkingDirectory = "/home/kodi";
+      Environment = [
+        "HOME=/home/kodi"
+      ];
+
+      # Attach Kodi to tty1 (TV) and keep it "appliance-like".
+      TTYPath = "/dev/tty1";
+      TTYReset = true;
+      TTYVHangup = true;
+      TTYVTDisallocate = true;
+      StandardInput = "tty";
+
+      ExecStart = "${kodiPackage}/bin/kodi";
+      Restart = "always";
+      RestartSec = 2;
+    };
+  };
 }
