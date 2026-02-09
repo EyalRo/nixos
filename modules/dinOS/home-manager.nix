@@ -64,6 +64,7 @@ in {
       enabled-extensions = [
         "appindicatorsupport@rgcjonas.gmail.com"
         "caffeine@patapon.info"
+        "tilingshell@ferrarodomenico.com"
       ];
     };
     "org/gnome/desktop/wm/preferences" = {
