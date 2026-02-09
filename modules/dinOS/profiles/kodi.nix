@@ -25,6 +25,9 @@ in {
   environment.systemPackages = [
     pkgs.alsa-utils
     kodiPackage
+    # Ensure /run/current-system/sw/share/alsa-card-profile is present; WirePlumber
+    # uses these profile-set files to create real HDMI/analog sinks.
+    pkgs.pipewire
     pkgs.wireplumber # wpctl for debugging
   ];
 
