@@ -13,11 +13,29 @@
 
   # Prefer newest kernel available in the pinned channel.
   boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+
+  # Enable KMScon for enhanced TTY console support on all virtual consoles
+  services.kmscon = {
+    enable = true;
+  };
+
+  # Enhanced console font setup for all TTYs  
+  console = {
+    earlySetup = true;
+    packages = with pkgs; [ 
+      kbd
+      terminus_font
+    ];
+    font = "ter-132n";  # Better than default
+    keyMap = lib.mkDefault "us";
+  };
   boot.loader.systemd-boot = {
     enable = lib.mkDefault true;
     configurationLimit = lib.mkDefault 5;
   };
   boot.loader.efi.canTouchEfiVariables = lib.mkDefault true;
+
+
 
   networking.networkmanager.enable = lib.mkDefault true;
   networking.networkmanager.dns = lib.mkDefault "systemd-resolved";
@@ -155,6 +173,8 @@
       gnomeExtensions.caffeine
       gnomeExtensions.tiling-shell
       nerd-fonts.fira-code
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.ubuntu-mono
     ];
 
   # Provide a GNOME default wallpaper without forcing user overrides.

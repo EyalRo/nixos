@@ -1,0 +1,14 @@
+namespace: Gdk
+version: "4.0"
+require_after:
+- clipboard.cr
+- display.cr
+- event.cr
+- gi_crystal.cr
+- modifier_type.cr
+
+types:
+  Event:
+    ignore_methods:
+    - ref
+    - unref
