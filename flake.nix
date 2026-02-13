@@ -3,23 +3,30 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
     agenix.url = "github:ryantm/agenix";
-    opencode.url = "github:anomalyco/opencode?ref=dev";
+    opencode.url = "github:anomalyco/opencode/v1.1.56";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, impermanence, agenix, opencode, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, impermanence, agenix, opencode, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
       overlays = {
         default = final: prev: {
           dinofetch = final.callPackage ./pkgs/dinofetch { };
+          crystal-sysinfo = final.callPackage ./pkgs/crystal-sysinfo { crystal = pkgs-unstable.crystal; };
         };
       };
       pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ overlays.default ];
+      };
+      
+      pkgs-unstable = import nixpkgs-unstable {
         inherit system;
         overlays = [ overlays.default ];
       };
@@ -154,12 +161,18 @@
           nodejs_20
           fish
           starship
-          # opencode.packages.${system}.default
+          opencode.packages.${system}.default
+          pkgs-unstable.crystal
+          pkgs-unstable.shards
+          gtk4
+          gtk4.dev
+          glib.dev
+          pkg-config
         ];
 
         shellHook = ''
           export STARSHIP_CONFIG=${./modules/dinOS/starship/develop.toml}
-          echo "Loaded nix develop shell with git, nixpkgs-fmt, nodejs_20, fish, and starship (develop theme)."
+          echo "Loaded nix develop shell with git, nixpkgs-fmt, nodejs_20, fish, starship (develop theme), opencode 1.1.56, crystal, shards, gtk4, and GTK4 development libraries."
           exec ${pkgs.fish}/bin/fish -C 'set -g fish_greeting "" ; ${pkgs.starship}/bin/starship init fish | source'
         '';
       };

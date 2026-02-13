@@ -6,7 +6,7 @@ stdenv.mkDerivation {
 
   src = ./.;
 
-  nativeBuildInputs = [ crystal shards ];
+  nativeBuildInputs = [ crystal shards git ];
 
   buildInputs = [ gtk4 ];
 

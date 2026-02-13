@@ -154,7 +154,7 @@ fn formatBytes(allocator: std.mem.Allocator, bytes: u64) ![]u8 {
     }
 
     const whole_mb = bytes / mb;
-    return std.fmt.allocPrint(allocator, "{d}M", .{ whole_mb });
+    return std.fmt.allocPrint(allocator, "{d}M", .{whole_mb});
 }
 
 // PNG generation

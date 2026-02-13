@@ -9,6 +9,7 @@
     protonvpn-gui
     tailscale-systray
     wl-clipboard
+    # pkgs.crystal-sysinfo
   ];
 
   systemd.user.services.tailscale-systray = {
