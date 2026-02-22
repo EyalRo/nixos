@@ -1,0 +1,21 @@
+{
+    "sources": [
+        {
+            "enabled": true,
+            "name": "Noctalia Plugins",
+            "url": "https://github.com/noctalia-dev/noctalia-plugins"
+        }
+    ],
+    "states": {
+        "tailscale": {
+            "enabled": true
+        },
+        "niri-keyboard-layout": {
+            "enabled": true,
+            "settings": {
+                "displayMode": "forceOpen"
+            }
+        }
+    },
+    "version": 2
+}

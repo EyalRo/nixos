@@ -1,0 +1,27 @@
+{
+  "id": "niri-keyboard-layout",
+  "name": "Niri Keyboard Layout",
+  "version": "1.0.0",
+  "minNoctaliaVersion": "4.0.0",
+  "author": "stags",
+  "license": "MIT",
+  "repository": "local",
+  "description": "Keyboard layout indicator for Niri compositor",
+  "tags": ["Bar", "System"],
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "defaultSettings": {
+      "showIcon": true,
+      "layoutCodes": {
+        "English (US)": "EN",
+        "Hebrew": "HE"
+      }
+    }
+  }
+}
