@@ -23,6 +23,9 @@
             layout = "us,il";
           };
         };
+        touchpad = {
+          click-method = "clickfinger";
+        };
       };
       binds = {
         "Super+Space" = {
