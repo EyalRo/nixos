@@ -16,4 +16,12 @@
   };
 
   services.displayManager.sessionPackages = [ pkgs.niri ];
+
+  systemd.services.nm-wake-reconnect = {
+    description = "Reconnect WiFi after resume";
+    after = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
+    wantedBy = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
+    serviceConfig.Type = "oneshot";
+    serviceConfig.ExecStart = "${pkgs.networkmanager}/bin/nmcli networking on";
+  };
 }
