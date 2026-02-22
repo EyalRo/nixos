@@ -27,6 +27,11 @@
           click-method = "clickfinger";
         };
       };
+      gestures = {
+        hot-corners = {
+          enable = false;
+        };
+      };
       binds = {
         "Super+Space" = {
           action = {
@@ -411,10 +416,10 @@
         widgets = {
           left = [
             { id = "Launcher"; }
-            { id = "niri-keyboard-layout"; }
-            { id = "tailscale"; }
+            { id = "plugin:niri-keyboard-layout"; }
             { id = "Clock"; formatHorizontal = "hh:mm a"; useMonospacedFont = true; }
             { id = "SystemMonitor"; }
+            { id = "plugin:tailscale"; }
           ];
           center = [
             { id = "Workspace"; hideUnoccupied = false; }
@@ -511,6 +516,11 @@
   home.file = {
     ".config/noctalia/plugins.json" = {
       source = ./plugins/noctalia-plugins.json;
+      force = true;
+    };
+    ".config/noctalia/plugins/niri-keyboard-layout" = {
+      source = ../../modules/dinOS/plugins/niri-keyboard-layout;
+      recursive = true;
       force = true;
     };
   };
