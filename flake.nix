@@ -14,9 +14,10 @@
     commafiles.url = "github:Suya1671/commafiles";
     noctalia.url = "github:noctalia-dev/noctalia-shell";
     noctalia.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, impermanence, agenix, opencode, niri-flake, commafiles, noctalia, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, impermanence, agenix, opencode, niri-flake, commafiles, noctalia, nixos-hardware, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
@@ -32,6 +33,11 @@
       
       pkgs-unstable = import nixpkgs-unstable {
         inherit system;
+        overlays = [ overlays.default ];
+      };
+
+      pkgs-aarch64 = import nixpkgs {
+        system = "aarch64-linux";
         overlays = [ overlays.default ];
       };
 
@@ -148,6 +154,96 @@
         ];
       };
 
+      mkSdImage = name: nixpkgs.lib.nixosSystem {
+        system = "aarch64-linux";
+        specialArgs = { inherit inputs; };
+        modules = [
+          (./hosts + "/${name}")
+          ({ lib, pkgs, modulesPath, config, ... }: {
+            imports = [
+              "${nixos-hardware}/raspberry-pi/5"
+              "${modulesPath}/installer/sd-card/sd-image.nix"
+              "${modulesPath}/profiles/base.nix"
+            ];
+            
+            nixpkgs.buildPlatform = "x86_64-linux";
+            nixpkgs.config.allowUnfree = true;
+            
+            networking.hostName = lib.mkDefault name;
+            
+            nix.settings.experimental-features = [ "nix-command" "flakes" ];
+            
+            programs.fish.enable = true;
+            users.defaultUserShell = pkgs.fish;
+            
+            boot.loader.grub.enable = false;
+            boot.loader.generic-extlinux-compatible.enable = true;
+            
+            boot.consoleLogLevel = lib.mkDefault 7;
+            boot.kernelParams = [
+              "console=ttyAMA0,115200n8"
+              "console=tty1"
+            ];
+            
+            sdImage = {
+              compressImage = false;
+              
+              populateFirmwareCommands = let
+                configTxt = pkgs.writeText "config.txt" ''
+                  [pi5]
+                  kernel=kernel_2712.img
+                  arm_64bit=1
+                  enable_uart=1
+                  uart_2ndstage=1
+                  
+                  [all]
+                  arm_64bit=1
+                  enable_uart=1
+                  avoid_warnings=1
+                '';
+              in ''
+                cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bootcode.bin firmware/ || true
+                cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/fixup*.dat firmware/ || true
+                cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/start*.elf firmware/ || true
+                cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bcm2712*.dtb firmware/ || true
+                cp ${config.boot.kernelPackages.kernel}/Image firmware/kernel_2712.img
+                cp ${configTxt} firmware/config.txt
+              '';
+              
+              populateRootCommands = ''
+                mkdir -p ./files/boot
+                ${config.boot.loader.generic-extlinux-compatible.populateCmd} -c ${config.system.build.toplevel} -d ./files/boot
+              '';
+            };
+            
+            services.openssh = {
+              enable = true;
+              settings.PermitRootLogin = "prohibit-password";
+            };
+            
+            users.users.stags = {
+              isNormalUser = true;
+              extraGroups = [ "wheel" "networkmanager" ];
+              openssh.authorizedKeys.keys = [
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILQ3ueSjCunmENDU8CMOKwoT+igDTQcG9R9sgzMPCquo EyalRo@users.noreply.github.com"
+              ];
+            };
+            
+            security.sudo.wheelNeedsPassword = false;
+            
+            environment.systemPackages = with pkgs; [
+              helix
+              git
+              parted
+              e2fsprogs
+              dosfstools
+            ];
+            
+            system.stateVersion = "25.11";
+          })
+        ];
+      };
+
     in {
       overlays = overlays;
       nixosModules.dinOS = ./modules/dinOS;
@@ -183,6 +279,10 @@
             exec ${pkgs.fish}/bin/fish -C 'set -g fish_greeting "" ; ${pkgs.starship}/bin/starship init fish | source'
           fi
         '';
+      };
+
+      sdImages = {
+        rpi5-1 = (mkSdImage "rpi5-1").config.system.build.sdImage;
       };
 
     };
