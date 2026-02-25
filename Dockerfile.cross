@@ -1,6 +1,8 @@
-FROM docker.io/nixos/nix:latest
-
+FROM docker.io/alpine:latest AS qemu
 RUN apk add --no-cache qemu-aarch64-static
+
+FROM docker.io/nixos/nix:latest
+COPY --from=qemu /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 
 RUN mkdir -p /etc/nix && \
     echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf && \
