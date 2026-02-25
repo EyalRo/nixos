@@ -1,6 +1,6 @@
 FROM docker.io/nixos/nix:latest
 
-RUN nix-env -iA nixpkgs.qemu-user-static
+RUN nix-env -iA nixpkgs.qemu-user
 
 RUN mkdir -p /etc/nix && \
     echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf && \
