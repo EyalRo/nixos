@@ -1,15 +1,20 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
+let
+  unstable-pkgs = import inputs.nixpkgs-unstable {
+    inherit (pkgs) system;
+    config.allowUnfree = true;
+  };
+in
 {
   imports = [
     ./hardware-configuration.nix
   ];
 
-  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+  boot.kernelPackages = unstable-pkgs.linuxPackages;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = pkgs.linuxPackages_6_12;
   boot.kernelParams = [
     "quiet"
     "loglevel=3"
@@ -25,9 +30,8 @@
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.enable = true;
-    # Borrowed from `main` (commit e8bf852): improves PRIME dGPU power gating.
     powerManagement.finegrained = true;
-    open = false;
+    open = true;
     nvidiaPersistenced = true;
     prime.offload.enable = true;
     prime.offload.enableOffloadCmd = true;
@@ -35,6 +39,7 @@
       intelBusId = "PCI:0:2:0";
       nvidiaBusId = "PCI:1:0:0";
     };
+    package = unstable-pkgs.linuxPackages.nvidiaPackages.latest;
   };
   services.xserver.videoDrivers = [ "nvidia" "intel" ];
   # Add bus IDs for PRIME offloading if needed:

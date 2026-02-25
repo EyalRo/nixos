@@ -155,26 +155,24 @@
       };
 
       mkSdImage = name: nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
+        system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
-          (./hosts + "/${name}")
           ({ lib, pkgs, modulesPath, config, ... }: {
             imports = [
               "${nixos-hardware}/raspberry-pi/5"
               "${modulesPath}/installer/sd-card/sd-image.nix"
-              "${modulesPath}/profiles/base.nix"
             ];
             
-            nixpkgs.buildPlatform = "x86_64-linux";
+            nixpkgs.crossSystem = {
+              system = "aarch64-linux";
+              config = "aarch64-unknown-linux-gnu";
+            };
             nixpkgs.config.allowUnfree = true;
             
-            networking.hostName = lib.mkDefault name;
+            networking.hostName = name;
             
             nix.settings.experimental-features = [ "nix-command" "flakes" ];
-            
-            programs.fish.enable = true;
-            users.defaultUserShell = pkgs.fish;
             
             boot.loader.grub.enable = false;
             boot.loader.generic-extlinux-compatible.enable = true;
@@ -183,6 +181,35 @@
             boot.kernelParams = [
               "console=ttyAMA0,115200n8"
               "console=tty1"
+            ];
+            
+            documentation.enable = false;
+            documentation.nixos.enable = false;
+            documentation.man.enable = false;
+            documentation.info.enable = false;
+            documentation.doc.enable = false;
+            
+            programs.bash.enableCompletion = false;
+            programs.fish.enable = false;
+            
+            services.openssh = {
+              enable = true;
+              settings.PermitRootLogin = "prohibit-password";
+            };
+            
+            users.users.stags = {
+              isNormalUser = true;
+              extraGroups = [ "wheel" ];
+              openssh.authorizedKeys.keys = [
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILQ3ueSjCunmENDU8CMOKwoT+igDTQcG9R9sgzMPCquo EyalRo@users.noreply.github.com"
+              ];
+            };
+            
+            security.sudo.wheelNeedsPassword = false;
+            
+            environment.systemPackages = with pkgs; [
+              git
+              helix
             ];
             
             sdImage = {
@@ -215,29 +242,6 @@
                 ${config.boot.loader.generic-extlinux-compatible.populateCmd} -c ${config.system.build.toplevel} -d ./files/boot
               '';
             };
-            
-            services.openssh = {
-              enable = true;
-              settings.PermitRootLogin = "prohibit-password";
-            };
-            
-            users.users.stags = {
-              isNormalUser = true;
-              extraGroups = [ "wheel" "networkmanager" ];
-              openssh.authorizedKeys.keys = [
-                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILQ3ueSjCunmENDU8CMOKwoT+igDTQcG9R9sgzMPCquo EyalRo@users.noreply.github.com"
-              ];
-            };
-            
-            security.sudo.wheelNeedsPassword = false;
-            
-            environment.systemPackages = with pkgs; [
-              helix
-              git
-              parted
-              e2fsprogs
-              dosfstools
-            ];
             
             system.stateVersion = "25.11";
           })
@@ -281,9 +285,7 @@
         '';
       };
 
-      sdImages = {
-        rpi5-1 = (mkSdImage "rpi5-1").config.system.build.sdImage;
-      };
+      raspi5 = (mkSdImage "raspi5").config.system.build.sdImage;
 
     };
 }
