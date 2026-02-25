@@ -1,4 +1,6 @@
-FROM nixos/nix:latest
+FROM docker.io/nixos/nix:latest
+
+RUN apk add --no-cache qemu-aarch64-static
 
 RUN mkdir -p /etc/nix && \
     echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf && \
@@ -7,4 +9,4 @@ RUN mkdir -p /etc/nix && \
 
 WORKDIR /build
 
-CMD ["nix", "build", ".#sdImages.rpi5-1", "-o", "result-sd"]
+CMD ["nix", "build", ".#raspi5", "-o", "result-sd"]
