@@ -1,5 +1,7 @@
 FROM docker.io/nixos/nix:latest
 
+RUN nix-env -iA nixpkgs.qemu-user-static
+
 RUN mkdir -p /etc/nix && \
     echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf && \
     echo "extra-platforms = aarch64-linux" >> /etc/nix/nix.conf && \
