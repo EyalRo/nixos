@@ -173,6 +173,7 @@
       nerd-fonts.fira-code
       nerd-fonts.jetbrains-mono
       nerd-fonts.ubuntu-mono
+      yt-dlp
     ];
 
   # Provide a GNOME default wallpaper without forcing user overrides.
@@ -220,7 +221,10 @@
   programs.firefox = {
     enable = true;
     package = pkgs.wrapFirefox pkgs.firefox-unwrapped {
-      nativeMessagingHosts = [ pkgs.gnome-browser-connector ];
+      nativeMessagingHosts = [
+        pkgs.gnome-browser-connector
+        pkgs.ff2mpv
+      ];
     };
   };
 

@@ -2,7 +2,7 @@
 
 let
   unstable-pkgs = import inputs.nixpkgs-unstable {
-    inherit (pkgs) system;
+    system = pkgs.stdenv.hostPlatform.system;
     config.allowUnfree = true;
   };
 in

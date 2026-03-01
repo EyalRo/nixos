@@ -84,17 +84,15 @@
         };
 
       mkSystemFor = system: extraModules: lib.nixosSystem {
-        inherit system;
         specialArgs = { inherit inputs; };
-        modules = baseModules ++ extraModules;
+        modules = baseModules ++ extraModules ++ [{ nixpkgs.hostPlatform = system; }];
       };
 
       mkSystem = extraModules: mkSystemFor system extraModules;
 
       mkInstaller = extraModules: lib.nixosSystem {
-        inherit system;
         specialArgs = { inherit inputs; };
-        modules = extraModules ++ baseModules;
+        modules = extraModules ++ baseModules ++ [{ nixpkgs.hostPlatform = system; }];
       };
 
       userLayers = {
@@ -155,10 +153,10 @@
       };
 
       mkSdImage = name: nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
         specialArgs = { inherit inputs; };
         modules = [
           ({ lib, pkgs, modulesPath, config, ... }: {
+            nixpkgs.buildPlatform = "x86_64-linux";
             imports = [
               "${nixos-hardware}/raspberry-pi/5"
               "${modulesPath}/installer/sd-card/sd-image.nix"
