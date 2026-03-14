@@ -8,7 +8,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
     agenix.url = "github:ryantm/agenix";
-    opencode.url = "github:anomalyco/opencode/v1.2.9";
+    opencode.url = "github:anomalyco/opencode/v1.2.26";
     niri-flake.url = "github:sodiboo/niri-flake";
     niri-flake.inputs.nixpkgs.follows = "nixpkgs";
     commafiles.url = "github:Suya1671/commafiles";
@@ -21,24 +21,23 @@
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
-      overlays = {
-        default = final: prev: {
-          crystal-sysinfo = final.callPackage ./pkgs/crystal-sysinfo { crystal = pkgs-unstable.crystal; };
-        };
+      overlays = final: prev: {
+        crystal-sysinfo = final.callPackage ./pkgs/crystal-sysinfo { crystal = pkgs-unstable.crystal; };
+        opencode-desktop = final.callPackage ./pkgs/opencode-desktop { };
       };
       pkgs = import nixpkgs {
         inherit system;
-        overlays = [ overlays.default ];
+        overlays = [ overlays ];
       };
       
       pkgs-unstable = import nixpkgs-unstable {
         inherit system;
-        overlays = [ overlays.default ];
+        overlays = [ overlays ];
       };
 
       pkgs-aarch64 = import nixpkgs {
         system = "aarch64-linux";
-        overlays = [ overlays.default ];
+        overlays = [ overlays ];
       };
 
       hostDirs = lib.filterAttrs (name: v: v == "directory" && name != "types")
@@ -51,7 +50,7 @@
       };
 
       baseModules = [
-        { nixpkgs.overlays = [ overlays.default inputs.niri-flake.overlays.niri ]; }
+        { nixpkgs.overlays = [ overlays inputs.niri-flake.overlays.niri ]; }
         self.nixosModules.dinOS
         impermanence.nixosModules.impermanence
         home-manager.nixosModules.home-manager
@@ -248,6 +247,10 @@
 
     in {
       overlays = overlays;
+      packages.${system} = {
+        inherit (pkgs) opencode-desktop;
+      };
+      packages.default = pkgs.opencode-desktop;
       nixosModules.dinOS = ./modules/dinOS;
       nixosModules.users-stags = ./modules/users/stags.nix;
 
