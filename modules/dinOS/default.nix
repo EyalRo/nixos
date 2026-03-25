@@ -169,7 +169,7 @@
       gnome-tweaks
       gnomeExtensions.appindicator
       gnomeExtensions.caffeine
-      gnomeExtensions.tiling-shell
+      gnomeExtensions.paperwm
       nerd-fonts.fira-code
       nerd-fonts.jetbrains-mono
       nerd-fonts.ubuntu-mono

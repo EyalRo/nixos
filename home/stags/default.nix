@@ -498,7 +498,9 @@
   home.packages = with pkgs; [
     celluloid
     ghostty
+    opencode-desktop
     protonvpn-gui
+    signal-desktop
     tailscale-systray
     wl-clipboard
   ];

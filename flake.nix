@@ -25,6 +25,7 @@
         crystal-sysinfo = final.callPackage ./pkgs/crystal-sysinfo { crystal = pkgs-unstable.crystal; };
         opencode-desktop = final.callPackage ./pkgs/opencode-desktop { };
       };
+      specialArgs = { inherit inputs; };
       pkgs = import nixpkgs {
         inherit system;
         overlays = [ overlays ];

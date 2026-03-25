@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, inputs, lib, ... }:
 
 let
   unstable-pkgs = import inputs.nixpkgs-unstable {
@@ -10,6 +10,9 @@ in
   imports = [
     ./hardware-configuration.nix
   ];
+
+  # Use systemd from unstable to fix double-suspend bug in v258
+  systemd.package = unstable-pkgs.systemd;
 
   boot.kernelPackages = unstable-pkgs.linuxPackages;
 
@@ -60,6 +63,7 @@ in
   services.logind.settings.Login = {
     HandleLidSwitch = "suspend";
     HandleLidSwitchExternalPower = "suspend";
+    InhibitDelayMaxSec = 5;
   };
 
   systemd.user.services.swayidle = {

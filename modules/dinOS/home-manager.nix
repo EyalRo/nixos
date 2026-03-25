@@ -61,11 +61,18 @@ in {
       enabled-extensions = [
         "appindicatorsupport@rgcjonas.gmail.com"
         "caffeine@patapon.info"
-        "tilingshell@ferrarodomenico.com"
+        "paperwm@paperwm.github.com"
       ];
     };
     "org/gnome/desktop/wm/preferences" = {
       button-layout = "appmenu:minimize,maximize,close";
+    };
+    "org/gnome/settings-daemon/plugins/power" = {
+      sleep-inactive-ac-timeout = 0;
+      sleep-inactive-ac-type = "nothing";
+      sleep-inactive-battery-timeout = 0;
+      sleep-inactive-battery-type = "nothing";
+      idle-dim = false;
     };
   };
 }
