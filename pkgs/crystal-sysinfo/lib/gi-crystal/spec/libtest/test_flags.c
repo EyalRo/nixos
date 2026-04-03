@@ -1,6 +1,5 @@
 #include "test_flags.h"
 
-// There no doc how to use glib-mkenums withotu meson or autotool, so fuck it...
 GType test_flag_flags_get_type() {
   static gsize static_g_define_type_id = 0;
 
