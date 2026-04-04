@@ -11,9 +11,6 @@
   nix.settings.auto-optimise-store = true;
   nixpkgs.config.allowUnfree = true;
 
-  # Prefer newest kernel available in the pinned channel.
-  boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
-
   # kmscon disabled - causes display issues on some hardware
   # services.kmscon = {
   #   enable = true;

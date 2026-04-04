@@ -8,7 +8,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
     agenix.url = "github:ryantm/agenix";
-    opencode.url = "github:anomalyco/opencode/v1.2.26";
+    opencode.url = "github:anomalyco/opencode/dev";
     niri-flake.url = "github:sodiboo/niri-flake";
     niri-flake.inputs.nixpkgs.follows = "nixpkgs";
     commafiles.url = "github:Suya1671/commafiles";
@@ -162,10 +162,7 @@
               "${modulesPath}/installer/sd-card/sd-image.nix"
             ];
             
-            nixpkgs.crossSystem = {
-              system = "aarch64-linux";
-              config = "aarch64-unknown-linux-gnu";
-            };
+            nixpkgs.hostPlatform = "aarch64-linux";
             nixpkgs.config.allowUnfree = true;
             
             networking.hostName = name;
@@ -211,7 +208,7 @@
             ];
             
             sdImage = {
-              compressImage = false;
+              compressImage = true;
               
               populateFirmwareCommands = let
                 configTxt = pkgs.writeText "config.txt" ''
@@ -220,6 +217,9 @@
                   arm_64bit=1
                   enable_uart=1
                   uart_2ndstage=1
+                  dtparam=pciex1
+                  dtparam=pciex1_gen=3
+                  usb_max_current_enable=1
                   
                   [all]
                   arm_64bit=1

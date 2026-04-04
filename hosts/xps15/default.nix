@@ -1,20 +1,9 @@
-{ config, pkgs, inputs, lib, ... }:
+{ config, pkgs, lib, ... }:
 
-let
-  unstable-pkgs = import inputs.nixpkgs-unstable {
-    system = pkgs.stdenv.hostPlatform.system;
-    config.allowUnfree = true;
-  };
-in
 {
   imports = [
     ./hardware-configuration.nix
   ];
-
-  # Use systemd from unstable to fix double-suspend bug in v258
-  systemd.package = unstable-pkgs.systemd;
-
-  boot.kernelPackages = unstable-pkgs.linuxPackages;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -35,14 +24,13 @@ in
     powerManagement.enable = true;
     powerManagement.finegrained = true;
     open = true;
-    nvidiaPersistenced = true;
+    nvidiaPersistenced = lib.mkDefault false;
     prime.offload.enable = true;
     prime.offload.enableOffloadCmd = true;
     prime = {
       intelBusId = "PCI:0:2:0";
       nvidiaBusId = "PCI:1:0:0";
     };
-    package = unstable-pkgs.linuxPackages.nvidiaPackages.latest;
   };
   services.xserver.videoDrivers = [ "nvidia" "intel" ];
   # Add bus IDs for PRIME offloading if needed:

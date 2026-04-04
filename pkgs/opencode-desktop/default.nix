@@ -1,8 +1,8 @@
 { stdenv, lib, fetchurl, appimageTools, copyDesktopItems, makeWrapper }:
 
 let
-  version = "1.2.26";
-  sha256 = "0wn2cr3l76jbpjkc206nl1wxvsb69y26mr323hf6s847ab5c3cx1";
+  version = "1.3.13";
+  sha256 = "04bin8n54qcgd8j30ipby7l18an6yz4kl17nhs84x4y7jjxg7i4y";
   pname = "opencode-desktop";
 
   appimageContents = appimageTools.extractType2 {
