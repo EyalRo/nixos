@@ -497,6 +497,7 @@
 
   home.packages = with pkgs; [
     celluloid
+    fractal
     ghostty
     opencode-desktop
     protonvpn-gui
