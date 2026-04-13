@@ -5,6 +5,8 @@ let
     kodiPkgs.jellyfin
   ]);
 in {
+  networking.firewall.allowedTCPPorts = [ 8080 ];
+
   users.users.kodi = {
     isNormalUser = true;
     description = "Kodi";
