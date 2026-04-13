@@ -5,14 +5,6 @@ let
     kodiPkgs.jellyfin
   ]);
 in {
-  fileSystems."/mnt/media" = {
-    device = "192.168.1.32:/media";
-    fsType = "nfs4";
-    options = [ "ro" "noatime" "_netdev" "port=2049" ];
-  };
-
-  services.rpcbind.enable = true;
-
   users.users.kodi = {
     isNormalUser = true;
     description = "Kodi";
