@@ -37,6 +37,19 @@
     ];
   };
 
+  hardware.firmware = with pkgs; [
+    sof-firmware
+  ];
+
+  # Alder Lake-N PCH audio (8086:54c8): the SOF DSP driver (snd_sof_pci_intel_tgl) claims this
+  # device via its wildcard alias but intermittently fails to initialize the Realtek ALC256 codec,
+  # leaving no sound card registered. snd_hda_intel drives the HDA codec directly and reliably.
+  boot.blacklistedKernelModules = [ "snd_sof_pci_intel_tgl" ];
+
+  environment.etc."modprobe.d/nuc14-audio.conf".text = ''
+    options snd_hda_intel power_save=0
+  '';
+
   environment.etc."machine-id".source = "/persist/etc/machine-id";
 
   environment.persistence."/persist" = {
