@@ -8,7 +8,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
     agenix.url = "github:ryantm/agenix";
-    opencode.url = "github:anomalyco/opencode/dev";
+    opencode.url = "github:anomalyco/opencode/v1.14.33";
     niri-flake.url = "github:sodiboo/niri-flake";
     niri-flake.inputs.nixpkgs.follows = "nixpkgs";
     commafiles.url = "github:Suya1671/commafiles";
