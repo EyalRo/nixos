@@ -1,10 +1,6 @@
 { config, pkgs, lib, inputs, ... }:
 
 {
-  nixpkgs.overlays = [
-    inputs.niri-flake.overlays.niri
-  ];
-
   networking.networkmanager.enable = true;
   hardware.bluetooth.enable = true;
   services.power-profiles-daemon.enable = true;
