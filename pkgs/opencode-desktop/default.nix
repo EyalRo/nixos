@@ -1,14 +1,14 @@
 { stdenv, lib, fetchurl, appimageTools, copyDesktopItems, makeWrapper }:
 
 let
-  version = "1.4.11";
-  sha256 = "115869bc93a353484e6f39bacf7d0a2dd3efe9c2935812fa149a033871c88db6";
+  version = "1.14.34";
+  sha256 = "f56f0710e1ed530958aa1d11403d7def5a02e87b4e093ff8ee2ef0b9067ee241";
   pname = "opencode-desktop";
 
   appimageContents = appimageTools.extractType2 {
     inherit pname version;
     src = fetchurl {
-      url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-electron-linux-x86_64.AppImage";
+      url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-desktop-linux-x86_64.AppImage";
       inherit sha256;
     };
   };
@@ -17,7 +17,7 @@ appimageTools.wrapType2 {
   inherit pname version;
 
   src = fetchurl {
-    url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-electron-linux-x86_64.AppImage";
+    url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-desktop-linux-x86_64.AppImage";
     inherit sha256;
   };
 
