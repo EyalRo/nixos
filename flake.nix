@@ -24,9 +24,14 @@
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
+      pkgs-unstable-no-overlays = import nixpkgs-unstable {
+        inherit system;
+      };
+
       overlays = final: prev: {
         crystal-sysinfo = final.callPackage ./pkgs/crystal-sysinfo { crystal = pkgs-unstable.crystal; };
         opencode-desktop = final.callPackage ./pkgs/opencode-desktop { };
+        tailscale = pkgs-unstable-no-overlays.tailscale;
       };
       specialArgs = { inherit inputs; };
       pkgs = import nixpkgs {
