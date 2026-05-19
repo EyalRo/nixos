@@ -238,4 +238,8 @@
   services.fwupd.enable = true;
   services.printing.enable = false;
   services.blueman.enable = false;
+
+  # NFS client support
+  boot.supportedFilesystems = [ "nfs4" ];
+  services.gvfs.enable = true;
 }
