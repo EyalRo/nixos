@@ -10,7 +10,6 @@
     impermanence.inputs.nixpkgs.follows = "nixpkgs";
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
-    opencode.url = "github:anomalyco/opencode/v1.14.33";
     niri-flake.url = "github:sodiboo/niri-flake";
     niri-flake.inputs.nixpkgs.follows = "nixpkgs";
     commafiles.url = "github:Suya1671/commafiles";
@@ -20,13 +19,18 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, impermanence, agenix, opencode, niri-flake, commafiles, noctalia, nixos-hardware, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, impermanence, agenix, niri-flake, commafiles, noctalia, nixos-hardware, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
+      pkgs-unstable-no-overlays = import nixpkgs-unstable {
+        inherit system;
+      };
+
       overlays = final: prev: {
         crystal-sysinfo = final.callPackage ./pkgs/crystal-sysinfo { crystal = pkgs-unstable.crystal; };
         opencode-desktop = final.callPackage ./pkgs/opencode-desktop { };
+        tailscale = pkgs-unstable-no-overlays.tailscale;
       };
       specialArgs = { inherit inputs; };
       pkgs = import nixpkgs {
@@ -268,12 +272,8 @@
 
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
-          git
           nixpkgs-fmt
           nodejs_20
-          fish
-          starship
-          opencode.packages.${system}.default
           pkgs-unstable.crystal
           pkgs-unstable.shards
           gtk4
@@ -284,9 +284,6 @@
 
         shellHook = ''
           export STARSHIP_CONFIG=${./modules/dinOS/starship/develop.toml}
-          if [ -z "$DIRENV_IN_ENVRC" ]; then
-            exec ${pkgs.fish}/bin/fish -C 'set -g fish_greeting "" ; ${pkgs.starship}/bin/starship init fish | source'
-          fi
         '';
       };
 

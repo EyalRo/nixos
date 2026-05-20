@@ -46,6 +46,7 @@ SystemAccount=false
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "client";
+    extraUpFlags = [ "--accept-routes" ];
   };
 
   services.nfs.idmapd.settings = {
