@@ -242,4 +242,25 @@
   # NFS client support
   boot.supportedFilesystems = [ "nfs4" ];
   services.gvfs.enable = true;
+
+  # Internal service hosts
+  networking.hosts."192.168.0.101" = [
+    "gitea.isdino.com"
+    "jellyfin.isdino.com"
+    "radarr.isdino.com"
+    "sonarr.isdino.com"
+    "prowlarr.isdino.com"
+    "bazarr.isdino.com"
+    "bitmagnet.isdino.com"
+    "nzbget.isdino.com"
+    "nntmux.isdino.com"
+    "downloader.isdino.com"
+    "transcodersaurus.isdino.com"
+    "portainer.isdino.com"
+    "rustfs.isdino.com"
+    "s3.isdino.com"
+    "router.isdino.com"
+    "home.isdino.com"
+    "dev.home.isdino.com"
+  ];
 }
