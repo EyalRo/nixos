@@ -50,6 +50,24 @@
     options snd_hda_intel power_save=0
   '';
 
+  networking.hosts."192.168.0.101" = [
+    "gitea.isdino.com"
+    "jellyfin.isdino.com"
+    "radarr.isdino.com"
+    "sonarr.isdino.com"
+    "prowlarr.isdino.com"
+    "bazarr.isdino.com"
+    "bitmagnet.isdino.com"
+    "nzbget.isdino.com"
+    "nntmux.isdino.com"
+    "downloader.isdino.com"
+    "transcodersaurus.isdino.com"
+    "portainer.isdino.com"
+    "rustfs.isdino.com"
+    "s3.isdino.com"
+    "router.isdino.com"
+  ];
+
   fileSystems."/mnt/nas-k8s" = {
     device = "nas:/volume1/k8s";
     fsType = "nfs4";
