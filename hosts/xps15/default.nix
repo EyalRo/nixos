@@ -13,6 +13,24 @@
     "rd.udev.log_level=3"
   ];
 
+  networking.hosts."192.168.0.101" = [
+    "gitea.isdino.com"
+    "jellyfin.isdino.com"
+    "radarr.isdino.com"
+    "sonarr.isdino.com"
+    "prowlarr.isdino.com"
+    "bazarr.isdino.com"
+    "bitmagnet.isdino.com"
+    "nzbget.isdino.com"
+    "nntmux.isdino.com"
+    "downloader.isdino.com"
+    "transcodersaurus.isdino.com"
+    "portainer.isdino.com"
+    "rustfs.isdino.com"
+    "s3.isdino.com"
+    "router.isdino.com"
+  ];
+
   hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [
