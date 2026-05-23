@@ -50,11 +50,11 @@
     options snd_hda_intel power_save=0
   '';
 
-  # Route to K8s cluster network via xps15 (dual-homed on 192.168.0.x and 192.168.88.x)
+  # Route to K8s cluster network via MikroTik gateway
   networking.routes = [{
     address = "192.168.88.0";
     prefixLength = 24;
-    via = "192.168.0.62";
+    via = "192.168.0.101";
   }];
 
   fileSystems."/mnt/nas-k8s" = {

@@ -76,10 +76,4 @@
   # Touchpad uses I2C interface instead
   # Disable MEI to prevent hardware ready errors
   boot.blacklistedKernelModules = [ "psmouse" "mei_me" "mei_hdcp" "mei_pxp" ];
-
-  # NAT gateway for K8s cluster (192.168.88.x) to reach NAS/services (192.168.0.x)
-  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
-  networking.nat.enable = true;
-  networking.nat.externalInterface = "wlp0s20f3";
-  networking.nat.internalInterfaces = [ "enp0s20f0u1" ];
 }
