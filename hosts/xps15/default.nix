@@ -76,4 +76,11 @@
   # Touchpad uses I2C interface instead
   # Disable MEI to prevent hardware ready errors
   boot.blacklistedKernelModules = [ "psmouse" "mei_me" "mei_hdcp" "mei_pxp" ];
+
+  # Route to K8s cluster network via MikroTik (USB Ethernet to 88.x is temporary)
+  networking.routes = [{
+    address = "192.168.88.0";
+    prefixLength = 24;
+    via = "192.168.0.101";
+  }];
 }
