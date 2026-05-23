@@ -244,7 +244,8 @@
   services.gvfs.enable = true;
 
   # Internal service hosts
-  networking.hosts."192.168.0.101" = [
+  networking.hosts."192.168.88.20" = [
+    "k8s.isdino.com"
     "gitea.isdino.com"
     "jellyfin.isdino.com"
     "radarr.isdino.com"
@@ -260,6 +261,9 @@
     "rustfs.isdino.com"
     "s3.isdino.com"
     "router.isdino.com"
+  ];
+
+  networking.hosts."192.168.88.30" = [
     "home.isdino.com"
     "dev.home.isdino.com"
   ];

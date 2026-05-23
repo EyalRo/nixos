@@ -50,6 +50,13 @@
     options snd_hda_intel power_save=0
   '';
 
+  # Route to K8s cluster network via xps15 (dual-homed on 192.168.0.x and 192.168.88.x)
+  networking.routes = [{
+    address = "192.168.88.0";
+    prefixLength = 24;
+    via = "192.168.0.62";
+  }];
+
   fileSystems."/mnt/nas-k8s" = {
     device = "nas:/volume1/k8s";
     fsType = "nfs4";
