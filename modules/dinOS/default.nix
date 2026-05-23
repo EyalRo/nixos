@@ -261,9 +261,6 @@
     "rustfs.isdino.com"
     "s3.isdino.com"
     "router.isdino.com"
-  ];
-
-  networking.hosts."192.168.88.30" = [
     "home.isdino.com"
     "dev.home.isdino.com"
   ];
