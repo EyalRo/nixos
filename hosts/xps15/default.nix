@@ -78,9 +78,13 @@
   boot.blacklistedKernelModules = [ "psmouse" "mei_me" "mei_hdcp" "mei_pxp" ];
 
   # Route to K8s cluster network via MikroTik (USB Ethernet to 88.x is temporary)
-  networking.routes = [{
-    address = "192.168.88.0";
-    prefixLength = 24;
-    via = "192.168.0.101";
-  }];
+  systemd.services.add-k8s-route = {
+    description = "Add route to K8s cluster network via MikroTik";
+    wantedBy = [ "network-online.target" ];
+    after = [ "network-online.target" ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      ${pkgs.iproute2}/bin/ip route replace 192.168.88.0/24 via 192.168.0.101 || true
+    '';
+  };
 }
