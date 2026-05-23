@@ -50,6 +50,62 @@
     options snd_hda_intel power_save=0
   '';
 
+  fileSystems."/mnt/nas-k8s" = {
+    device = "nas:/volume1/k8s";
+    fsType = "nfs4";
+    options = [
+      "_netdev"
+      "noauto"
+      "x-systemd.automount"
+      "x-systemd.device-timeout=10s"
+      "x-systemd.idle-timeout=600"
+      "x-systemd.mount-timeout=10s"
+      "soft"
+      "noatime"
+    ];
+  };
+
+  fileSystems."/media" = {
+    device = "/mnt/nas-k8s/media-media-library-pvc-be51baa2-d7e2-4676-9de6-9961383f11bb";
+    fsType = "none";
+    options = [
+      "bind"
+      "_netdev"
+      "noauto"
+      "x-systemd.automount"
+      "x-systemd.device-timeout=10s"
+      "x-systemd.idle-timeout=600"
+      "x-systemd.mount-timeout=10s"
+    ];
+  };
+
+  systemd.services.nuc14-media-retry = {
+    description = "Retry NFS automounts for /media";
+    serviceConfig = {
+      Type = "oneshot";
+    };
+    path = with pkgs; [
+      systemd
+      util-linux
+    ];
+    script = ''
+      set -euo pipefail
+      systemctl reset-failed mnt-nas\\x2dk8s.automount || true
+      systemctl reset-failed media.automount || true
+      if ! mountpoint -q /media; then
+        mount /media || true
+      fi
+    '';
+  };
+
+  systemd.timers.nuc14-media-retry = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "1min";
+      OnUnitActiveSec = "1min";
+    };
+  };
+
   environment.etc."machine-id".source = "/persist/etc/machine-id";
 
   environment.persistence."/persist" = {
