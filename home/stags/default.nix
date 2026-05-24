@@ -538,6 +538,7 @@
     tailscale
     tailscale-systray
     wl-clipboard
+    cliphist
   ];
 
   systemd.user.services.tailscale-systray = {
@@ -547,6 +548,20 @@
       PartOf = [ "graphical-session.target" ];
     };
     Service.ExecStart = "${pkgs.tailscale-systray}/bin/tailscale-systray";
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
+  systemd.user.services.cliphist-watcher = {
+    Unit = {
+      Description = "Cliphist clipboard watcher";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --type text --watch ${pkgs.cliphist}/bin/cliphist store";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
