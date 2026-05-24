@@ -425,7 +425,6 @@
             { id = "Workspace"; hideUnoccupied = false; }
           ];
           right = [
-            { id = "Tray"; }
             { id = "Battery"; alwaysShowPercentage = false; }
             { id = "Network"; }
             { id = "ControlCenter"; }
