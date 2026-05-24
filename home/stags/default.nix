@@ -483,6 +483,31 @@
         enableCountdown = false;
       };
     };
+
+    plugins = {
+      sources = [
+        {
+          enabled = true;
+          name = "Noctalia Plugins";
+          url = "https://github.com/noctalia-dev/noctalia-plugins";
+        }
+      ];
+      states = {
+        tailscale = {
+          enabled = true;
+        };
+        niri-keyboard-layout = {
+          enabled = true;
+          settings = {
+            displayMode = "forceOpen";
+          };
+        };
+        clipper = {
+          enabled = true;
+        };
+      };
+      version = 2;
+    };
   };
 
   programs.mpv = {
@@ -502,6 +527,7 @@
     opencode-desktop
     protonvpn-gui
     signal-desktop
+    tailscale
     tailscale-systray
     wl-clipboard
   ];
@@ -517,10 +543,6 @@
   };
 
   home.file = {
-    ".config/noctalia/plugins.json" = {
-      source = ./plugins/noctalia-plugins.json;
-      force = true;
-    };
     ".config/noctalia/plugins/niri-keyboard-layout" = {
       source = ../../modules/dinOS/plugins/niri-keyboard-layout;
       recursive = true;
