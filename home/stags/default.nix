@@ -518,6 +518,8 @@
     };
   };
 
+  xdg.configFile."noctalia/plugins/tailscale/settings.json".force = true;
+
   programs.mpv = {
     enable = true;
     config = {
