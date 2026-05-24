@@ -429,6 +429,7 @@
             { id = "Battery"; alwaysShowPercentage = false; }
             { id = "Network"; }
             { id = "ControlCenter"; }
+            { id = "plugin:clipper"; }
           ];
         };
       };
