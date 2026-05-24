@@ -420,6 +420,7 @@
             { id = "Clock"; formatHorizontal = "hh:mm a"; useMonospacedFont = true; }
             { id = "SystemMonitor"; }
             { id = "plugin:tailscale"; }
+            { id = "plugin:clipper"; }
           ];
           center = [
             { id = "Workspace"; hideUnoccupied = false; }
@@ -428,7 +429,7 @@
           right = [
             { id = "Battery"; alwaysShowPercentage = false; }
             { id = "Network"; }
-            { id = "ControlCenter"; }
+            { id = "ControlCenter"; showDistroLogo = true; colorization = true; }
             { id = "plugin:polkit-agent"; }
             { id = "plugin:clipper"; }
           ];
