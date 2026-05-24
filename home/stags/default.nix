@@ -429,7 +429,7 @@
           right = [
             { id = "Battery"; alwaysShowPercentage = false; }
             { id = "Network"; }
-            { id = "ControlCenter"; showDistroLogo = true; colorization = true; }
+            { id = "ControlCenter"; useDistroLogo = true; enableColorization = true; }
           ];
         };
       };
