@@ -430,8 +430,6 @@
             { id = "Battery"; alwaysShowPercentage = false; }
             { id = "Network"; }
             { id = "ControlCenter"; showDistroLogo = true; colorization = true; }
-            { id = "plugin:polkit-agent"; }
-            { id = "plugin:clipper"; }
           ];
         };
       };
