@@ -82,6 +82,7 @@
     description = "Add route to K8s cluster network via MikroTik";
     wantedBy = [ "network-online.target" ];
     after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
     serviceConfig.Type = "oneshot";
     script = ''
       ${pkgs.iproute2}/bin/ip route replace 192.168.88.0/24 via 192.168.0.101 || true
