@@ -423,11 +423,13 @@
           ];
           center = [
             { id = "Workspace"; hideUnoccupied = false; }
+            { id = "plugin:keybind-cheatsheet"; }
           ];
           right = [
             { id = "Battery"; alwaysShowPercentage = false; }
             { id = "Network"; }
             { id = "ControlCenter"; }
+            { id = "plugin:polkit-agent"; }
             { id = "plugin:clipper"; }
           ];
         };
@@ -503,6 +505,12 @@
           };
         };
         clipper = {
+          enabled = true;
+        };
+        "keybind-cheatsheet" = {
+          enabled = true;
+        };
+        "polkit-agent" = {
           enabled = true;
         };
       };
