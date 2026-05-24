@@ -508,6 +508,13 @@
       };
       version = 2;
     };
+
+    pluginSettings = {
+      tailscale = {
+        compactMode = true;
+        terminalCommand = "ghostty";
+      };
+    };
   };
 
   programs.mpv = {
