@@ -427,6 +427,7 @@
             { id = "plugin:keybind-cheatsheet"; }
           ];
           right = [
+            { id = "plugin:keepawake"; }
             { id = "Battery"; alwaysShowPercentage = false; }
             { id = "Network"; }
             { id = "ControlCenter"; useDistroLogo = true; enableColorization = true; }
@@ -493,10 +494,13 @@
           url = "https://github.com/noctalia-dev/noctalia-plugins";
         }
       ];
-      states = {
-        tailscale = {
-          enabled = true;
-        };
+        states = {
+          keepawake = {
+            enabled = true;
+          };
+          tailscale = {
+            enabled = true;
+          };
         niri-keyboard-layout = {
           enabled = true;
           settings = {
@@ -539,7 +543,10 @@
   home.packages = with pkgs; [
     celluloid
     fractal
+    gitea-cli
     ghostty
+    helm
+    kubectl
     opencode-desktop
     protonvpn-gui
     signal-desktop
