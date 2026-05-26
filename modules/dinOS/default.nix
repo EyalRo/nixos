@@ -35,6 +35,18 @@
 
   networking.networkmanager.enable = lib.mkDefault true;
   networking.networkmanager.dns = lib.mkDefault "systemd-resolved";
+  networking.networkmanager.dispatcherScripts = [
+    {
+      source = pkgs.writeShellScript "nm-dispatcher-k8s-route" ''
+        case "$2" in
+          up)
+            ${pkgs.iproute2}/bin/ip route replace 192.168.88.0/24 via 192.168.0.101 || true
+            ;;
+        esac
+      '';
+      type = "basic";
+    }
+  ];
   networking.resolvconf.enable = lib.mkDefault false;
   security.sudo.enable = lib.mkDefault true;
   services.resolved.enable = lib.mkDefault true;

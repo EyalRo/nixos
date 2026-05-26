@@ -50,18 +50,6 @@
     options snd_hda_intel power_save=0
   '';
 
-  # Route to K8s cluster network via MikroTik gateway
-  systemd.services.add-k8s-route = {
-    description = "Add route to K8s cluster network via MikroTik";
-    wantedBy = [ "network-online.target" ];
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    serviceConfig.Type = "oneshot";
-    script = ''
-      ${pkgs.iproute2}/bin/ip route replace 192.168.88.0/24 via 192.168.0.101 || true
-    '';
-  };
-
   fileSystems."/mnt/nas-k8s" = {
     device = "nas:/volume1/k8s";
     fsType = "nfs4";

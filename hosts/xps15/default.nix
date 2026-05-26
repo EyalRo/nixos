@@ -1,8 +1,9 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
+    inputs.nixos-hardware.nixosModules.dell-xps-15-9500-nvidia
   ];
 
   boot.loader.systemd-boot.enable = true;
@@ -33,17 +34,6 @@
     };
   };
   services.xserver.videoDrivers = [ "nvidia" "intel" ];
-  # Add bus IDs for PRIME offloading if needed:
-  # hardware.nvidia.prime = {
-  #   intelBusId = "PCI:0:2:0";
-  #   nvidiaBusId = "PCI:1:0:0";
-  # };
-
-  services.fprintd = {
-    enable = true;
-    tod.enable = true;
-    tod.driver = pkgs.libfprint-2-tod1-goodix;
-  };
 
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
@@ -72,20 +62,6 @@
 
   environment.etc."machine-id".source = "/persist/etc/machine-id";
 
-  # Disable PS/2 mouse driver to prevent elantech errors
-  # Touchpad uses I2C interface instead
-  # Disable MEI to prevent hardware ready errors
   boot.blacklistedKernelModules = [ "psmouse" "mei_me" "mei_hdcp" "mei_pxp" ];
 
-  # Route to K8s cluster network via MikroTik (USB Ethernet to 88.x is temporary)
-  systemd.services.add-k8s-route = {
-    description = "Add route to K8s cluster network via MikroTik";
-    wantedBy = [ "network-online.target" ];
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    serviceConfig.Type = "oneshot";
-    script = ''
-      ${pkgs.iproute2}/bin/ip route replace 192.168.88.0/24 via 192.168.0.101 || true
-    '';
-  };
 }

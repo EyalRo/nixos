@@ -543,7 +543,7 @@
   home.packages = with pkgs; [
     celluloid
     fractal
-    gitea-cli
+    tea
     ghostty
     helm
     kubectl
