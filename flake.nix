@@ -195,7 +195,9 @@
               "cgroup_enable=memory"
               "cgroup_memory=1"
             ];
-            
+
+            boot.initrd.allowMissingModules = true;
+
             documentation.enable = false;
             documentation.nixos.enable = false;
             documentation.man.enable = false;
