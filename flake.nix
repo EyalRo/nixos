@@ -112,25 +112,32 @@
 
       profileModules = {
         headless = ./modules/dinOS/profiles/headless.nix;
+        k3s = ./modules/dinOS/profiles/k3s.nix;
         kodi = ./modules/dinOS/profiles/kodi.nix;
         server = ./modules/dinOS/profiles/server.nix;
         niri = ./modules/dinOS/profiles/niri.nix;
       };
 
       profileDeps = {
+        k3s = [ "headless" "server" ];
       };
 
       profileUsers = {
         server = [ "stags" ];
+        k3s = [ "stags" ];
       };
 
       hostUsers = {
         ideapad3 = [ "stags" ];
+        k8s-3 = [ "stags" ];
+        k8s-4 = [ "stags" ];
         nuc14 = [ "stags" ];
         xps15 = [ "stags" ];
       };
 
       hostProfiles = {
+        k8s-3 = [ "k3s" ];
+        k8s-4 = [ "k3s" ];
         nuc14 = [ "server" "kodi" ];
       };
 
@@ -184,6 +191,9 @@
             boot.kernelParams = [
               "console=ttyAMA0,115200n8"
               "console=tty1"
+              "cgroup_enable=cpuset"
+              "cgroup_enable=memory"
+              "cgroup_memory=1"
             ];
             
             documentation.enable = false;
@@ -192,7 +202,7 @@
             documentation.info.enable = false;
             documentation.doc.enable = false;
             
-            programs.bash.enableCompletion = false;
+            programs.bash.completion.enable = false;
             programs.fish.enable = false;
             
             services.openssh = {
@@ -213,7 +223,11 @@
             environment.systemPackages = with pkgs; [
               git
               helix
+              kubectl
             ];
+            
+            # Disable swap for Kubernetes
+            swapDevices = [];
             
             sdImage = {
               compressImage = true;
@@ -225,9 +239,16 @@
                   arm_64bit=1
                   enable_uart=1
                   uart_2ndstage=1
+                  
+                  # PCIe/NVMe boot support
                   dtparam=pciex1
                   dtparam=pciex1_gen=3
+                  
+                  # USB power
                   usb_max_current_enable=1
+                  
+                  # NVMe boot overlay (uncomment if booting from NVMe)
+                  # dtoverlay=pcie-32bit-dma
                   
                   [all]
                   arm_64bit=1
@@ -255,7 +276,7 @@
       };
 
     in {
-      overlays = overlays;
+      overlays.default = overlays;
       packages.${system} = {
         inherit (pkgs) opencode-desktop;
       };
