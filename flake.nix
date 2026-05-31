@@ -223,7 +223,6 @@
             environment.systemPackages = with pkgs; [
               git
               helix
-              kubectl
             ];
             
             # Disable swap for Kubernetes
