@@ -43,6 +43,11 @@
     settings.PermitRootLogin = "prohibit-password";
   };
 
+  # Passwordless SSH for stags user
+  users.users.stags.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILQ3ueSjCunmENDU8CMOKwoT+igDTQcG9R9sgzMPCquo EyalRo@users.noreply.github.com"
+  ];
+
   # GPU/display not needed for headless k8s node
   services.xserver.enable = lib.mkForce false;
   services.displayManager.gdm.enable = lib.mkForce false;
