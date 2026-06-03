@@ -455,6 +455,7 @@
       wallpaper = {
         enabled = true;
         automationEnabled = true;
+        directory = ../../modules/dinOS/wallpaper;
         wallpaperChangeMode = "random";
         randomIntervalSec = 300;
         skipStartupTransition = true;
@@ -548,7 +549,7 @@
     helm
     kubectl
     opencode-desktop
-    protonvpn-gui
+    proton-vpn
     signal-desktop
     tailscale
     tailscale-systray
@@ -591,18 +592,28 @@
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
-    matchBlocks."*" = {
-      addKeysToAgent = "yes";
-      compression = true;
-      forwardAgent = false;
-      hashKnownHosts = true;
-      serverAliveInterval = 60;
-      serverAliveCountMax = 3;
+    settings = {
+      "*" = {
+        AddKeysToAgent = "yes";
+        Compression = "yes";
+        ForwardAgent = "no";
+        HashKnownHosts = "yes";
+        ServerAliveInterval = "60";
+        ServerAliveCountMax = "3";
+      };
+      "github.com" = {
+        User = "git";
+        IdentityFile = "/mnt/stags/.ssh/id_ed25519_github";
+        IdentitiesOnly = "yes";
+      };
     };
-    matchBlocks."github.com" = {
-      user = "git";
-      identityFile = "/mnt/stags/.ssh/id_ed25519_github";
-      identitiesOnly = true;
+  };
+
+  dconf.settings = {
+    "org/gnome/desktop/background" = {
+      picture-uri = "file:///run/current-system/sw/share/backgrounds/friendly-pals-day.png";
+      picture-uri-dark = "file:///run/current-system/sw/share/backgrounds/friendly-pals-night.png";
+      picture-options = "scaled";
     };
   };
 
