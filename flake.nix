@@ -303,6 +303,7 @@
           gtk4.dev
           glib.dev
           pkg-config
+          opencode
         ];
 
         shellHook = ''

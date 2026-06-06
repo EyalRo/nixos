@@ -253,6 +253,7 @@
 
   # NFS client support
   boot.supportedFilesystems = [ "nfs4" ];
+  services.rpcbind.enable = true;
   services.gvfs.enable = true;
 
   # Internal service hosts
@@ -275,5 +276,15 @@
     "router.isdino.com"
     "home.isdino.com"
     "dev.home.isdino.com"
+  ];
+
+  # Proxmox server (replaced retired k8s)
+  networking.hosts."192.168.0.115" = [
+    "sonarr.virtualdino.com"
+    "radarr.virtualdino.com"
+    "prowlarr.virtualdino.com"
+    "sabnzbd.virtualdino.com"
+    "qbittorrent.virtualdino.com"
+    "bitmagnet.virtualdino.com"
   ];
 }

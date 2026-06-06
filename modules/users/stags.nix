@@ -60,8 +60,8 @@ SystemAccount=false
   ];
 
   fileSystems."/mnt/stags" = {
-    device = "nas.dino.home:/volume1/homes/Eyal";
-    fsType = "nfs4";
+    device = "192.168.0.100:/volume1/homes/Eyal";
+    fsType = "nfs";
     options = [
       "_netdev"
       "noauto"
@@ -69,12 +69,13 @@ SystemAccount=false
       "x-systemd.device-timeout=10s"
       "x-systemd.idle-timeout=600"
       "x-systemd.mount-timeout=10s"
+      "vers=3"
     ];
   };
 
   fileSystems."/mnt/shared" = {
-    device = "nas.dino.home:/volume1/Shared";
-    fsType = "nfs4";
+    device = "192.168.0.100:/volume1/Shared";
+    fsType = "nfs";
     options = [
       "_netdev"
       "noauto"
@@ -82,11 +83,26 @@ SystemAccount=false
       "x-systemd.device-timeout=10s"
       "x-systemd.idle-timeout=600"
       "x-systemd.mount-timeout=10s"
+      "vers=3"
+    ];
+  };
+
+  fileSystems."/mnt/media" = {
+    device = "192.168.0.100:/volume1/k8s/media-media-library-pvc-be51baa2-d7e2-4676-9de6-9961383f11bb";
+    fsType = "nfs";
+    options = [
+      "_netdev"
+      "noauto"
+      "x-systemd.automount"
+      "x-systemd.device-timeout=10s"
+      "x-systemd.idle-timeout=600"
+      "x-systemd.mount-timeout=10s"
+      "vers=3"
     ];
   };
 
   systemd.services.nfs-mounts-retry = {
-    description = "Retry NFS automounts for /mnt/stags and /mnt/shared";
+    description = "Retry NFS automounts for /mnt/stags, /mnt/shared, and /mnt/media";
     serviceConfig = {
       Type = "oneshot";
     };
@@ -96,12 +112,15 @@ SystemAccount=false
     ];
     script = ''
       set -euo pipefail
-      systemctl reset-failed mnt-stags.automount mnt-shared.automount || true
+      systemctl reset-failed mnt-stags.automount mnt-shared.automount mnt-media.automount || true
       if ! mountpoint -q /mnt/stags; then
         mount /mnt/stags || true
       fi
       if ! mountpoint -q /mnt/shared; then
         mount /mnt/shared || true
+      fi
+      if ! mountpoint -q /mnt/media; then
+        mount /mnt/media || true
       fi
     '';
   };

@@ -26,6 +26,18 @@ in {
       if not set -q STARSHIP_CONFIG
         set -gx STARSHIP_CONFIG "${configDir}/starship/default.toml"
       end
+
+      # Synology NAS: use xterm-256color to avoid terminfo issues
+      function ssh
+        if test (count $argv) -gt 0
+          switch $argv[1]
+            case nas 192.168.0.100
+              command ssh -t $argv "export TERM=xterm-256color; exec \$SHELL -l"
+              return
+          end
+        end
+        command ssh $argv
+      end
     '';
   };
   xdg.configFile."fish/config.fish".force = true;

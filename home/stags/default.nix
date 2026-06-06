@@ -606,6 +606,11 @@
         IdentityFile = "/mnt/stags/.ssh/id_ed25519_github";
         IdentitiesOnly = "yes";
       };
+      "nas" = {
+        HostName = "192.168.0.100";
+        Port = "5022";
+        User = "eyal";
+      };
     };
   };
 
