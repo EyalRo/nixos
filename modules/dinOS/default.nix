@@ -278,13 +278,18 @@
     "dev.home.isdino.com"
   ];
 
-  # Proxmox server (replaced retired k8s)
-  networking.hosts."192.168.0.115" = [
+  # Proxmox servers (replaced retired k8s)
+  networking.hosts."192.168.0.11" = [
+    "pve1.virtualdino.com"
     "sonarr.virtualdino.com"
     "radarr.virtualdino.com"
     "prowlarr.virtualdino.com"
     "sabnzbd.virtualdino.com"
     "qbittorrent.virtualdino.com"
     "bitmagnet.virtualdino.com"
+  ];
+
+  networking.hosts."192.168.0.12" = [
+    "pve2.virtualdino.com"
   ];
 }
