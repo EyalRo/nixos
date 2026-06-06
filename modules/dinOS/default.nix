@@ -278,9 +278,17 @@
     "dev.home.isdino.com"
   ];
 
-  # Proxmox servers (replaced retired k8s)
+  # Physical machines (192.168.0.11 - 192.168.0.19)
   networking.hosts."192.168.0.11" = [
     "pve1.virtualdino.com"
+  ];
+
+  networking.hosts."192.168.0.12" = [
+    "pve2.virtualdino.com"
+  ];
+
+  # Caddy reverse proxy VIP (192.168.0.20)
+  networking.hosts."192.168.0.20" = [
     "sonarr.virtualdino.com"
     "radarr.virtualdino.com"
     "prowlarr.virtualdino.com"
@@ -289,7 +297,9 @@
     "bitmagnet.virtualdino.com"
   ];
 
-  networking.hosts."192.168.0.12" = [
-    "pve2.virtualdino.com"
+  # Reserved for dedicated VIPs (192.168.0.29)
+  # VM/LXC service VIPs (192.168.0.30 - 192.168.0.49)
+  networking.hosts."192.168.0.30" = [
+    "sonarr-backend.virtualdino.com"
   ];
 }
