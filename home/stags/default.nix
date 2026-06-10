@@ -546,9 +546,9 @@
     fractal
     tea
     ghostty
-    helm
-    kubectl
+    melia
     opencode-desktop
+    proton-drive-cli
     proton-vpn
     signal-desktop
     tailscale

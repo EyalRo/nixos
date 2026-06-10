@@ -29,7 +29,9 @@
 
       overlays = final: prev: {
         crystal-sysinfo = final.callPackage ./pkgs/crystal-sysinfo { crystal = pkgs-unstable.crystal; };
+        melia = final.callPackage ./pkgs/melia { };
         opencode-desktop = final.callPackage ./pkgs/opencode-desktop { };
+        proton-drive-cli = final.callPackage ./pkgs/proton-drive-cli { };
         tailscale = pkgs-unstable-no-overlays.tailscale;
       };
       specialArgs = { inherit inputs; };
@@ -279,7 +281,7 @@
     in {
       overlays.default = overlays;
       packages.${system} = {
-        inherit (pkgs) opencode-desktop;
+        inherit (pkgs) melia opencode-desktop proton-drive-cli;
       };
       packages.default = pkgs.opencode-desktop;
       nixosModules.dinOS = ./modules/dinOS;
