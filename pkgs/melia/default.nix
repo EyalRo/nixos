@@ -1,14 +1,14 @@
 { stdenv, lib, fetchurl, appimageTools }:
 
 let
-  version = "1.1.170";
-  sha256 = "9fff831262d3151ccddcdb4b5570978dad0fae904a0d3d2c8c1d8cd93bdf5279";
+  version = "1.1.208";
+  sha256 = "e5e17716b926ab9533bc3a31a18c35b662be98b634b08e8ef56685de524b10b0";
   pname = "melia";
 
   appimageContents = appimageTools.extractType2 {
     inherit pname version;
     src = fetchurl {
-      url = "https://github.com/buxjr311/box-app/releases/download/v${version}/box_${version}_x64.AppImage";
+      url = "https://github.com/buxjr311/melia-app/releases/download/v${version}/melia_${version}_x64.AppImage";
       inherit sha256;
     };
   };
@@ -17,7 +17,7 @@ appimageTools.wrapType2 {
   inherit pname version;
 
   src = fetchurl {
-    url = "https://github.com/buxjr311/box-app/releases/download/v${version}/box_${version}_x64.AppImage";
+    url = "https://github.com/buxjr311/melia-app/releases/download/v${version}/melia_${version}_x64.AppImage";
     inherit sha256;
   };
 
@@ -32,14 +32,14 @@ appimageTools.wrapType2 {
     Name=Melia
     GenericName=Email Client
     Comment=A privacy-first desktop email client for Linux
-    Exec=${pname}
+    Exec=${pname} %U
     Icon=${pname}
     Categories=Network;Email;
     MimeType=message/rfc822;x-scheme-handler/mailto;
     Terminal=false
     EOF
 
-    cp ${appimageContents}/usr/share/icons/hicolor/512x512/apps/box.png \
+    cp ${appimageContents}/usr/share/icons/hicolor/512x512/apps/melia.png \
       $out/share/icons/hicolor/512x512/apps/${pname}.png
   '';
 
