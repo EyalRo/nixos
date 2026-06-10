@@ -1,4 +1,4 @@
-{ stdenv, lib, fetchurl, appimageTools, copyDesktopItems, makeWrapper }:
+{ stdenv, lib, fetchurl, appimageTools }:
 
 let
   version = "1.1.170";
@@ -23,21 +23,24 @@ appimageTools.wrapType2 {
 
   extraInstallCommands = ''
     mkdir -p $out/share/applications
-    mkdir -p $out/share/icons/hicolor
+    mkdir -p $out/share/icons/hicolor/512x512/apps
 
-    cp ${appimageContents}/*.desktop $out/share/applications/${pname}.desktop
+    cat > $out/share/applications/${pname}.desktop <<EOF
+    [Desktop Entry]
+    Version=1.5
+    Type=Application
+    Name=Melia
+    GenericName=Email Client
+    Comment=A privacy-first desktop email client for Linux
+    Exec=${pname}
+    Icon=${pname}
+    Categories=Network;Email;
+    MimeType=message/rfc822;x-scheme-handler/mailto;
+    Terminal=false
+    EOF
 
-    for size in 32 44 64 71 89 107 128 142 150 284 310; do
-      mkdir -p $out/share/icons/hicolor/''${size}x''${size}/apps
-      icon="${appimageContents}/usr/share/icons/hicolor/''${size}x''${size}/apps"
-      if [ -d "$icon" ]; then
-        cp "$icon"/*.png $out/share/icons/hicolor/''${size}x''${size}/apps/${pname}.png 2>/dev/null || true
-      fi
-    done
-
-    substituteInPlace $out/share/applications/${pname}.desktop \
-      --replace-fail 'Exec=AppRun' 'Exec=${pname}' \
-      --replace-fail 'Exec=AppRun --no-sandbox' 'Exec=${pname} --no-sandbox' || true
+    cp ${appimageContents}/usr/share/icons/hicolor/512x512/apps/box.png \
+      $out/share/icons/hicolor/512x512/apps/${pname}.png
   '';
 
   meta = with lib; {
