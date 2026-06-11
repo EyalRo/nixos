@@ -37,6 +37,16 @@
   networking.networkmanager.dns = lib.mkDefault "systemd-resolved";
   networking.networkmanager.dispatcherScripts = [
     {
+      source = pkgs.writeShellScript "nm-dispatcher-dns" ''
+        case "$2" in
+          up)
+            ${pkgs.systemd}/bin/resolvectl dns "$1" 192.168.0.30
+            ;;
+        esac
+      '';
+      type = "basic";
+    }
+    {
       source = pkgs.writeShellScript "nm-dispatcher-k8s-route" ''
         case "$2" in
           up)
@@ -47,6 +57,7 @@
       type = "basic";
     }
   ];
+  networking.nameservers = lib.mkDefault [ "192.168.0.30" ];
   networking.resolvconf.enable = lib.mkDefault false;
   security.sudo.enable = lib.mkDefault true;
   services.resolved.enable = lib.mkDefault true;
@@ -183,6 +194,11 @@
       nerd-fonts.jetbrains-mono
       nerd-fonts.ubuntu-mono
       yt-dlp
+      gst_all_1.gst-plugins-base
+      gst_all_1.gst-plugins-good
+      gst_all_1.gst-plugins-bad
+      gst_all_1.gst-plugins-ugly
+      gst_all_1.gst-libav
     ];
 
   # Provide a GNOME default wallpaper without forcing user overrides.
@@ -256,50 +272,5 @@
   services.rpcbind.enable = true;
   services.gvfs.enable = true;
 
-  # Internal service hosts
-  networking.hosts."192.168.88.20" = [
-    "k8s.isdino.com"
-    "gitea.isdino.com"
-    "jellyfin.isdino.com"
-    "radarr.isdino.com"
-    "sonarr.isdino.com"
-    "prowlarr.isdino.com"
-    "bazarr.isdino.com"
-    "bitmagnet.isdino.com"
-    "nzbget.isdino.com"
-    "nntmux.isdino.com"
-    "downloader.isdino.com"
-    "transcodersaurus.isdino.com"
-    "portainer.isdino.com"
-    "rustfs.isdino.com"
-    "s3.isdino.com"
-    "router.isdino.com"
-    "home.isdino.com"
-    "dev.home.isdino.com"
-  ];
-
-  # Physical machines (192.168.0.11 - 192.168.0.19)
-  networking.hosts."192.168.0.11" = [
-    "pve1.virtualdino.com"
-  ];
-
-  networking.hosts."192.168.0.12" = [
-    "pve2.virtualdino.com"
-  ];
-
-  # Caddy reverse proxy VIP (192.168.0.20)
-  networking.hosts."192.168.0.20" = [
-    "sonarr.virtualdino.com"
-    "radarr.virtualdino.com"
-    "prowlarr.virtualdino.com"
-    "sabnzbd.virtualdino.com"
-    "qbittorrent.virtualdino.com"
-    "bitmagnet.virtualdino.com"
-  ];
-
-  # Reserved for dedicated VIPs (192.168.0.29)
-  # VM/LXC service VIPs (192.168.0.30 - 192.168.0.49)
-  networking.hosts."192.168.0.30" = [
-    "sonarr-backend.virtualdino.com"
-  ];
+  # Internal services are resolved via DNS (192.168.0.30)
 }
