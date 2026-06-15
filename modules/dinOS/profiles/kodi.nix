@@ -1,9 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  kodiPackage = pkgs.kodi-gbm.withPackages (kodiPkgs: [
-    kodiPkgs.jellyfin
-  ]);
+  kodiPackage = pkgs.kodi-gbm;
 in {
   networking.firewall.allowedTCPPorts = [ 8080 ];
 

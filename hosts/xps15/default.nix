@@ -60,8 +60,6 @@
     nix-direnv.enable = true;
   };
 
-  environment.etc."machine-id".source = "/persist/etc/machine-id";
-
   boot.blacklistedKernelModules = [ "psmouse" "mei_me" "mei_hdcp" "mei_pxp" ];
 
 }

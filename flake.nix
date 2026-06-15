@@ -45,11 +45,6 @@
         overlays = [ overlays ];
       };
 
-      pkgs-aarch64 = import nixpkgs {
-        system = "aarch64-linux";
-        overlays = [ overlays ];
-      };
-
       hostDirs = lib.filterAttrs (name: v: v == "directory" && name != "types")
         (builtins.readDir ./hosts);
 
@@ -108,39 +103,31 @@
       userLayers = {
         stags = [
           self.nixosModules.users-stags
-          profileModules.niri
         ];
       };
 
       profileModules = {
-        headless = ./modules/dinOS/profiles/headless.nix;
-        k3s = ./modules/dinOS/profiles/k3s.nix;
         kodi = ./modules/dinOS/profiles/kodi.nix;
-        server = ./modules/dinOS/profiles/server.nix;
         niri = ./modules/dinOS/profiles/niri.nix;
+        workstation = ./modules/dinOS/profiles/workstation.nix;
       };
 
       profileDeps = {
-        k3s = [ "headless" "server" ];
+        niri = [ "workstation" ];
       };
 
       profileUsers = {
-        server = [ "stags" ];
-        k3s = [ "stags" ];
+        workstation = [ "stags" ];
       };
 
       hostUsers = {
-        ideapad3 = [ "stags" ];
-        k8s-3 = [ "stags" ];
-        k8s-4 = [ "stags" ];
         nuc14 = [ "stags" ];
-        xps15 = [ "stags" ];
       };
 
       hostProfiles = {
-        k8s-3 = [ "k3s" ];
-        k8s-4 = [ "k3s" ];
-        nuc14 = [ "server" "kodi" ];
+        nuc14 = [ "kodi" ];
+        xps15 = [ "niri" ];
+        ideapad3 = [ "niri" ];
       };
 
       expandProfiles = profiles:
@@ -166,115 +153,6 @@
       baseConfigurations = {
         dinOS = mkSystem [
           genericHostModule
-        ];
-      };
-
-      mkSdImage = name: nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
-        modules = [
-          ({ lib, pkgs, modulesPath, config, ... }: {
-            nixpkgs.buildPlatform = "x86_64-linux";
-            imports = [
-              "${nixos-hardware}/raspberry-pi/5"
-              "${modulesPath}/installer/sd-card/sd-image.nix"
-            ];
-            
-            nixpkgs.hostPlatform = "aarch64-linux";
-            nixpkgs.config.allowUnfree = true;
-            
-            networking.hostName = name;
-            
-            nix.settings.experimental-features = [ "nix-command" "flakes" ];
-            
-            boot.loader.grub.enable = false;
-            boot.loader.generic-extlinux-compatible.enable = true;
-            
-            boot.consoleLogLevel = lib.mkDefault 7;
-            boot.kernelParams = [
-              "console=ttyAMA0,115200n8"
-              "console=tty1"
-              "cgroup_enable=cpuset"
-              "cgroup_enable=memory"
-              "cgroup_memory=1"
-            ];
-
-            boot.initrd.allowMissingModules = true;
-
-            documentation.enable = false;
-            documentation.nixos.enable = false;
-            documentation.man.enable = false;
-            documentation.info.enable = false;
-            documentation.doc.enable = false;
-            
-            programs.bash.completion.enable = false;
-            programs.fish.enable = false;
-            
-            services.openssh = {
-              enable = true;
-              settings.PermitRootLogin = "prohibit-password";
-            };
-            
-            users.users.stags = {
-              isNormalUser = true;
-              extraGroups = [ "wheel" ];
-              openssh.authorizedKeys.keys = [
-                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILQ3ueSjCunmENDU8CMOKwoT+igDTQcG9R9sgzMPCquo EyalRo@users.noreply.github.com"
-              ];
-            };
-            
-            security.sudo.wheelNeedsPassword = false;
-            
-            environment.systemPackages = with pkgs; [
-              git
-              helix
-            ];
-            
-            # Disable swap for Kubernetes
-            swapDevices = [];
-            
-            sdImage = {
-              compressImage = true;
-              
-              populateFirmwareCommands = let
-                configTxt = pkgs.writeText "config.txt" ''
-                  [pi5]
-                  kernel=kernel_2712.img
-                  arm_64bit=1
-                  enable_uart=1
-                  uart_2ndstage=1
-                  
-                  # PCIe/NVMe boot support
-                  dtparam=pciex1
-                  dtparam=pciex1_gen=3
-                  
-                  # USB power
-                  usb_max_current_enable=1
-                  
-                  # NVMe boot overlay (uncomment if booting from NVMe)
-                  # dtoverlay=pcie-32bit-dma
-                  
-                  [all]
-                  arm_64bit=1
-                  enable_uart=1
-                  avoid_warnings=1
-                '';
-              in ''
-                cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bootcode.bin firmware/ || true
-                cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/fixup*.dat firmware/ || true
-                cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/start*.elf firmware/ || true
-                cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bcm2712*.dtb firmware/ || true
-                cp ${config.boot.kernelPackages.kernel}/Image firmware/kernel_2712.img
-                cp ${configTxt} firmware/config.txt
-              '';
-              
-              populateRootCommands = ''
-                mkdir -p ./files/boot
-                ${config.boot.loader.generic-extlinux-compatible.populateCmd} -c ${config.system.build.toplevel} -d ./files/boot
-              '';
-            };
-            
-            system.stateVersion = "26.05";
-          })
         ];
       };
 
@@ -312,8 +190,6 @@
           export STARSHIP_CONFIG=${./modules/dinOS/starship/develop.toml}
         '';
       };
-
-      raspi5 = (mkSdImage "raspi5").config.system.build.sdImage;
 
     };
 }

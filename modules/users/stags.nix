@@ -12,7 +12,12 @@
     home = "/home/stags";
     uid = 1026;
     createHome = true;
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILQ3ueSjCunmENDU8CMOKwoT+igDTQcG9R9sgzMPCquo EyalRo@users.noreply.github.com"
+    ];
   };
+
+  security.sudo.wheelNeedsPassword = false;
 
   # Avatar configuration for stags
   environment.etc."avatars/stags.png".source = ./stags-avatar.png;

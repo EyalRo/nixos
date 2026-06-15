@@ -15,5 +15,4 @@
     ];
   };
 
-  environment.etc."machine-id".source = "/persist/etc/machine-id";
 }
