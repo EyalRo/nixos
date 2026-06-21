@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   defaultTheme = ./starship/default.toml;
@@ -51,14 +51,27 @@ in {
     # Point Starship at the default theme file instead of the root starship.toml.
     configPath = "${configDir}/starship/default.toml";
   };
-  xdg.configFile = {
-    "starship/default.toml".source = defaultTheme;
-    "starship/develop.toml".source = developTheme;
-  };
+  # develop.toml is read-only (noctalia doesn't touch it), so manage it normally.
+  # default.toml must stay writable so noctalia's apply.sh can append the palette
+  # section. Seed it only when it doesn't already exist (noctalia owns it after that).
+  xdg.configFile."starship/develop.toml".source = developTheme;
+  home.activation.seedStarshipDefaultTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -f "${configDir}/starship/default.toml" ]; then
+      $DRY_RUN_CMD mkdir -p "${configDir}/starship"
+      $DRY_RUN_CMD install -m 644 ${defaultTheme} "${configDir}/starship/default.toml"
+    fi
+  '';
 
-  xdg.configFile."ghostty/config".text = ''
-    font-family = FiraCode Nerd Font
-    shell-integration-features = ssh-terminfo,ssh-env
+  # ghostty/config must be a writable regular file so noctalia's apply.sh can
+  # append "theme = noctalia" to it. xdg.configFile would create a read-only symlink.
+  home.activation.seedGhosttyConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -f "${configDir}/ghostty/config" ]; then
+      $DRY_RUN_CMD mkdir -p "${configDir}/ghostty"
+      $DRY_RUN_CMD install -m 644 /dev/stdin "${configDir}/ghostty/config" <<'EOF'
+font-family = FiraCode Nerd Font
+shell-integration-features = ssh-terminfo,ssh-env
+EOF
+    fi
   '';
 
   dconf.settings = {

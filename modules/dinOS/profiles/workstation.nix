@@ -1,6 +1,10 @@
 { pkgs, lib, ... }:
 
 let
+  gdmHiddenUserConf = pkgs.writeText "accounts-service-system-account" ''
+    [User]
+    SystemAccount=true
+  '';
   dinoWallpaper = pkgs.runCommandLocal "wallpaper-dinosaur-picnic" { } ''
     set -euo pipefail
     install -Dm644 "${../wallpaper}/Dinosaur Picnic on a Sunny Hill.png" \
@@ -85,6 +89,12 @@ in {
     "/var/lib/fprint"
   ];
 
+  systemd.tmpfiles.rules = [
+    "d /var/lib/AccountsService/users 0755 root root -"
+    "C+ /var/lib/AccountsService/users/root 0644 root root - ${gdmHiddenUserConf}"
+    "C+ /var/lib/AccountsService/users/shmool 0644 root root - ${gdmHiddenUserConf}"
+  ];
+
   programs.dconf = {
     enable = true;
     profiles.user.databases = [
@@ -113,6 +123,7 @@ in {
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
     nerd-fonts.ubuntu-mono
+    claude-code
     yt-dlp
     gst_all_1.gst-plugins-base
     gst_all_1.gst-plugins-good

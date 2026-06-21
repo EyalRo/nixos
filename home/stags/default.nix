@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
   imports = [
@@ -14,7 +14,7 @@
     settings = {
       spawn-at-startup = [
         {
-          command = [ "noctalia-shell" ];
+          command = [ "noctalia" ];
         }
       ];
       input = {
@@ -53,13 +53,13 @@
         };
         "Mod+D" = {
           action = {
-            spawn-sh = "noctalia-shell ipc call launcher toggle";
+            spawn-sh = "noctalia msg panel-toggle launcher";
           };
           hotkey-overlay.title = "Open launcher";
         };
         "Super+Alt+L" = {
           action = {
-            spawn-sh = "noctalia-shell ipc call lockScreen lock";
+            spawn-sh = "noctalia msg session lock";
           };
           hotkey-overlay.title = "Lock screen";
         };
@@ -368,37 +368,37 @@
         };
         "Mod+S" = {
           action = {
-            spawn-sh = "noctalia-shell ipc call controlCenter toggle";
+            spawn-sh = "noctalia msg panel-toggle control-center";
           };
           hotkey-overlay.title = "Open control center";
         };
         "XF86AudioRaiseVolume" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "volume" "increase" ];
+            spawn-sh = "noctalia msg volume-up";
           };
           hotkey-overlay.title = "Increase volume";
         };
         "XF86AudioLowerVolume" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "volume" "decrease" ];
+            spawn-sh = "noctalia msg volume-down";
           };
           hotkey-overlay.title = "Decrease volume";
         };
         "XF86AudioMute" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "volume" "muteOutput" ];
+            spawn-sh = "noctalia msg volume-mute";
           };
           hotkey-overlay.title = "Mute volume";
         };
         "XF86MonBrightnessUp" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "brightness" "increase" ];
+            spawn-sh = "noctalia msg brightness-up";
           };
           hotkey-overlay.title = "Increase brightness";
         };
         "XF86MonBrightnessDown" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "brightness" "decrease" ];
+            spawn-sh = "noctalia msg brightness-down";
           };
           hotkey-overlay.title = "Decrease brightness";
         };
@@ -406,130 +406,21 @@
     };
   };
 
-  programs.noctalia-shell = {
-    enable = true;
-    settings = {
-      settingsVersion = 0;
-      bar = {
-        position = "top";
-        density = "compact";
-        widgets = {
-          left = [
-            { id = "Launcher"; }
-            { id = "plugin:niri-keyboard-layout"; }
-            { id = "Clock"; formatHorizontal = "hh:mm a"; useMonospacedFont = true; }
-            { id = "SystemMonitor"; }
-            { id = "plugin:tailscale"; }
-            { id = "plugin:clipper"; }
-          ];
-          center = [
-            { id = "Workspace"; hideUnoccupied = false; }
-            { id = "plugin:keybind-cheatsheet"; }
-          ];
-          right = [
-            { id = "plugin:keepawake"; }
-            { id = "Battery"; alwaysShowPercentage = false; }
-            { id = "Network"; }
-            { id = "ControlCenter"; useDistroLogo = true; enableColorization = true; }
-          ];
-        };
-      };
-      location = {
-        name = "Seattle, WA";
-        useFahrenheit = true;
-        use12hourFormat = true;
-      };
-      ui = {
-        use12hourFormat = true;
-        clockStyle = "digital";
-        clockFormat = "hh:mm a";
-      };
-      general = {
-        lockScreenAnimations = true;
-        allowPasswordWithFprintd = true;
-        compactLockScreen = false;
-        showSessionButtonsOnLockScreen = true;
-        clockStyle = "digital";
-        passwordChars = true;
-      };
-      wallpaper = {
-        enabled = true;
-        automationEnabled = true;
-        directory = ../../modules/dinOS/wallpaper;
-        wallpaperChangeMode = "random";
-        randomIntervalSec = 300;
-        skipStartupTransition = true;
-      };
-      colorSchemes = {
-        useWallpaperColors = true;
-        predefinedScheme = "vibrant";
-      };
-      dock = {
-        enable = false;
-      };
-      launcher = {
-        showCategories = false;
-      };
-      nightLight = {
-        enabled = true;
-        temperature = 4000;
-        schedule = {
-          enabled = true;
-          from = "20:00";
-          to = "07:00";
-        };
-      };
-      power = {
-        showTimer = false;
-      };
-      sessionMenu = {
-        enableCountdown = false;
-      };
-    };
+  programs.noctalia.enable = true;
 
-    plugins = {
-      sources = [
-        {
-          enabled = true;
-          name = "Noctalia Plugins";
-          url = "https://github.com/noctalia-dev/noctalia-plugins";
-        }
-      ];
-        states = {
-          keepawake = {
-            enabled = true;
-          };
-          tailscale = {
-            enabled = true;
-          };
-        niri-keyboard-layout = {
-          enabled = true;
-          settings = {
-            displayMode = "forceOpen";
-          };
-        };
-        clipper = {
-          enabled = true;
-        };
-        "keybind-cheatsheet" = {
-          enabled = true;
-        };
-        "polkit-agent" = {
-          enabled = true;
-        };
-      };
-      version = 2;
-    };
-
-    pluginSettings = {
-      tailscale = {
-        compactMode = true;
-        terminalCommand = "ghostty";
-      };
-    };
-  };
-
-  xdg.configFile."noctalia/plugins/tailscale/settings.json".force = true;
+  # niri/config.kdl is a read-only nix-store symlink generated by programs.niri.settings.
+  # Noctalia's apply.sh can't append "include noctalia.kdl" to it. After each rebuild
+  # home-manager re-creates the symlink, so we replace it with a writable copy + include.
+  home.activation.addNiriNoctaliaInclude = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    niri_config="${config.xdg.configHome}/niri/config.kdl"
+    if [ -L "$niri_config" ]; then
+      resolved=$(readlink -f "$niri_config")
+      tmp="$niri_config.tmp"
+      $DRY_RUN_CMD install -m 644 "$resolved" "$tmp"
+      printf '\ninclude "noctalia.kdl"\n' >> "$tmp"
+      $DRY_RUN_CMD mv -f "$tmp" "$niri_config"
+    fi
+  '';
 
   programs.mpv = {
     enable = true;
@@ -581,13 +472,6 @@
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
-  home.file = {
-    ".config/noctalia/plugins/niri-keyboard-layout" = {
-      source = ../../modules/dinOS/plugins/niri-keyboard-layout;
-      recursive = true;
-      force = true;
-    };
-  };
 
   programs.ssh = {
     enable = true;

@@ -33,6 +33,7 @@
         opencode-desktop = final.callPackage ./pkgs/opencode-desktop { };
         proton-drive-cli = final.callPackage ./pkgs/proton-drive-cli { };
         tailscale = pkgs-unstable-no-overlays.tailscale;
+        telegram-desktop = final.callPackage ./pkgs/telegram-desktop-bin { inherit (prev) telegram-desktop fetchFromGitHub; };
       };
       specialArgs = { inherit inputs; };
       pkgs = import nixpkgs {
@@ -187,7 +188,7 @@
         ];
 
         shellHook = ''
-          export STARSHIP_CONFIG=${./modules/dinOS/starship/develop.toml}
+          export STARSHIP_CONFIG="$HOME/.config/starship/develop.toml"
         '';
       };
 
