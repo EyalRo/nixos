@@ -452,10 +452,18 @@ in
     };
   };
 
+  # Clone the personal noctalia plugins repo on first setup; leave it alone on rebuilds
+  # so local edits and git history are preserved.
+  home.activation.cloneNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    plugins_dir="$HOME/.local/share/noctalia-local-plugins"
+    if [ ! -d "$plugins_dir/.git" ]; then
+      $DRY_RUN_CMD ${pkgs.git}/bin/git clone https://forgejo.virtualdino.com/stags/noctalia-plugins.git "$plugins_dir"
+    fi
+  '';
+
   # Noctalia scans ~/.config/noctalia/plugins/ (configDir + "plugins"), not the XDG data dir.
-  # Symlink the live git repo into the right place so Noctalia discovers it and edits are
-  # reflected immediately without a nixos-rebuild.
-  home.activation.linkNoctaliaMediawatchPlugin = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  # Symlink each plugin subdirectory so edits are reflected immediately without a nixos-rebuild.
+  home.activation.linkNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" "cloneNoctaliaPlugins" ] ''
     plugin_dir="${config.xdg.configHome}/noctalia/plugins"
     $DRY_RUN_CMD mkdir -p "$plugin_dir"
     $DRY_RUN_CMD ln -sfn "$HOME/.local/share/noctalia-local-plugins/mediawatch" "$plugin_dir/mediawatch"
