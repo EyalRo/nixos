@@ -10,13 +10,7 @@
         "tailscale": {
             "enabled": true
         },
-        "niri-keyboard-layout": {
-            "enabled": true,
-            "settings": {
-                "displayMode": "forceOpen"
-            }
-        },
-        "clipper": {
+"clipper": {
             "enabled": true
         }
     },

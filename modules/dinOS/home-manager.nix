@@ -16,6 +16,7 @@ in {
   programs.home-manager.enable = true;
   programs.git.enable = true;
   programs.direnv.enable = true;
+  programs.direnv.silent = true;
   programs.direnv.nix-direnv.enable = true;
   programs.fish = {
     enable = true;
