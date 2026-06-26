@@ -129,6 +129,7 @@
         nuc14 = [ "kodi" ];
         xps15 = [ "niri" ];
         ideapad3 = [ "niri" ];
+        z590i = [ "niri" ];
       };
 
       expandProfiles = profiles:
