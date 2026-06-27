@@ -45,6 +45,10 @@
           matches = [{ app-id = "io.stags.mediawatch-panel"; }];
           open-floating = true;
         }
+        {
+          matches = [{ app-id = "io.stags.todo-panel"; }];
+          open-floating = true;
+        }
       ];
       binds = {
         "Super+Space" = {
@@ -386,6 +390,12 @@
           };
           hotkey-overlay.title = "Open control center";
         };
+        "Mod+N" = {
+          action = {
+            spawn-sh = "noctalia msg panel-toggle stags/todo:panel";
+          };
+          hotkey-overlay.title = "Open todo panel";
+        };
         "XF86AudioRaiseVolume" = {
           action = {
             spawn = [ "noctalia-shell" "ipc" "call" "volume" "increase" ];
@@ -429,6 +439,20 @@
     force = true;
   };
 
+  home.activation.cloneNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    plugins_dir="$HOME/.local/share/noctalia-local-plugins"
+    if [ ! -d "$plugins_dir/.git" ]; then
+      $DRY_RUN_CMD ${pkgs.git}/bin/git clone https://forgejo.virtualdino.com/stags/noctalia-plugins.git "$plugins_dir"
+    fi
+  '';
+
+  home.activation.linkNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" "cloneNoctaliaPlugins" ] ''
+    plugin_dir="${config.xdg.configHome}/noctalia/plugins"
+    $DRY_RUN_CMD mkdir -p "$plugin_dir"
+    $DRY_RUN_CMD ln -sfn "$HOME/.local/share/noctalia-local-plugins/mediawatch" "$plugin_dir/mediawatch"
+    $DRY_RUN_CMD ln -sfn "$HOME/.local/share/noctalia-local-plugins/todo" "$plugin_dir/todo"
+  '';
+
   programs.mpv = {
     enable = true;
     config = {
@@ -464,6 +488,7 @@
     Service.ExecStart = "${pkgs.tailscale-systray}/bin/tailscale-systray";
     Install.WantedBy = [ "graphical-session.target" ];
   };
+
 
   systemd.user.services.cliphist-watcher = {
     Unit = {
