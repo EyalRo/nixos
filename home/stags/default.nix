@@ -1,13 +1,5 @@
 { config, pkgs, lib, inputs, ... }:
 
-let
-  mediawatchPanelEnv = pkgs.python3.withPackages (ps: [ ps.pygobject3 ]);
-  mediawatch-panel = pkgs.writeShellScriptBin "mediawatch-panel" ''
-    export GI_TYPELIB_PATH="${pkgs.gtk4-layer-shell}/lib/girepository-1.0:''${GI_TYPELIB_PATH:-}"
-    exec ${mediawatchPanelEnv}/bin/python3 "$HOME/.local/share/noctalia-local-plugins/mediawatch/panel.py" "$@"
-  '';
-in
-
 {
   imports = [
     inputs.noctalia.homeModules.default
@@ -22,7 +14,7 @@ in
     settings = {
       spawn-at-startup = [
         {
-          command = [ "noctalia" ];
+          command = [ "noctalia-shell" ];
         }
       ];
       input = {
@@ -75,13 +67,13 @@ in
         };
         "Mod+D" = {
           action = {
-            spawn-sh = "noctalia msg panel-toggle launcher";
+            spawn = [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
           };
           hotkey-overlay.title = "Open launcher";
         };
         "Super+Alt+L" = {
           action = {
-            spawn-sh = "noctalia msg session lock";
+            spawn = [ "noctalia-shell" "ipc" "call" "lockScreen" "lock" ];
           };
           hotkey-overlay.title = "Lock screen";
         };
@@ -390,37 +382,37 @@ in
         };
         "Mod+S" = {
           action = {
-            spawn-sh = "noctalia msg panel-toggle control-center";
+            spawn = [ "noctalia-shell" "ipc" "call" "controlCenter" "toggle" ];
           };
           hotkey-overlay.title = "Open control center";
         };
         "XF86AudioRaiseVolume" = {
           action = {
-            spawn-sh = "noctalia msg volume-up";
+            spawn = [ "noctalia-shell" "ipc" "call" "volume" "increase" ];
           };
           hotkey-overlay.title = "Increase volume";
         };
         "XF86AudioLowerVolume" = {
           action = {
-            spawn-sh = "noctalia msg volume-down";
+            spawn = [ "noctalia-shell" "ipc" "call" "volume" "decrease" ];
           };
           hotkey-overlay.title = "Decrease volume";
         };
         "XF86AudioMute" = {
           action = {
-            spawn-sh = "noctalia msg volume-mute";
+            spawn = [ "noctalia-shell" "ipc" "call" "volume" "muteOutput" ];
           };
           hotkey-overlay.title = "Mute volume";
         };
         "XF86MonBrightnessUp" = {
           action = {
-            spawn-sh = "noctalia msg brightness-up";
+            spawn = [ "noctalia-shell" "ipc" "call" "brightness" "increase" ];
           };
           hotkey-overlay.title = "Increase brightness";
         };
         "XF86MonBrightnessDown" = {
           action = {
-            spawn-sh = "noctalia msg brightness-down";
+            spawn = [ "noctalia-shell" "ipc" "call" "brightness" "decrease" ];
           };
           hotkey-overlay.title = "Decrease brightness";
         };
@@ -430,96 +422,12 @@ in
 
   programs.noctalia = {
     enable = true;
-    settings = {
-      bar.default.end = [
-        "stags/mediawatch:widget"
-        "media"
-        "tray"
-        "notifications"
-        "clipboard"
-        "network"
-        "bluetooth"
-        "keyboard-layout"
-        "volume"
-        "brightness"
-        "battery"
-        "control-center"
-        "session"
-      ];
-      "plugin_settings"."stags/mediawatch" = {
-        base_url = "https://mediawatch.virtualdino.com";
-      };
-    };
   };
 
-  # Clone the personal noctalia plugins repo on first setup; leave it alone on rebuilds
-  # so local edits and git history are preserved.
-  home.activation.cloneNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    plugins_dir="$HOME/.local/share/noctalia-local-plugins"
-    if [ ! -d "$plugins_dir/.git" ]; then
-      $DRY_RUN_CMD ${pkgs.git}/bin/git clone https://forgejo.virtualdino.com/stags/noctalia-plugins.git "$plugins_dir"
-    fi
-  '';
-
-  # Noctalia scans ~/.config/noctalia/plugins/ (configDir + "plugins"), not the XDG data dir.
-  # Symlink each plugin subdirectory so edits are reflected immediately without a nixos-rebuild.
-  home.activation.linkNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" "cloneNoctaliaPlugins" ] ''
-    plugin_dir="${config.xdg.configHome}/noctalia/plugins"
-    $DRY_RUN_CMD mkdir -p "$plugin_dir"
-    $DRY_RUN_CMD ln -sfn "$HOME/.local/share/noctalia-local-plugins/mediawatch" "$plugin_dir/mediawatch"
-  '';
-
-  xdg.configFile."niri/noctalia.kdl".text = ''
-    layout {
-
-        focus-ring {
-            active-color   "#e46c67"
-            inactive-color "#291514"
-            urgent-color   "#94413e"
-        }
-
-        border {
-            active-color   "#e46c67"
-            inactive-color "#291514"
-            urgent-color   "#94413e"
-        }
-
-        shadow {
-            color "#29151470"
-        }
-
-        tab-indicator {
-            active-color   "#e46c67"
-            inactive-color "#8d110c"
-            urgent-color   "#94413e"
-        }
-
-        insert-hint {
-            color "#e46c6780"
-        }
-    }
-
-    recent-windows {
-        highlight {
-            active-color "#e46c67"
-            urgent-color "#94413e"
-        }
-    }
-  '';
-
-  # niri/config.kdl is a read-only nix-store symlink generated by programs.niri.settings.
-  # Noctalia's apply.sh can't append "include noctalia.kdl" to it. After each rebuild
-  # home-manager re-creates the symlink, so we replace it with a writable copy + include.
-  home.activation.addNiriNoctaliaInclude = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    niri_config="${config.xdg.configHome}/niri/config.kdl"
-    if [ -L "$niri_config" ]; then
-      resolved=$(readlink -f "$niri_config")
-      tmp="$niri_config.tmp"
-      $DRY_RUN_CMD install -m 644 "$resolved" "$tmp"
-      printf '\ninclude "noctalia.kdl"\n' >> "$tmp"
-      $DRY_RUN_CMD mv -f "$tmp" "$niri_config"
-    fi
-  '';
+  home.file.".config/noctalia/plugins.json" = {
+    source = ./plugins/noctalia-plugins.json;
+    force = true;
+  };
 
   programs.mpv = {
     enable = true;
@@ -532,7 +440,6 @@ in
   };
 
   home.packages = with pkgs; [
-    mediawatch-panel
     celluloid
     fractal
     tea
@@ -572,7 +479,6 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
-
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
@@ -595,14 +501,6 @@ in
         Port = "5022";
         User = "eyal";
       };
-    };
-  };
-
-  dconf.settings = {
-    "org/gnome/desktop/background" = {
-      picture-uri = "file:///run/current-system/sw/share/backgrounds/friendly-pals-day.png";
-      picture-uri-dark = "file:///run/current-system/sw/share/backgrounds/friendly-pals-night.png";
-      picture-options = "scaled";
     };
   };
 

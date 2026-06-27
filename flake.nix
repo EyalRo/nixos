@@ -104,6 +104,7 @@
       userLayers = {
         stags = [
           self.nixosModules.users-stags
+          profileModules.niri
         ];
       };
 
@@ -117,19 +118,17 @@
         niri = [ "workstation" ];
       };
 
-      profileUsers = {
-        workstation = [ "stags" ];
-      };
+      profileUsers = { };
 
       hostUsers = {
+        ideapad3 = [ "stags" ];
         nuc14 = [ "stags" ];
+        xps15 = [ "stags" ];
+        z590i = [ "stags" ];
       };
 
       hostProfiles = {
         nuc14 = [ "kodi" ];
-        xps15 = [ "niri" ];
-        ideapad3 = [ "niri" ];
-        z590i = [ "niri" ];
       };
 
       expandProfiles = profiles:
@@ -157,6 +156,7 @@
           genericHostModule
         ];
       };
+
 
     in {
       overlays.default = overlays;
