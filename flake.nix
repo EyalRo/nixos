@@ -104,6 +104,7 @@
       userLayers = {
         stags = [
           self.nixosModules.users-stags
+          profileModules.workstation
           profileModules.niri
         ];
       };
