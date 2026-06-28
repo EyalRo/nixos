@@ -435,6 +435,7 @@
     settings = {
       bar.default = {
         end = [
+          "stags/todo:widget"
           "stags/mediawatch:widget"
           "media"
           "tray"
@@ -452,6 +453,9 @@
       };
       plugin_settings."stags/mediawatch" = {
         base_url = "https://mediawatch.virtualdino.com";
+      };
+      plugin_settings."stags/todo" = {
+        base_url = "http://192.168.0.48:7410";
       };
     };
   };
@@ -475,23 +479,16 @@
     $DRY_RUN_CMD ln -sfn "$HOME/.local/share/gnome-local-plugins/mediawatch@stags.virtualdino.com" "$ext_dir/mediawatch@stags.virtualdino.com"
   '';
   home.activation.cloneNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    plugins_dir="$HOME/.local/share/noctalia-local-plugins"
-    if [ ! -d "$plugins_dir/.git" ]; then
-      $DRY_RUN_CMD ${pkgs.git}/bin/git clone https://forgejo.virtualdino.com/stags/noctalia-plugins.git "$plugins_dir"
+    source_dir="$HOME/.local/state/noctalia/plugins/sources/stags/repo"
+    if [ ! -d "$source_dir/.git" ]; then
+      $DRY_RUN_CMD mkdir -p "$(dirname "$source_dir")"
+      $DRY_RUN_CMD ${pkgs.git}/bin/git clone https://forgejo.virtualdino.com/stags/noctalia-plugins.git "$source_dir"
     fi
-  '';
-
-  home.activation.linkNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" "cloneNoctaliaPlugins" ] ''
-    plugin_dir="${config.xdg.configHome}/noctalia/plugins"
-    $DRY_RUN_CMD mkdir -p "$plugin_dir"
-    $DRY_RUN_CMD ln -sfn "$HOME/.local/share/noctalia-local-plugins/mediawatch" "$plugin_dir/mediawatch"
-    $DRY_RUN_CMD ln -sfn "$HOME/.local/share/noctalia-local-plugins/todo" "$plugin_dir/todo"
   '';
 
   home.file.".config/autostart/ibus-daemon.desktop".text = ''
     [Desktop Entry]
     Hidden=true
-  '';
   '';
 
   programs.mpv = {
