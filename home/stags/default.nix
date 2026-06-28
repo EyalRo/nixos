@@ -14,7 +14,7 @@
     settings = {
       spawn-at-startup = [
         {
-          command = [ "noctalia-shell" ];
+          command = [ "noctalia" ];
         }
       ];
       input = {
@@ -67,13 +67,13 @@
         };
         "Mod+D" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
+            spawn = [ "noctalia" "msg" "panel-toggle" "launcher" ];
           };
           hotkey-overlay.title = "Open launcher";
         };
         "Super+Alt+L" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "lockScreen" "lock" ];
+            spawn = [ "noctalia" "msg" "session" "lock" ];
           };
           hotkey-overlay.title = "Lock screen";
         };
@@ -382,37 +382,37 @@
         };
         "Mod+S" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "controlCenter" "toggle" ];
+            spawn = [ "noctalia" "msg" "panel-toggle" "control-center" ];
           };
           hotkey-overlay.title = "Open control center";
         };
         "XF86AudioRaiseVolume" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "volume" "increase" ];
+            spawn = [ "noctalia" "msg" "volume-up" ];
           };
           hotkey-overlay.title = "Increase volume";
         };
         "XF86AudioLowerVolume" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "volume" "decrease" ];
+            spawn = [ "noctalia" "msg" "volume-down" ];
           };
           hotkey-overlay.title = "Decrease volume";
         };
         "XF86AudioMute" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "volume" "muteOutput" ];
+            spawn = [ "noctalia" "msg" "volume-mute" ];
           };
           hotkey-overlay.title = "Mute volume";
         };
         "XF86MonBrightnessUp" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "brightness" "increase" ];
+            spawn = [ "noctalia" "msg" "brightness-up" ];
           };
           hotkey-overlay.title = "Increase brightness";
         };
         "XF86MonBrightnessDown" = {
           action = {
-            spawn = [ "noctalia-shell" "ipc" "call" "brightness" "decrease" ];
+            spawn = [ "noctalia" "msg" "brightness-down" ];
           };
           hotkey-overlay.title = "Decrease brightness";
         };
@@ -422,12 +422,41 @@
 
   programs.noctalia = {
     enable = true;
+    settings = {
+      bar.default = {
+        end = [
+          "stags/mediawatch:widget"
+          "media"
+          "tray"
+          "notifications"
+          "clipboard"
+          "network"
+          "bluetooth"
+          "keyboard-layout"
+          "volume"
+          "brightness"
+          "battery"
+          "control-center"
+          "session"
+        ];
+      };
+      plugin_settings."stags/mediawatch" = {
+        base_url = "https://mediawatch.virtualdino.com";
+      };
+    };
   };
 
   home.file.".config/noctalia/plugins.json" = {
     source = ./plugins/noctalia-plugins.json;
     force = true;
   };
+
+  # GNOME manages IBus via systemd (NotShowIn=GNOME in the system autostart).
+  # Suppress XDG autostart so IBus doesn't also start in niri sessions.
+  home.file.".config/autostart/ibus-daemon.desktop".text = ''
+    [Desktop Entry]
+    Hidden=true
+  '';
 
   programs.mpv = {
     enable = true;
