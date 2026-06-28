@@ -478,15 +478,7 @@
     $DRY_RUN_CMD ln -sfn "$HOME/.local/share/gnome-local-plugins/todo@stags.virtualdino.com" "$ext_dir/todo@stags.virtualdino.com"
     $DRY_RUN_CMD ln -sfn "$HOME/.local/share/gnome-local-plugins/mediawatch@stags.virtualdino.com" "$ext_dir/mediawatch@stags.virtualdino.com"
   '';
-  home.activation.cloneNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    source_dir="$HOME/.local/state/noctalia/plugins/sources/stags/repo"
-    if [ ! -d "$source_dir/.git" ]; then
-      $DRY_RUN_CMD mkdir -p "$(dirname "$source_dir")"
-      $DRY_RUN_CMD ${pkgs.git}/bin/git clone https://forgejo.virtualdino.com/stags/noctalia-plugins.git "$source_dir"
-    fi
-  '';
-
-  home.file.".config/autostart/ibus-daemon.desktop".text = ''
+home.file.".config/autostart/ibus-daemon.desktop".text = ''
     [Desktop Entry]
     Hidden=true
   '';
