@@ -465,11 +465,6 @@
     };
   };
 
-  home.file.".config/noctalia/plugins.json" = {
-    source = ./plugins/noctalia-plugins.json;
-    force = true;
-  };
-
   home.activation.cloneGnomePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     plugins_dir="$HOME/.local/share/gnome-local-plugins"
     if [ ! -d "$plugins_dir/.git" ]; then
