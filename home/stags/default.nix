@@ -439,6 +439,19 @@
     force = true;
   };
 
+  home.activation.cloneGnomePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    plugins_dir="$HOME/.local/share/gnome-local-plugins"
+    if [ ! -d "$plugins_dir/.git" ]; then
+      $DRY_RUN_CMD ${pkgs.git}/bin/git clone https://forgejo.virtualdino.com/stags/gnome-plugins.git "$plugins_dir"
+    fi
+  '';
+
+  home.activation.linkGnomePlugins = lib.hm.dag.entryAfter [ "writeBoundary" "cloneGnomePlugins" ] ''
+    ext_dir="$HOME/.local/share/gnome-shell/extensions"
+    $DRY_RUN_CMD mkdir -p "$ext_dir"
+    $DRY_RUN_CMD ln -sfn "$HOME/.local/share/gnome-local-plugins/todo@stags.virtualdino.com" "$ext_dir/todo@stags.virtualdino.com"
+    $DRY_RUN_CMD ln -sfn "$HOME/.local/share/gnome-local-plugins/mediawatch@stags.virtualdino.com" "$ext_dir/mediawatch@stags.virtualdino.com"
+  '';
   home.activation.cloneNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     plugins_dir="$HOME/.local/share/noctalia-local-plugins"
     if [ ! -d "$plugins_dir/.git" ]; then
@@ -526,6 +539,20 @@
         Port = "5022";
         User = "eyal";
       };
+    };
+  };
+
+  dconf.settings = {
+    "org/gnome/desktop/background" = {
+      picture-uri = "file:///run/current-system/sw/share/backgrounds/friendly-pals-day.png";
+      picture-uri-dark = "file:///run/current-system/sw/share/backgrounds/friendly-pals-night.png";
+      picture-options = "scaled";
+    };
+    "org/gnome/shell" = {
+      enabled-extensions = [
+        "todo@stags.virtualdino.com"
+        "mediawatch@stags.virtualdino.com"
+      ];
     };
   };
 
