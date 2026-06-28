@@ -457,6 +457,11 @@
       plugin_settings."stags/todo" = {
         base_url = "http://192.168.0.48:7410";
       };
+      plugins.source = [
+        { kind = "git"; location = "https://github.com/noctalia-dev/community-plugins"; name = "community"; }
+        { kind = "git"; location = "https://github.com/noctalia-dev/official-plugins"; name = "official"; }
+        { kind = "git"; location = "https://forgejo.virtualdino.com/stags/noctalia-plugins"; name = "DinOS"; }
+      ];
     };
   };
 

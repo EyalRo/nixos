@@ -7,7 +7,7 @@
         },
         {
             "enabled": true,
-            "name": "stags plugins",
+            "name": "DinOS",
             "url": "https://forgejo.virtualdino.com/stags/noctalia-plugins"
         }
     ],
