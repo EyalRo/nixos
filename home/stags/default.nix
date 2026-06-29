@@ -520,9 +520,11 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
       After = [ "network.target" ];
     };
     Service = {
-      ExecStart = "%h/.local/bin/todo serve";
-      # Uncomment and populate to enable Cloudflare Access JWT auth:
-      # ExecStart = "%h/.local/bin/todo serve --cf-access-aud <aud> --cf-team-domain <team>.cloudflareaccess.com --public-url https://todo.virtualdino.com";
+      ExecStart = "%h/.local/bin/todo serve --public-url https://todo.virtualdino.com";
+      # App-level CF Access JWT auth is disabled: LAN clients bypass Cloudflare via
+      # Technitium DNS and would have no JWT. Edge-level CF Access Application handles
+      # external security. To enable defense-in-depth (requires Service Tokens for clients):
+      # ExecStart = "%h/.local/bin/todo serve --public-url https://todo.virtualdino.com --cf-access-aud 921a0fdf34b51fd434c3e408f4a1c74afddfc1454af6f83b6dba60e10fb468b8 --cf-team-domain isdino.cloudflareaccess.com";
       Environment = [
         "TODO_URL=http://localhost:7410"
         "INBOX_TOKEN=changeme"
