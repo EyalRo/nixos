@@ -435,6 +435,7 @@
     settings = {
       bar.default = {
         end = [
+          "stags/inbox:widget"
           "stags/todo:widget"
           "stags/mediawatch:widget"
           "media"
@@ -450,6 +451,9 @@
           "control-center"
           "session"
         ];
+      };
+      plugin_settings."stags/inbox" = {
+        base_url = "http://192.168.0.48:7410";
       };
       plugin_settings."stags/mediawatch" = {
         base_url = "https://mediawatch.virtualdino.com";
@@ -508,6 +512,33 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
     wl-clipboard
     cliphist
   ];
+
+  # Todo daemon — HTTP API on localhost:7410.
+  # After setting up Cloudflare Access, add to EnvironmentFile:
+  #   CF_ACCESS_AUD=<audience-tag>
+  #   CF_TEAM_DOMAIN=<team>.cloudflareaccess.com
+  # Then update ExecStart to include the auth flags.
+  systemd.user.services.todo = {
+    Unit = {
+      Description = "Todo daemon";
+      After = [ "network.target" ];
+    };
+    Service = {
+      ExecStart = "%h/.local/bin/todo serve";
+      # Uncomment and populate to enable Cloudflare Access JWT auth:
+      # ExecStart = "%h/.local/bin/todo serve --cf-access-aud <aud> --cf-team-domain <team>.cloudflareaccess.com --public-url https://todo.virtualdino.com";
+      Environment = [
+        "TODO_URL=http://localhost:7410"
+        "INBOX_TOKEN=changeme"
+        "LOG_NODE=todo"
+        "LOG_LEVEL=info"
+        "LOG_ENDPOINT=http://192.168.0.39:9428/insert/jsonline?_stream_fields=service,level,component&_msg_field=msg&_time_field=ts"
+      ];
+      Restart = "on-failure";
+      RestartSec = 5;
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
 
   systemd.user.services.tailscale-systray = {
     Unit = {
