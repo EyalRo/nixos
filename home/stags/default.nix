@@ -435,7 +435,6 @@
     settings = {
       bar.default = {
         end = [
-          "stags/inbox:widget"
           "stags/todo:widget"
           "stags/mediawatch:widget"
           "media"
@@ -451,9 +450,6 @@
           "control-center"
           "session"
         ];
-      };
-      plugin_settings."stags/inbox" = {
-        base_url = "http://192.168.0.48:7410";
       };
       plugin_settings."stags/mediawatch" = {
         base_url = "https://mediawatch.virtualdino.com";
