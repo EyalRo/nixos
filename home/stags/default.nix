@@ -510,10 +510,12 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
   ];
 
   # Todo daemon — HTTP API on localhost:7410.
-  # After setting up Cloudflare Access, add to EnvironmentFile:
-  #   CF_ACCESS_AUD=<audience-tag>
-  #   CF_TEAM_DOMAIN=<team>.cloudflareaccess.com
-  # Then update ExecStart to include the auth flags.
+  # Secrets live in ~/.config/todo/env (not in git). Create it with:
+  #   INBOX_TOKEN=<token>
+  # App-level CF Access JWT auth is disabled: LAN clients bypass Cloudflare via
+  # Technitium DNS. Edge-level CF Access Application handles external security.
+  # AUD: 921a0fdf34b51fd434c3e408f4a1c74afddfc1454af6f83b6dba60e10fb468b8
+  # Team: isdino.cloudflareaccess.com
   systemd.user.services.todo = {
     Unit = {
       Description = "Todo daemon";
@@ -521,13 +523,9 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
     };
     Service = {
       ExecStart = "%h/.local/bin/todo serve --public-url https://todo.virtualdino.com";
-      # App-level CF Access JWT auth is disabled: LAN clients bypass Cloudflare via
-      # Technitium DNS and would have no JWT. Edge-level CF Access Application handles
-      # external security. To enable defense-in-depth (requires Service Tokens for clients):
-      # ExecStart = "%h/.local/bin/todo serve --public-url https://todo.virtualdino.com --cf-access-aud 921a0fdf34b51fd434c3e408f4a1c74afddfc1454af6f83b6dba60e10fb468b8 --cf-team-domain isdino.cloudflareaccess.com";
+      EnvironmentFile = [ "-%h/.config/todo/env" ];
       Environment = [
         "TODO_URL=http://localhost:7410"
-        "INBOX_TOKEN=01b2c2cf5113dfd07d64dcd9e5b0da37a91980252c593d63a9dd81435a56b46b"
         "LOG_NODE=todo"
         "LOG_LEVEL=info"
         "LOG_ENDPOINT=http://192.168.0.39:9428/insert/jsonline?_stream_fields=service,level,component&_msg_field=msg&_time_field=ts"
