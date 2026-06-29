@@ -455,7 +455,7 @@
         base_url = "https://mediawatch.virtualdino.com";
       };
       plugin_settings."stags/todo" = {
-        base_url = "http://192.168.0.48:7410";
+        base_url = "https://todo.virtualdino.com";
       };
       plugins.source = [
         { kind = "git"; location = "https://github.com/noctalia-dev/community-plugins"; name = "community"; }
