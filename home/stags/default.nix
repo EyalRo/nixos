@@ -454,9 +454,6 @@
       plugin_settings."stags/mediawatch" = {
         base_url = "https://mediawatch.virtualdino.com";
       };
-      plugin_settings."stags/todo" = {
-        base_url = "https://todo.virtualdino.com";
-      };
       plugins.source = [
         { kind = "git"; location = "https://github.com/noctalia-dev/community-plugins"; name = "community"; }
         { kind = "git"; location = "https://github.com/noctalia-dev/official-plugins"; name = "official"; }
