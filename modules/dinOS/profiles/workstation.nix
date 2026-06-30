@@ -78,6 +78,8 @@ in {
     };
   };
 
+  programs.nix-ld.enable = true;
+
   virtualisation.docker.enable = true;
   services.fwupd.enable = true;
   services.printing.enable = false;

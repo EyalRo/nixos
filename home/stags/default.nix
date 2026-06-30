@@ -490,6 +490,11 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
     };
   };
 
+  programs.zed-editor = {
+    enable = true;
+    extensions = [ "nix" ];
+  };
+
   home.packages = with pkgs; [
     celluloid
     fractal
