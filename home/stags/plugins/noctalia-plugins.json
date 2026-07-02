@@ -4,13 +4,21 @@
             "enabled": true,
             "name": "Noctalia Plugins",
             "url": "https://github.com/noctalia-dev/noctalia-plugins"
+        },
+        {
+            "enabled": true,
+            "name": "stags plugins",
+            "url": "https://forgejo.virtualdino.com/stags/noctalia-plugins"
         }
     ],
     "states": {
         "tailscale": {
             "enabled": true
         },
-"clipper": {
+        "clipper": {
+            "enabled": true
+        },
+        "stags/mediawatch": {
             "enabled": true
         }
     },
