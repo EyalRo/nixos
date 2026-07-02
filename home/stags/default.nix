@@ -1,5 +1,98 @@
 { config, pkgs, lib, inputs, ... }:
 
+let
+  # Claude Code reads MCP server definitions from the top-level "mcpServers"
+  # key in ~/.claude.json (as written by `claude mcp add -s user`) — it does
+  # NOT read them from settings.json. Keep this list separate so it can be
+  # merged into ~/.claude.json without clobbering that file's mutable
+  # runtime state (OAuth tokens, project history, usage counters).
+  claudeMcpServers = {
+    forgejo = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export FORGEJO_URL=https://forgejo.virtualdino.com; export FORGEJO_TOKEN; FORGEJO_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/forgejo 2>/dev/null); exec forgejo-mcp" ];
+    };
+    todo = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export TODO_URL; TODO_URL=$(cat /mnt/stags/.config/mcp-tokens/todo-url 2>/dev/null); exec todo-mcp" ];
+    };
+    victorialogs = {
+      type = "stdio";
+      command = "victorialogs-mcp";
+    };
+    mediawatch = {
+      type = "stdio";
+      command = "mediawatch-mcp";
+      env.MEDIAWATCH_URL = "https://mediawatch.virtualdino.com";
+    };
+    jobhunt = {
+      type = "stdio";
+      command = "jobhunt-mcp";
+      env.JOBHUNT_URL = "https://jobhunt.virtualdino.com";
+    };
+    prowlarr = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export PROWLARR_URL; PROWLARR_URL=$(cat /mnt/stags/.config/mcp-tokens/prowlarr-url 2>/dev/null); export PROWLARR_API_KEY; PROWLARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/prowlarr 2>/dev/null); exec prowlarr-mcp" ];
+    };
+    proxmox = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export PROXMOX_HOST; PROXMOX_HOST=$(cat /mnt/stags/.config/mcp-tokens/proxmox-host 2>/dev/null); export PROXMOX_TOKEN_ID; PROXMOX_TOKEN_ID=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-id 2>/dev/null); export PROXMOX_TOKEN_SECRET; PROXMOX_TOKEN_SECRET=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-secret 2>/dev/null); exec proxmox-mcp" ];
+    };
+    radarr = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export RADARR_URL; RADARR_URL=$(cat /mnt/stags/.config/mcp-tokens/radarr-url 2>/dev/null); export RADARR_API_KEY; RADARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/radarr 2>/dev/null); exec radarr-mcp" ];
+    };
+    sonarr = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export SONARR_URL; SONARR_URL=$(cat /mnt/stags/.config/mcp-tokens/sonarr-url 2>/dev/null); export SONARR_API_KEY; SONARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/sonarr 2>/dev/null); exec sonarr-mcp" ];
+    };
+    grammarly = {
+      type = "stdio";
+      command = "grammarly-mcp";
+      args = [ "--cookies-file" "/mnt/stags/.config/mcp-tokens/grammarly-cookies" ];
+    };
+    linkedin = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export LINKEDIN_ACCESS_TOKEN; LINKEDIN_ACCESS_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/linkedin 2>/dev/null); exec linkedin-mcp" ];
+    };
+    cloudflare = {
+      type = "sse";
+      url = "https://mcp.cloudflare.com/mcp";
+    };
+    cloudflare-docs = {
+      type = "sse";
+      url = "https://docs.mcp.cloudflare.com/mcp";
+    };
+    cloudflare-bindings = {
+      type = "sse";
+      url = "https://bindings.mcp.cloudflare.com/mcp";
+    };
+    cloudflare-builds = {
+      type = "sse";
+      url = "https://builds.mcp.cloudflare.com/mcp";
+    };
+    cloudflare-observability = {
+      type = "sse";
+      url = "https://observability.mcp.cloudflare.com/mcp";
+    };
+  };
+
+  claudeSettings = pkgs.writeText "claude-code-settings.json" (builtins.toJSON {
+    enabledPlugins."superpowers@claude-plugins-official" = true;
+    theme = "dark";
+    skipAutoPermissionPrompt = true;
+    effortLevel = "high";
+    permissions.defaultMode = "auto";
+  });
+
+  claudeMcpServersJson = pkgs.writeText "claude-code-mcp-servers.json" (builtins.toJSON claudeMcpServers);
+in
 {
   imports = [
     inputs.noctalia.homeModules.default
@@ -508,98 +601,32 @@
     radarr-mcp
     sonarr-mcp
     grammarly-mcp
+    linkedin-mcp
   ];
 
-  home.file.".claude/settings.json" = {
-    force = true;
-    text = builtins.toJSON {
-      enabledPlugins."superpowers@claude-plugins-official" = true;
-      theme = "dark";
-      skipAutoPermissionPrompt = true;
-      effortLevel = "high";
-      permissions.defaultMode = "auto";
-      mcpServers = {
-        forgejo = {
-          type = "stdio";
-          command = "sh";
-          args = [ "-c" "export FORGEJO_URL=https://forgejo.virtualdino.com; export FORGEJO_TOKEN; FORGEJO_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/forgejo 2>/dev/null); exec forgejo-mcp" ];
-        };
-        todo = {
-          type = "stdio";
-          command = "sh";
-          args = [ "-c" "export TODO_URL; TODO_URL=$(cat /mnt/stags/.config/mcp-tokens/todo-url 2>/dev/null); exec todo-mcp" ];
-        };
-        victorialogs = {
-          type = "stdio";
-          command = "victorialogs-mcp";
-        };
-        mediawatch = {
-          type = "stdio";
-          command = "mediawatch-mcp";
-          env.MEDIAWATCH_URL = "https://mediawatch.virtualdino.com";
-        };
-        # jobhunt: bespoke resume storage and PDF rendering.
-        # https://jobhunt.virtualdino.com, no auth (private network + Cloudflare edge).
-        # Added 2026-07 with the resume_variants REST API.
-        jobhunt = {
-          type = "stdio";
-          command = "jobhunt-mcp";
-          env.JOBHUNT_URL = "https://jobhunt.virtualdino.com";
-        };
-        prowlarr = {
-          type = "stdio";
-          command = "sh";
-          args = [ "-c" "export PROWLARR_URL; PROWLARR_URL=$(cat /mnt/stags/.config/mcp-tokens/prowlarr-url 2>/dev/null); export PROWLARR_API_KEY; PROWLARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/prowlarr 2>/dev/null); exec prowlarr-mcp" ];
-        };
-        proxmox = {
-          type = "stdio";
-          command = "sh";
-          args = [ "-c" "export PROXMOX_HOST; PROXMOX_HOST=$(cat /mnt/stags/.config/mcp-tokens/proxmox-host 2>/dev/null); export PROXMOX_TOKEN_ID; PROXMOX_TOKEN_ID=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-id 2>/dev/null); export PROXMOX_TOKEN_SECRET; PROXMOX_TOKEN_SECRET=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-secret 2>/dev/null); exec proxmox-mcp" ];
-        };
-        radarr = {
-          type = "stdio";
-          command = "sh";
-          args = [ "-c" "export RADARR_URL; RADARR_URL=$(cat /mnt/stags/.config/mcp-tokens/radarr-url 2>/dev/null); export RADARR_API_KEY; RADARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/radarr 2>/dev/null); exec radarr-mcp" ];
-        };
-        sonarr = {
-          type = "stdio";
-          command = "sh";
-          args = [ "-c" "export SONARR_URL; SONARR_URL=$(cat /mnt/stags/.config/mcp-tokens/sonarr-url 2>/dev/null); export SONARR_API_KEY; SONARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/sonarr 2>/dev/null); exec sonarr-mcp" ];
-        };
-        grammarly = {
-          type = "stdio";
-          command = "grammarly-mcp";
-          args = [ "--cookies-file" "/mnt/stags/.config/mcp-tokens/grammarly-cookies" ];
-        };
-        # Cloudflare MCP servers (remote / SSE, OAuth-gated except docs).
-        # See https://developers.cloudflare.com/agent-setup/. Added in
-        # 2025-W26 at user request. Each OAuth-gated server grants the
-        # scopes registered on its Cloudflare OAuth app; revoke from
-        # Cloudflare dashboard → Connected Apps. The diff is purely
-        # additive — no existing MCP entries were changed.
-        cloudflare = {
-          type = "sse";
-          url = "https://mcp.cloudflare.com/mcp";
-        };
-        cloudflare-docs = {
-          type = "sse";
-          url = "https://docs.mcp.cloudflare.com/mcp";
-        };
-        cloudflare-bindings = {
-          type = "sse";
-          url = "https://bindings.mcp.cloudflare.com/mcp";
-        };
-        cloudflare-builds = {
-          type = "sse";
-          url = "https://builds.mcp.cloudflare.com/mcp";
-        };
-        cloudflare-observability = {
-          type = "sse";
-          url = "https://observability.mcp.cloudflare.com/mcp";
-        };
-      };
-    };
-  };
+  # home.file would create a read-only nix-store symlink; Claude Code needs
+  # to write runtime state (MCP auth, server status) back to this file.
+  # home.activation copies it as a regular writable file on each switch.
+  home.activation.claudeCodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD install -Dm644 ${claudeSettings} "$HOME/.claude/settings.json"
+  '';
+
+  # Claude Code does NOT read mcpServers from settings.json — it reads the
+  # top-level "mcpServers" key in ~/.claude.json (the same file `claude mcp
+  # add -s user` writes to). That file also holds mutable runtime state
+  # (OAuth tokens, project history, usage counters), so merge our servers
+  # into it with jq on each switch instead of overwriting the whole file.
+  home.activation.claudeCodeMcpServers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    claudeJson="$HOME/.claude.json"
+    tmp="$(mktemp)"
+    if [ -f "$claudeJson" ]; then
+      ${pkgs.jq}/bin/jq --slurpfile mcp ${claudeMcpServersJson} '.mcpServers = $mcp[0]' "$claudeJson" > "$tmp"
+    else
+      ${pkgs.jq}/bin/jq -n --slurpfile mcp ${claudeMcpServersJson} '{mcpServers: $mcp[0]}' > "$tmp"
+    fi
+    $DRY_RUN_CMD install -Dm600 "$tmp" "$claudeJson"
+    rm -f "$tmp"
+  '';
 
   home.file.".config/opencode/config.json" = {
     force = true;
@@ -657,9 +684,13 @@
           type = "local";
           command = [ "grammarly-mcp" "--cookies-file" "/mnt/stags/.config/mcp-tokens/grammarly-cookies" ];
         };
+        linkedin = {
+          type = "local";
+          command = [ "sh" "-c" "export LINKEDIN_ACCESS_TOKEN; LINKEDIN_ACCESS_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/linkedin 2>/dev/null); exec linkedin-mcp" ];
+        };
         # Cloudflare MCP servers (remote, OAuth-gated except docs).
-        # Mirrors the additions in home.file.".claude/settings.json"
-        # above. OAuth fires on first tool use of each server. Type
+        # Mirrors cloudflare entries in claudeSettings above. OAuth fires
+        # on first tool use of each server. Type
         # "remote" matches the OpenCode docs' example for HTTPS MCP
         # servers; if your OpenCode build is older than the spec
         # transition, switch to type = "sse".

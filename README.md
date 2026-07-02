@@ -23,3 +23,29 @@ sudo nixos-rebuild switch --flake .#xps15
 ```
 
 Outputs: dinOS, ideapad3, nuc14, xps15, m710q-1, m710q-2, rpi5-1
+
+## Package conventions
+
+### External binary packages (`pkgs/<name>/`)
+
+Packages that distribute pre-built binaries (e.g. `claude-code`, `opencode-desktop`,
+`telegram-desktop`) follow a two-file layout:
+
+- `manifest.json` — version pin and download URL/hash. **This is the only file to
+  edit when bumping a version.** Update `version`, `url`, and `hash`, then run
+  `nixos-rebuild switch`.
+- `default.nix` — derivation that reads from `manifest.json` via `lib.importJSON`.
+  Rarely needs to change.
+
+To get the hash for a new release: download the asset's `SHASUMS256.txt`, take the
+hex SHA-256 for the relevant file, then convert to SRI format:
+```
+printf '%b' "$(echo '<hex>' | sed 's/../\\x&/g')" | base64 -w0
+# Prefix result with "sha256-"
+```
+
+### Source packages (`pkgs/mcp/`)
+
+Go MCP servers are built from source via `buildGoModule`. The Nix store caches the
+build output by content hash, so recompilation only happens when the source rev or
+vendor hash changes — not on every switch.

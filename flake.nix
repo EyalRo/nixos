@@ -29,15 +29,16 @@
 
       overlays = final: prev: {
         crystal-sysinfo = final.callPackage ./pkgs/crystal-sysinfo { crystal = pkgs-unstable.crystal; };
+        claude-code = final.callPackage ./pkgs/claude-code { };
         melia = final.callPackage ./pkgs/melia { };
         opencode-desktop = final.callPackage ./pkgs/opencode-desktop { };
         proton-drive-cli = final.callPackage ./pkgs/proton-drive-cli { };
         tailscale = pkgs-unstable-no-overlays.tailscale;
         telegram-desktop = final.callPackage ./pkgs/telegram-desktop-bin { inherit (prev) telegram-desktop fetchFromGitHub; };
         inherit (final.callPackage ./pkgs/mcp { })
-          forgejo-mcp todo-mcp victorialogs-mcp mediawatch-mcp
+          forgejo-mcp jobhunt-mcp todo-mcp victorialogs-mcp mediawatch-mcp
           prowlarr-mcp proxmox-mcp radarr-mcp sonarr-mcp
-          grammarly-mcp;
+          grammarly-mcp linkedin-mcp;
       };
       specialArgs = { inherit inputs; };
       pkgs = import nixpkgs {

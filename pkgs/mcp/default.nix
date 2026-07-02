@@ -51,4 +51,7 @@ in
     vendorHash = "sha256-3GXkOgSWHpQnEFSI5TG4CRuY/vBgy1eCYKwK4iPYE8M=";
     postInstall = "mv $out/bin/cmd $out/bin/grammarly-mcp";
   };
+  linkedin-mcp = pkgs.writeShellScriptBin "linkedin-mcp" ''
+    exec ${pkgs.nodejs}/bin/npx -y @pegasusheavy/linkedin-mcp "$@"
+  '';
 }
