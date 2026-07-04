@@ -585,6 +585,12 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
         Port = "5022";
         User = "eyal";
       };
+      "forgejo.virtualdino.com" = {
+        HostName = "192.168.0.37";
+        User = "git";
+        IdentityFile = "/mnt/stags/.ssh/id_ed25519";
+        IdentitiesOnly = "yes";
+      };
     };
   };
 
