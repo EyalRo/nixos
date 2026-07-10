@@ -1,5 +1,98 @@
 { config, pkgs, lib, inputs, ... }:
 
+let
+  # Claude Code reads MCP server definitions from the top-level "mcpServers"
+  # key in ~/.claude.json (as written by `claude mcp add -s user`) — it does
+  # NOT read them from settings.json. Keep this list separate so it can be
+  # merged into ~/.claude.json without clobbering that file's mutable
+  # runtime state (OAuth tokens, project history, usage counters).
+  claudeMcpServers = {
+    forgejo = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export FORGEJO_URL=https://forgejo.virtualdino.com; export FORGEJO_TOKEN; FORGEJO_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/forgejo 2>/dev/null); exec forgejo-mcp" ];
+    };
+    todo = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export TODO_URL; TODO_URL=$(cat /mnt/stags/.config/mcp-tokens/todo-url 2>/dev/null); exec todo-mcp" ];
+    };
+    victorialogs = {
+      type = "stdio";
+      command = "victorialogs-mcp";
+    };
+    mediawatch = {
+      type = "stdio";
+      command = "mediawatch-mcp";
+      env.MEDIAWATCH_URL = "https://mediawatch.virtualdino.com";
+    };
+    jobhunt = {
+      type = "stdio";
+      command = "jobhunt-mcp";
+      env.JOBHUNT_URL = "https://jobhunt.virtualdino.com";
+    };
+    prowlarr = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export PROWLARR_URL; PROWLARR_URL=$(cat /mnt/stags/.config/mcp-tokens/prowlarr-url 2>/dev/null); export PROWLARR_API_KEY; PROWLARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/prowlarr 2>/dev/null); exec prowlarr-mcp" ];
+    };
+    proxmox = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export PROXMOX_HOST; PROXMOX_HOST=$(cat /mnt/stags/.config/mcp-tokens/proxmox-host 2>/dev/null); export PROXMOX_TOKEN_ID; PROXMOX_TOKEN_ID=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-id 2>/dev/null); export PROXMOX_TOKEN_SECRET; PROXMOX_TOKEN_SECRET=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-secret 2>/dev/null); exec proxmox-mcp" ];
+    };
+    radarr = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export RADARR_URL; RADARR_URL=$(cat /mnt/stags/.config/mcp-tokens/radarr-url 2>/dev/null); export RADARR_API_KEY; RADARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/radarr 2>/dev/null); exec radarr-mcp" ];
+    };
+    sonarr = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export SONARR_URL; SONARR_URL=$(cat /mnt/stags/.config/mcp-tokens/sonarr-url 2>/dev/null); export SONARR_API_KEY; SONARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/sonarr 2>/dev/null); exec sonarr-mcp" ];
+    };
+    grammarly = {
+      type = "stdio";
+      command = "grammarly-mcp";
+      args = [ "--cookies-file" "/mnt/stags/.config/mcp-tokens/grammarly-cookies" ];
+    };
+    linkedin = {
+      type = "stdio";
+      command = "sh";
+      args = [ "-c" "export LINKEDIN_ACCESS_TOKEN; LINKEDIN_ACCESS_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/linkedin 2>/dev/null); exec linkedin-mcp" ];
+    };
+    cloudflare = {
+      type = "sse";
+      url = "https://mcp.cloudflare.com/mcp";
+    };
+    cloudflare-docs = {
+      type = "sse";
+      url = "https://docs.mcp.cloudflare.com/mcp";
+    };
+    cloudflare-bindings = {
+      type = "sse";
+      url = "https://bindings.mcp.cloudflare.com/mcp";
+    };
+    cloudflare-builds = {
+      type = "sse";
+      url = "https://builds.mcp.cloudflare.com/mcp";
+    };
+    cloudflare-observability = {
+      type = "sse";
+      url = "https://observability.mcp.cloudflare.com/mcp";
+    };
+  };
+
+  claudeSettings = pkgs.writeText "claude-code-settings.json" (builtins.toJSON {
+    enabledPlugins."superpowers@claude-plugins-official" = true;
+    theme = "dark";
+    skipAutoPermissionPrompt = true;
+    effortLevel = "high";
+    permissions.defaultMode = "auto";
+  });
+
+  claudeMcpServersJson = pkgs.writeText "claude-code-mcp-servers.json" (builtins.toJSON claudeMcpServers);
+in
 {
   imports = [
     inputs.noctalia.homeModules.default
@@ -13,6 +106,9 @@
     package = pkgs.niri-unstable;
     settings = {
       spawn-at-startup = [
+        {
+          command = [ "awww-daemon" ];
+        }
         {
           command = [ "noctalia" ];
         }
@@ -451,6 +547,16 @@
           "session"
         ];
       };
+      location = {
+        auto_locate = false;
+        address = "Seattle";
+      };
+      weather = {
+        unit = "imperial";
+      };
+      nightlight = {
+        enabled = true;
+      };
       plugin_settings."stags/mediawatch" = {
         base_url = "https://mediawatch.virtualdino.com";
       };
@@ -475,7 +581,10 @@
     $DRY_RUN_CMD ln -sfn "$HOME/.local/share/gnome-local-plugins/todo@stags.virtualdino.com" "$ext_dir/todo@stags.virtualdino.com"
     $DRY_RUN_CMD ln -sfn "$HOME/.local/share/gnome-local-plugins/mediawatch@stags.virtualdino.com" "$ext_dir/mediawatch@stags.virtualdino.com"
   '';
-home.file.".config/autostart/ibus-daemon.desktop".text = ''
+
+  # GNOME manages IBus via systemd (NotShowIn=GNOME in the system autostart).
+  # Suppress XDG autostart so IBus doesn't also start in niri sessions.
+  home.file.".config/autostart/ibus-daemon.desktop".text = ''
     [Desktop Entry]
     Hidden=true
   '';
@@ -497,6 +606,8 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
 
   home.packages = with pkgs; [
     celluloid
+    mpvpaper
+    awww
     fractal
     tea
     ghostty
@@ -509,6 +620,18 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
     tailscale-systray
     wl-clipboard
     cliphist
+    # MCP servers — secrets read from /mnt/stags/.config/mcp-tokens/<service>
+    forgejo-mcp
+    jobhunt-mcp
+    todo-mcp
+    victorialogs-mcp
+    mediawatch-mcp
+    prowlarr-mcp
+    proxmox-mcp
+    radarr-mcp
+    sonarr-mcp
+    grammarly-mcp
+    linkedin-mcp
   ];
 
   # Todo daemon — HTTP API on localhost:7410.
@@ -538,6 +661,129 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
     Install.WantedBy = [ "default.target" ];
   };
 
+  # home.file would create a read-only nix-store symlink; Claude Code needs
+  # to write runtime state (MCP auth, server status) back to this file.
+  # home.activation copies it as a regular writable file on each switch.
+  home.activation.claudeCodeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD install -Dm644 ${claudeSettings} "$HOME/.claude/settings.json"
+  '';
+
+  # Claude Code does NOT read mcpServers from settings.json — it reads the
+  # top-level "mcpServers" key in ~/.claude.json (the same file `claude mcp
+  # add -s user` writes to). That file also holds mutable runtime state
+  # (OAuth tokens, project history, usage counters), so merge our servers
+  # into it with jq on each switch instead of overwriting the whole file.
+  home.activation.claudeCodeMcpServers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    claudeJson="$HOME/.claude.json"
+    tmp="$(mktemp)"
+    if [ -f "$claudeJson" ]; then
+      ${pkgs.jq}/bin/jq --slurpfile mcp ${claudeMcpServersJson} '.mcpServers = $mcp[0]' "$claudeJson" > "$tmp"
+    else
+      ${pkgs.jq}/bin/jq -n --slurpfile mcp ${claudeMcpServersJson} '{mcpServers: $mcp[0]}' > "$tmp"
+    fi
+    $DRY_RUN_CMD install -Dm600 "$tmp" "$claudeJson"
+    rm -f "$tmp"
+  '';
+
+  home.file.".config/opencode/config.json" = {
+    force = true;
+    text = builtins.toJSON {
+      plugin = [
+        "@tarquinen/opencode-dcp"
+        "harness-memory"
+        "opencode-command-inject"
+        "opencode-snip"
+        "crewbee"
+      ];
+      mcp = {
+        forgejo = {
+          type = "local";
+          command = [ "sh" "-c" "export FORGEJO_URL=https://forgejo.virtualdino.com; export FORGEJO_TOKEN; FORGEJO_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/forgejo 2>/dev/null); exec forgejo-mcp" ];
+        };
+        todo = {
+          type = "local";
+          command = [ "sh" "-c" "export TODO_URL; TODO_URL=$(cat /mnt/stags/.config/mcp-tokens/todo-url 2>/dev/null); exec todo-mcp" ];
+        };
+        victorialogs = {
+          type = "local";
+          command = [ "victorialogs-mcp" ];
+        };
+        mediawatch = {
+          type = "local";
+          command = [ "mediawatch-mcp" ];
+          environment.MEDIAWATCH_URL = "https://mediawatch.virtualdino.com";
+        };
+        # jobhunt: bespoke resume storage and PDF rendering.
+        # https://jobhunt.virtualdino.com, no auth (private network + Cloudflare edge).
+        # Added 2026-07 with the resume_variants REST API.
+        jobhunt = {
+          type = "local";
+          command = [ "jobhunt-mcp" ];
+          environment.JOBHUNT_URL = "https://jobhunt.virtualdino.com";
+        };
+        prowlarr = {
+          type = "local";
+          command = [ "sh" "-c" "export PROWLARR_URL; PROWLARR_URL=$(cat /mnt/stags/.config/mcp-tokens/prowlarr-url 2>/dev/null); export PROWLARR_API_KEY; PROWLARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/prowlarr 2>/dev/null); exec prowlarr-mcp" ];
+        };
+        proxmox = {
+          type = "local";
+          command = [ "sh" "-c" "export PROXMOX_HOST; PROXMOX_HOST=$(cat /mnt/stags/.config/mcp-tokens/proxmox-host 2>/dev/null); export PROXMOX_TOKEN_ID; PROXMOX_TOKEN_ID=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-id 2>/dev/null); export PROXMOX_TOKEN_SECRET; PROXMOX_TOKEN_SECRET=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-secret 2>/dev/null); exec proxmox-mcp" ];
+        };
+        radarr = {
+          type = "local";
+          command = [ "sh" "-c" "export RADARR_URL; RADARR_URL=$(cat /mnt/stags/.config/mcp-tokens/radarr-url 2>/dev/null); export RADARR_API_KEY; RADARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/radarr 2>/dev/null); exec radarr-mcp" ];
+        };
+        sonarr = {
+          type = "local";
+          command = [ "sh" "-c" "export SONARR_URL; SONARR_URL=$(cat /mnt/stags/.config/mcp-tokens/sonarr-url 2>/dev/null); export SONARR_API_KEY; SONARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/sonarr 2>/dev/null); exec sonarr-mcp" ];
+        };
+        grammarly = {
+          type = "local";
+          command = [ "grammarly-mcp" "--cookies-file" "/mnt/stags/.config/mcp-tokens/grammarly-cookies" ];
+        };
+        linkedin = {
+          type = "local";
+          command = [ "sh" "-c" "export LINKEDIN_ACCESS_TOKEN; LINKEDIN_ACCESS_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/linkedin 2>/dev/null); exec linkedin-mcp" ];
+        };
+        # Cloudflare MCP servers (remote, OAuth-gated except docs).
+        # Mirrors cloudflare entries in claudeSettings above. OAuth fires
+        # on first tool use of each server. Type
+        # "remote" matches the OpenCode docs' example for HTTPS MCP
+        # servers; if your OpenCode build is older than the spec
+        # transition, switch to type = "sse".
+        cloudflare = {
+          type = "remote";
+          url = "https://mcp.cloudflare.com/mcp";
+          enabled = true;
+          oauth = { };
+        };
+        cloudflare-docs = {
+          type = "remote";
+          url = "https://docs.mcp.cloudflare.com/mcp";
+          enabled = true;
+        };
+        cloudflare-bindings = {
+          type = "remote";
+          url = "https://bindings.mcp.cloudflare.com/mcp";
+          enabled = true;
+          oauth = { };
+        };
+        cloudflare-builds = {
+          type = "remote";
+          url = "https://builds.mcp.cloudflare.com/mcp";
+          enabled = true;
+          oauth = { };
+        };
+        cloudflare-observability = {
+          type = "remote";
+          url = "https://observability.mcp.cloudflare.com/mcp";
+          enabled = true;
+          oauth = { };
+        };
+      };
+    };
+  };
+
   systemd.user.services.tailscale-systray = {
     Unit = {
       Description = "Tailscale system tray";
@@ -547,7 +793,6 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
     Service.ExecStart = "${pkgs.tailscale-systray}/bin/tailscale-systray";
     Install.WantedBy = [ "graphical-session.target" ];
   };
-
 
   systemd.user.services.cliphist-watcher = {
     Unit = {
@@ -589,6 +834,18 @@ home.file.".config/autostart/ibus-daemon.desktop".text = ''
         HostName = "192.168.0.37";
         User = "git";
         IdentityFile = "/mnt/stags/.ssh/id_ed25519";
+        IdentitiesOnly = "yes";
+      };
+      "pve-node1" = {
+        HostName = "192.168.0.11";
+        User = "root";
+        IdentityFile = "/mnt/stags/.ssh/id_ed25519_proxmox";
+        IdentitiesOnly = "yes";
+      };
+      "pve-node2" = {
+        HostName = "192.168.0.12";
+        User = "root";
+        IdentityFile = "/mnt/stags/.ssh/id_ed25519_proxmox";
         IdentitiesOnly = "yes";
       };
     };
