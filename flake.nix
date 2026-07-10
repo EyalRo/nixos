@@ -17,9 +17,11 @@
     noctalia.url = "github:noctalia-dev/noctalia-shell";
     noctalia.inputs.nixpkgs.follows = "nixpkgs-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
+    claude-desktop-debian.url = "github:aaddrick/claude-desktop-debian";
+    claude-desktop-debian.inputs.nixpkgs.follows = "nixpkgs-unstable";
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, impermanence, agenix, niri-flake, commafiles, noctalia, nixos-hardware, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, impermanence, agenix, niri-flake, commafiles, noctalia, nixos-hardware, claude-desktop-debian, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
@@ -30,6 +32,15 @@
       overlays = final: prev: {
         crystal-sysinfo = final.callPackage ./pkgs/crystal-sysinfo { crystal = pkgs-unstable.crystal; };
         claude-code = final.callPackage ./pkgs/claude-code { };
+        claude-desktop = final.symlinkJoin {
+          name = "claude-desktop";
+          paths = [ claude-desktop-debian.packages.${final.system}.default ];
+          nativeBuildInputs = [ final.makeWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/claude-desktop --set NIXOS_OZONE_WL 1
+          '';
+          meta = claude-desktop-debian.packages.${final.system}.default.meta;
+        };
         melia = final.callPackage ./pkgs/melia { };
         opencode-desktop = final.callPackage ./pkgs/opencode-desktop { };
         proton-drive-cli = final.callPackage ./pkgs/proton-drive-cli { };

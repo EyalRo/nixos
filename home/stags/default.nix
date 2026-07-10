@@ -611,6 +611,7 @@ in
     fractal
     tea
     ghostty
+    claude-desktop
     melia
     opencode-desktop
     proton-drive-cli
