@@ -36,14 +36,31 @@ let
   noctaliaBarDefaultToml =
     (pkgs.formats.toml { }).generate "noctalia-bar-default.toml" { bar.default = noctaliaBarDefault; };
 
-  # Replaces the [bar.default] table in a noctalia settings.toml with the
-  # contents of a freshly generated snippet, validating the result parses
-  # before writing it back. Used because noctalia has no `msg` command to
-  # set bar layout at runtime (only visibility/layer/auto-hide toggles).
-  resetNoctaliaBarScript = pkgs.writeText "reset-noctalia-bar.py" ''
+  # The noctalia binary currently installed here still stores theme/template
+  # state under the legacy [theme] table (theme.mode, theme.templates.*),
+  # not the newer colorSchemes/templates schema used elsewhere in this file
+  # (confirmed live: toggling theme-mode-set did not fire hooks.darkModeChange
+  # above, and theme.templates.community_ids is what actually regenerates
+  # ~/.config/telegram-desktop/themes/noctalia.tdesktop-theme). Declare
+  # against the schema that's proven to work today; colorSchemes/hooks stay
+  # in place for whenever noctalia updates past this build.
+  noctaliaThemeTemplates = {
+    builtin_ids = [ "gtk3" "gtk4" "ghostty" "helix" "niri" "starship" ];
+    community_ids = [ "zed" "opencode" "pi-agent" "telegram" ];
+  };
+
+  noctaliaThemeTemplatesToml =
+    (pkgs.formats.toml { }).generate "noctalia-theme-templates.toml" { theme.templates = noctaliaThemeTemplates; };
+
+  # Replaces an arbitrary dotted TOML table (e.g. "bar.default" or
+  # "theme.templates") in a noctalia settings.toml with the contents of a
+  # freshly generated snippet, validating the result parses before writing
+  # it back. Used for settings noctalia has no `msg` IPC command to set at
+  # runtime (bar layout, template activation).
+  spliceNoctaliaTomlSectionScript = pkgs.writeText "splice-noctalia-toml-section.py" ''
     import re, sys, tomllib, os
 
-    target_path, snippet_path = sys.argv[1], sys.argv[2]
+    target_path, snippet_path, section = sys.argv[1], sys.argv[2], sys.argv[3]
 
     with open(snippet_path) as f:
         new_block = f.read().rstrip("\n") + "\n"
@@ -51,7 +68,8 @@ let
     with open(target_path) as f:
         content = f.read()
 
-    pattern = re.compile(r"^\[bar\.default\]\n(?:(?!\[).*\n)*", re.MULTILINE)
+    escaped = re.escape(section)
+    pattern = re.compile(rf"^[ \t]*\[{escaped}\]\n(?:(?!^[ \t]*\[).*\n)*", re.MULTILINE)
     if pattern.search(content):
         new_content = pattern.sub(lambda m: new_block, content, count=1)
     else:
@@ -619,6 +637,9 @@ in
           fi
         '';
       };
+      # Legacy schema (see noctaliaThemeTemplates above) — keeps the
+      # telegram community template and builtin templates active.
+      theme.templates = noctaliaThemeTemplates;
       plugin_settings."stags/mediawatch" = {
         base_url = "https://mediawatch.virtualdino.com";
       };
@@ -663,12 +684,19 @@ in
     $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg plugins enable stags/todo 2>/dev/null || true
   '';
 
-  # See noctaliaBarDefault/resetNoctaliaBarScript above: no IPC exists for
-  # bar layout, so force it by rewriting the state file's [bar.default]
-  # table directly on every switch.
+  # See noctaliaBarDefault/spliceNoctaliaTomlSectionScript above: no IPC
+  # exists for bar layout, so force it by rewriting the state file's
+  # [bar.default] table directly on every switch.
   home.activation.resetNoctaliaBar = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    $DRY_RUN_CMD ${pkgs.python3}/bin/python3 ${resetNoctaliaBarScript} \
-      "$HOME/.local/state/noctalia/settings.toml" ${noctaliaBarDefaultToml} 2>/dev/null || true
+    $DRY_RUN_CMD ${pkgs.python3}/bin/python3 ${spliceNoctaliaTomlSectionScript} \
+      "$HOME/.local/state/noctalia/settings.toml" ${noctaliaBarDefaultToml} bar.default 2>/dev/null || true
+  '';
+
+  # Same story for template activation (see noctaliaThemeTemplates above):
+  # no IPC to set which templates are active, so force it directly too.
+  home.activation.resetNoctaliaTemplates = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD ${pkgs.python3}/bin/python3 ${spliceNoctaliaTomlSectionScript} \
+      "$HOME/.local/state/noctalia/settings.toml" ${noctaliaThemeTemplatesToml} theme.templates 2>/dev/null || true
   '';
 
   home.activation.cloneGnomePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
