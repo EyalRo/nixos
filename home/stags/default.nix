@@ -1,6 +1,9 @@
 { config, pkgs, lib, inputs, ... }:
 
 let
+  wallpaperDayPath = "/run/current-system/sw/share/backgrounds/friendly-pals-day.png";
+  wallpaperNightPath = "/run/current-system/sw/share/backgrounds/friendly-pals-night.png";
+
   # Claude Code reads MCP server definitions from the top-level "mcpServers"
   # key in ~/.claude.json (as written by `claude mcp add -s user`) — it does
   # NOT read them from settings.json. Keep this list separate so it can be
@@ -557,6 +560,21 @@ in
       nightlight = {
         enabled = true;
       };
+      # Auto-toggle dark/light at real sunrise/sunset for this location
+      # (location.address above), then swap the wallpaper to match.
+      colorSchemes = {
+        schedulingMode = "location";
+      };
+      hooks = {
+        enabled = true;
+        darkModeChange = ''
+          if [ "$1" = "true" ]; then
+            noctalia msg wallpaper-set ${wallpaperNightPath}
+          else
+            noctalia msg wallpaper-set ${wallpaperDayPath}
+          fi
+        '';
+      };
       plugin_settings."stags/mediawatch" = {
         base_url = "https://mediawatch.virtualdino.com";
       };
@@ -567,6 +585,27 @@ in
       ];
     };
   };
+
+  # Noctalia keeps the active wallpaper in mutable app state
+  # (~/.local/state/noctalia/settings.toml), not in the config.toml rendered
+  # above, so a GUI wallpaper pick sticks around forever. Reset it to the
+  # dinOS day/night default on every switch, mirroring the GNOME background
+  # below. The hour check is just a same-switch fallback (matches noctalia's
+  # own default 06:30/18:30 manual sunrise/sunset) — once the app is running,
+  # the hooks.darkModeChange script above takes over with real sunrise/sunset
+  # times for this location. `wallpaper-set` with no connector applies to
+  # every output and is a no-op if noctalia's IPC socket isn't up yet (e.g.
+  # before first login).
+  home.activation.resetNoctaliaWallpaper = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    hour=$(date +%H)
+    if [ "$hour" -ge 6 ] && [ "$hour" -lt 18 ]; then
+      wallpaperPath=${wallpaperDayPath}
+    else
+      wallpaperPath=${wallpaperNightPath}
+    fi
+    $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg wallpaper-set \
+      "$wallpaperPath" 2>/dev/null || true
+  '';
 
   home.activation.cloneGnomePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     plugins_dir="$HOME/.local/share/gnome-local-plugins"
@@ -854,8 +893,8 @@ in
 
   dconf.settings = {
     "org/gnome/desktop/background" = {
-      picture-uri = "file:///run/current-system/sw/share/backgrounds/friendly-pals-day.png";
-      picture-uri-dark = "file:///run/current-system/sw/share/backgrounds/friendly-pals-night.png";
+      picture-uri = "file://${wallpaperDayPath}";
+      picture-uri-dark = "file://${wallpaperNightPath}";
       picture-options = "scaled";
     };
     "org/gnome/shell" = {
