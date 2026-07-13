@@ -4,6 +4,67 @@ let
   wallpaperDayPath = "/run/current-system/sw/share/backgrounds/friendly-pals-day.png";
   wallpaperNightPath = "/run/current-system/sw/share/backgrounds/friendly-pals-night.png";
 
+  # Noctalia's bar layout (widget arrangement, scale, spacing) has no IPC
+  # command to set it, unlike wallpaper/plugins, so it can only be enforced
+  # by directly rewriting its [bar.default] table in the mutable state file.
+  # This is the single source of truth for that table, reused below both to
+  # render config.toml's default and to build the snippet the activation
+  # script splices into ~/.local/state/noctalia/settings.toml.
+  noctaliaBarDefault = {
+    start = [ "launcher" "media" ];
+    center = [ "clock" "caffeine" "widget" ];
+    end = [
+      "stags/mediawatch:widget"
+      "keyboard_layout"
+      "tray"
+      "notifications"
+      "clipboard"
+      "network"
+      "bluetooth"
+      "volume"
+      "brightness"
+      "battery"
+      "control-center"
+      "session"
+    ];
+    background_opacity = 0.8;
+    margin_ends = 10;
+    scale = 1.25;
+    widget_spacing = 10;
+  };
+
+  noctaliaBarDefaultToml =
+    (pkgs.formats.toml { }).generate "noctalia-bar-default.toml" { bar.default = noctaliaBarDefault; };
+
+  # Replaces the [bar.default] table in a noctalia settings.toml with the
+  # contents of a freshly generated snippet, validating the result parses
+  # before writing it back. Used because noctalia has no `msg` command to
+  # set bar layout at runtime (only visibility/layer/auto-hide toggles).
+  resetNoctaliaBarScript = pkgs.writeText "reset-noctalia-bar.py" ''
+    import re, sys, tomllib, os
+
+    target_path, snippet_path = sys.argv[1], sys.argv[2]
+
+    with open(snippet_path) as f:
+        new_block = f.read().rstrip("\n") + "\n"
+
+    with open(target_path) as f:
+        content = f.read()
+
+    pattern = re.compile(r"^\[bar\.default\]\n(?:(?!\[).*\n)*", re.MULTILINE)
+    if pattern.search(content):
+        new_content = pattern.sub(lambda m: new_block, content, count=1)
+    else:
+        new_content = content.rstrip("\n") + "\n\n" + new_block
+
+    tomllib.loads(new_content)  # validate before touching the real file
+
+    tmp_path = target_path + ".tmp"
+    with open(tmp_path, "w") as f:
+        f.write(new_content)
+    os.replace(tmp_path, target_path)
+  '';
+
   # Claude Code reads MCP server definitions from the top-level "mcpServers"
   # key in ~/.claude.json (as written by `claude mcp add -s user`) — it does
   # NOT read them from settings.json. Keep this list separate so it can be
@@ -532,24 +593,7 @@ in
   programs.noctalia = {
     enable = true;
     settings = {
-      bar.default = {
-        end = [
-          "stags/todo:widget"
-          "stags/mediawatch:widget"
-          "media"
-          "tray"
-          "notifications"
-          "clipboard"
-          "network"
-          "bluetooth"
-          "keyboard-layout"
-          "volume"
-          "brightness"
-          "battery"
-          "control-center"
-          "session"
-        ];
-      };
+      bar.default = noctaliaBarDefault;
       location = {
         auto_locate = false;
         address = "Seattle";
@@ -578,6 +622,10 @@ in
       plugin_settings."stags/mediawatch" = {
         base_url = "https://mediawatch.virtualdino.com";
       };
+      plugin_settings."stags/todo" = {
+        base_url = "https://todo.virtualdino.com";
+      };
+      plugins.enabled = [ "stags/mediawatch" "stags/todo" ];
       plugins.source = [
         { kind = "git"; location = "https://github.com/noctalia-dev/community-plugins"; name = "community"; }
         { kind = "git"; location = "https://github.com/noctalia-dev/official-plugins"; name = "official"; }
@@ -605,6 +653,22 @@ in
     fi
     $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg wallpaper-set \
       "$wallpaperPath" 2>/dev/null || true
+  '';
+
+  # Plugin enable/disable state also lives in the mutable state file and
+  # sticks around once toggled via the GUI. Unlike bar layout, there's a
+  # real IPC command for this, so force it every switch like wallpaper.
+  home.activation.resetNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg plugins enable stags/mediawatch 2>/dev/null || true
+    $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg plugins enable stags/todo 2>/dev/null || true
+  '';
+
+  # See noctaliaBarDefault/resetNoctaliaBarScript above: no IPC exists for
+  # bar layout, so force it by rewriting the state file's [bar.default]
+  # table directly on every switch.
+  home.activation.resetNoctaliaBar = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD ${pkgs.python3}/bin/python3 ${resetNoctaliaBarScript} \
+      "$HOME/.local/state/noctalia/settings.toml" ${noctaliaBarDefaultToml} 2>/dev/null || true
   '';
 
   home.activation.cloneGnomePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
