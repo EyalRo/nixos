@@ -12,9 +12,8 @@ let
   # script splices into ~/.local/state/noctalia/settings.toml.
   noctaliaBarDefault = {
     start = [ "launcher" "media" ];
-    center = [ "clock" "caffeine" "widget" ];
+    center = [ "clock" "caffeine" "todo" "mediawatch" "life" ];
     end = [
-      "stags/mediawatch:widget"
       "keyboard_layout"
       "tray"
       "notifications"
@@ -35,6 +34,23 @@ let
 
   noctaliaBarDefaultToml =
     (pkgs.formats.toml { }).generate "noctalia-bar-default.toml" { bar.default = noctaliaBarDefault; };
+
+  # bar.default above references widgets by plain id ("todo", "mediawatch",
+  # "life"), which needs a matching [widget.<id>] table telling noctalia what
+  # plugin entry to instantiate. Keeping these named — rather than inlining
+  # the "author/plugin:entry" string directly in bar.default, as this used to
+  # do for mediawatch — matters because re-splicing a literal type string on
+  # every switch makes noctalia mint a fresh numbered widget_N key each time;
+  # the previous approach left orphaned widget_3/widget_4 duplicates behind
+  # after repeated switches. A stable name gets overwritten in place instead.
+  noctaliaWidgetDefs = {
+    todo = "stags/todo:widget";
+    mediawatch = "stags/mediawatch:widget";
+    life = "stags/life:widget";
+  };
+
+  noctaliaWidgetDefToml = name: type:
+    (pkgs.formats.toml { }).generate "noctalia-widget-${name}.toml" { widget.${name} = { inherit type; }; };
 
   # The noctalia binary currently installed here still stores theme/template
   # state under the legacy [theme] table (theme.mode, theme.templates.*),
@@ -67,6 +83,12 @@ let
 
     with open(target_path) as f:
         content = f.read()
+    if content and not content.endswith("\n"):
+        # Otherwise a section with no trailing newline (possible when it's
+        # the last one in the file — noctalia's own writer doesn't always
+        # add one) makes the content-line regex below fail to consume the
+        # last line, leaving it behind as an orphaned duplicate key.
+        content += "\n"
 
     escaped = re.escape(section)
     pattern = re.compile(rf"^[ \t]*\[{escaped}\]\n(?:(?!^[ \t]*\[).*\n)*", re.MULTILINE)
@@ -646,7 +668,7 @@ in
       plugin_settings."stags/todo" = {
         base_url = "https://todo.virtualdino.com";
       };
-      plugins.enabled = [ "stags/mediawatch" "stags/todo" ];
+      plugins.enabled = [ "stags/mediawatch" "stags/todo" "stags/life" ];
       plugins.source = [
         { kind = "git"; location = "https://github.com/noctalia-dev/community-plugins"; name = "community"; }
         { kind = "git"; location = "https://github.com/noctalia-dev/official-plugins"; name = "official"; }
@@ -682,6 +704,7 @@ in
   home.activation.resetNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg plugins enable stags/mediawatch 2>/dev/null || true
     $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg plugins enable stags/todo 2>/dev/null || true
+    $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg plugins enable stags/life 2>/dev/null || true
   '';
 
   # See noctaliaBarDefault/spliceNoctaliaTomlSectionScript above: no IPC
@@ -691,6 +714,17 @@ in
     $DRY_RUN_CMD ${pkgs.python3}/bin/python3 ${spliceNoctaliaTomlSectionScript} \
       "$HOME/.local/state/noctalia/settings.toml" ${noctaliaBarDefaultToml} bar.default 2>/dev/null || true
   '';
+
+  # See noctaliaWidgetDefs above: force each named widget's [widget.<id>]
+  # table too, so bar.default's plain-id references always resolve, without
+  # minting new numbered keys on every switch the way a literal type string
+  # in bar.default itself would.
+  home.activation.resetNoctaliaWidgets = lib.hm.dag.entryAfter [ "writeBoundary" ] (
+    lib.concatStrings (lib.mapAttrsToList (name: type: ''
+      $DRY_RUN_CMD ${pkgs.python3}/bin/python3 ${spliceNoctaliaTomlSectionScript} \
+        "$HOME/.local/state/noctalia/settings.toml" ${noctaliaWidgetDefToml name type} "widget.${name}" 2>/dev/null || true
+    '') noctaliaWidgetDefs)
+  );
 
   # Same story for template activation (see noctaliaThemeTemplates above):
   # no IPC to set which templates are active, so force it directly too.
