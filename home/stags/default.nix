@@ -105,21 +105,56 @@ let
     os.replace(tmp_path, target_path)
   '';
 
+  infisicalTokensPath = "/mnt/stags/.config/mcp-tokens";
+  infisicalDomain = "https://infisical.virtualdino.com";
+  infisicalProjectId = "e0945d85-c9f4-4d1e-a1cf-611295ba6613"; # homelab project
+
+  # infisical isn't a home.package — invoked via `nix run` so no rebuild is
+  # needed just to get the binary. Cached in the Nix store after first fetch.
+  infisicalBin = "nix run nixpkgs#infisical --";
+
+  # Logs in as the read-only `mcp-servers` Infisical identity and re-execs
+  # `binary` with secrets from `path` injected as env vars. `path` must be
+  # a folder the mcp-servers-reader role can read (scoped to /mcp/**).
+  # --domain is required on both calls — it is not inherited between them.
+  mkInfisicalRunCmd = { path, binary, extraArgs ? "" }: ''
+    INFISICAL_CLIENT_ID=$(cat ${infisicalTokensPath}/infisical-client-id)
+    INFISICAL_CLIENT_SECRET=$(cat ${infisicalTokensPath}/infisical-client-secret)
+    INFISICAL_TOKEN=$(${infisicalBin} login --domain=${infisicalDomain} --method=universal-auth --client-id="$INFISICAL_CLIENT_ID" --client-secret="$INFISICAL_CLIENT_SECRET" --plain --silent)
+    exec ${infisicalBin} run --domain=${infisicalDomain} --token="$INFISICAL_TOKEN" --projectId=${infisicalProjectId} --env=dev --path=${path} -- ${binary} ${extraArgs}
+  '';
+
+  mkInfisicalClaudeMcp = { path, binary, extraArgs ? "" }: {
+    type = "stdio";
+    command = "sh";
+    args = [ "-c" (mkInfisicalRunCmd { inherit path binary extraArgs; }) ];
+  };
+
+  # grammarly-mcp takes a --cookies-file path, not env vars, so the fetched
+  # secret has to be materialized to a temp file before exec'ing it.
+  mkInfisicalGrammarlyCmd = path: ''
+    INFISICAL_CLIENT_ID=$(cat ${infisicalTokensPath}/infisical-client-id)
+    INFISICAL_CLIENT_SECRET=$(cat ${infisicalTokensPath}/infisical-client-secret)
+    INFISICAL_TOKEN=$(${infisicalBin} login --domain=${infisicalDomain} --method=universal-auth --client-id="$INFISICAL_CLIENT_ID" --client-secret="$INFISICAL_CLIENT_SECRET" --plain --silent)
+    COOKIES_FILE=$(mktemp)
+    trap 'rm -f "$COOKIES_FILE"' EXIT
+    ${infisicalBin} run --domain=${infisicalDomain} --token="$INFISICAL_TOKEN" --projectId=${infisicalProjectId} --env=dev --path=${path} -- sh -c 'printf %s "$GRAMMARLY_COOKIES"' > "$COOKIES_FILE"
+    exec grammarly-mcp --cookies-file "$COOKIES_FILE"
+  '';
+
   # Claude Code reads MCP server definitions from the top-level "mcpServers"
   # key in ~/.claude.json (as written by `claude mcp add -s user`) — it does
   # NOT read them from settings.json. Keep this list separate so it can be
   # merged into ~/.claude.json without clobbering that file's mutable
   # runtime state (OAuth tokens, project history, usage counters).
   claudeMcpServers = {
-    forgejo = {
-      type = "stdio";
-      command = "sh";
-      args = [ "-c" "export FORGEJO_URL=https://forgejo.virtualdino.com; export FORGEJO_TOKEN; FORGEJO_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/forgejo 2>/dev/null); exec forgejo-mcp" ];
+    forgejo = mkInfisicalClaudeMcp {
+      path = "/mcp/forgejo";
+      binary = "forgejo-mcp";
     };
-    todo = {
-      type = "stdio";
-      command = "sh";
-      args = [ "-c" "export TODO_URL; TODO_URL=$(cat /mnt/stags/.config/mcp-tokens/todo-url 2>/dev/null); exec todo-mcp" ];
+    todo = mkInfisicalClaudeMcp {
+      path = "/mcp/todo";
+      binary = "todo-mcp";
     };
     victorialogs = {
       type = "stdio";
@@ -135,35 +170,30 @@ let
       command = "jobhunt-mcp";
       env.JOBHUNT_URL = "https://jobhunt.virtualdino.com";
     };
-    prowlarr = {
-      type = "stdio";
-      command = "sh";
-      args = [ "-c" "export PROWLARR_URL; PROWLARR_URL=$(cat /mnt/stags/.config/mcp-tokens/prowlarr-url 2>/dev/null); export PROWLARR_API_KEY; PROWLARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/prowlarr 2>/dev/null); exec prowlarr-mcp" ];
+    prowlarr = mkInfisicalClaudeMcp {
+      path = "/mcp/prowlarr";
+      binary = "prowlarr-mcp";
     };
-    proxmox = {
-      type = "stdio";
-      command = "sh";
-      args = [ "-c" "export PROXMOX_HOST; PROXMOX_HOST=$(cat /mnt/stags/.config/mcp-tokens/proxmox-host 2>/dev/null); export PROXMOX_TOKEN_ID; PROXMOX_TOKEN_ID=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-id 2>/dev/null); export PROXMOX_TOKEN_SECRET; PROXMOX_TOKEN_SECRET=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-secret 2>/dev/null); exec proxmox-mcp" ];
+    proxmox = mkInfisicalClaudeMcp {
+      path = "/mcp/proxmox";
+      binary = "proxmox-mcp";
     };
-    radarr = {
-      type = "stdio";
-      command = "sh";
-      args = [ "-c" "export RADARR_URL; RADARR_URL=$(cat /mnt/stags/.config/mcp-tokens/radarr-url 2>/dev/null); export RADARR_API_KEY; RADARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/radarr 2>/dev/null); exec radarr-mcp" ];
+    radarr = mkInfisicalClaudeMcp {
+      path = "/mcp/radarr";
+      binary = "radarr-mcp";
     };
-    sonarr = {
-      type = "stdio";
-      command = "sh";
-      args = [ "-c" "export SONARR_URL; SONARR_URL=$(cat /mnt/stags/.config/mcp-tokens/sonarr-url 2>/dev/null); export SONARR_API_KEY; SONARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/sonarr 2>/dev/null); exec sonarr-mcp" ];
+    sonarr = mkInfisicalClaudeMcp {
+      path = "/mcp/sonarr";
+      binary = "sonarr-mcp";
     };
     grammarly = {
       type = "stdio";
-      command = "grammarly-mcp";
-      args = [ "--cookies-file" "/mnt/stags/.config/mcp-tokens/grammarly-cookies" ];
-    };
-    linkedin = {
-      type = "stdio";
       command = "sh";
-      args = [ "-c" "export LINKEDIN_ACCESS_TOKEN; LINKEDIN_ACCESS_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/linkedin 2>/dev/null); exec linkedin-mcp" ];
+      args = [ "-c" (mkInfisicalGrammarlyCmd "/mcp/grammarly") ];
+    };
+    linkedin = mkInfisicalClaudeMcp {
+      path = "/mcp/linkedin";
+      binary = "linkedin-mcp";
     };
     cloudflare = {
       type = "sse";
@@ -864,11 +894,11 @@ in
       mcp = {
         forgejo = {
           type = "local";
-          command = [ "sh" "-c" "export FORGEJO_URL=https://forgejo.virtualdino.com; export FORGEJO_TOKEN; FORGEJO_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/forgejo 2>/dev/null); exec forgejo-mcp" ];
+          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/forgejo"; binary = "forgejo-mcp"; }) ];
         };
         todo = {
           type = "local";
-          command = [ "sh" "-c" "export TODO_URL; TODO_URL=$(cat /mnt/stags/.config/mcp-tokens/todo-url 2>/dev/null); exec todo-mcp" ];
+          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/todo"; binary = "todo-mcp"; }) ];
         };
         victorialogs = {
           type = "local";
@@ -889,27 +919,27 @@ in
         };
         prowlarr = {
           type = "local";
-          command = [ "sh" "-c" "export PROWLARR_URL; PROWLARR_URL=$(cat /mnt/stags/.config/mcp-tokens/prowlarr-url 2>/dev/null); export PROWLARR_API_KEY; PROWLARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/prowlarr 2>/dev/null); exec prowlarr-mcp" ];
+          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/prowlarr"; binary = "prowlarr-mcp"; }) ];
         };
         proxmox = {
           type = "local";
-          command = [ "sh" "-c" "export PROXMOX_HOST; PROXMOX_HOST=$(cat /mnt/stags/.config/mcp-tokens/proxmox-host 2>/dev/null); export PROXMOX_TOKEN_ID; PROXMOX_TOKEN_ID=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-id 2>/dev/null); export PROXMOX_TOKEN_SECRET; PROXMOX_TOKEN_SECRET=$(cat /mnt/stags/.config/mcp-tokens/proxmox-token-secret 2>/dev/null); exec proxmox-mcp" ];
+          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/proxmox"; binary = "proxmox-mcp"; }) ];
         };
         radarr = {
           type = "local";
-          command = [ "sh" "-c" "export RADARR_URL; RADARR_URL=$(cat /mnt/stags/.config/mcp-tokens/radarr-url 2>/dev/null); export RADARR_API_KEY; RADARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/radarr 2>/dev/null); exec radarr-mcp" ];
+          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/radarr"; binary = "radarr-mcp"; }) ];
         };
         sonarr = {
           type = "local";
-          command = [ "sh" "-c" "export SONARR_URL; SONARR_URL=$(cat /mnt/stags/.config/mcp-tokens/sonarr-url 2>/dev/null); export SONARR_API_KEY; SONARR_API_KEY=$(cat /mnt/stags/.config/mcp-tokens/sonarr 2>/dev/null); exec sonarr-mcp" ];
+          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/sonarr"; binary = "sonarr-mcp"; }) ];
         };
         grammarly = {
           type = "local";
-          command = [ "grammarly-mcp" "--cookies-file" "/mnt/stags/.config/mcp-tokens/grammarly-cookies" ];
+          command = [ "sh" "-c" (mkInfisicalGrammarlyCmd "/mcp/grammarly") ];
         };
         linkedin = {
           type = "local";
-          command = [ "sh" "-c" "export LINKEDIN_ACCESS_TOKEN; LINKEDIN_ACCESS_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/linkedin 2>/dev/null); exec linkedin-mcp" ];
+          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/linkedin"; binary = "linkedin-mcp"; }) ];
         };
         # Cloudflare MCP servers (remote, OAuth-gated except docs).
         # Mirrors cloudflare entries in claudeSettings above. OAuth fires
