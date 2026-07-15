@@ -130,15 +130,30 @@ let
     args = [ "-c" (mkInfisicalRunCmd { inherit path binary extraArgs; }) ];
   };
 
-  # grammarly-mcp takes a --cookies-file path, not env vars, so the fetched
-  # secret has to be materialized to a temp file before exec'ing it.
-  mkInfisicalGrammarlyCmd = path: ''
-    INFISICAL_CLIENT_ID=$(cat ${infisicalTokensPath}/infisical-client-id)
-    INFISICAL_CLIENT_SECRET=$(cat ${infisicalTokensPath}/infisical-client-secret)
-    INFISICAL_TOKEN=$(${infisicalBin} login --domain=${infisicalDomain} --method=universal-auth --client-id="$INFISICAL_CLIENT_ID" --client-secret="$INFISICAL_CLIENT_SECRET" --plain --silent)
+  # Self-hosted GraphQL secrets service (replaces Infisical for these 7
+  # services; `linkedin` stays on mkInfisicalClaudeMcp above since it has no
+  # real token to migrate). SECRETS_URL is pinned to the direct CT160 IP for
+  # now, not secrets.virtualdino.com — DNS + first-time ACME cert issuance
+  # for that hostname aren't live yet (see proxmox repo Caddy/DNS notes).
+  # Switch this to the hostname once that's resolved.
+  secretsUrl = "http://192.168.0.60:4000/graphql";
+  secretsRunScript = "/home/stags/Source/proxmox/scripts/secrets-run.sh";
+
+  mkSecretsRunCmd = { service, binary, extraArgs ? "" }: ''
+    exec env SECRETS_URL=${secretsUrl} ${secretsRunScript} ${service} -- ${binary} ${extraArgs}
+  '';
+
+  mkSecretsClaudeMcp = { service, binary, extraArgs ? "" }: {
+    type = "stdio";
+    command = "sh";
+    args = [ "-c" (mkSecretsRunCmd { inherit service binary extraArgs; }) ];
+  };
+
+  mkSecretsGrammarlyCmd = service: ''
     COOKIES_FILE=$(mktemp)
     trap 'rm -f "$COOKIES_FILE"' EXIT
-    ${infisicalBin} run --domain=${infisicalDomain} --token="$INFISICAL_TOKEN" --projectId=${infisicalProjectId} --env=dev --path=${path} -- sh -c 'printf %s "$GRAMMARLY_COOKIES"' > "$COOKIES_FILE"
+    env SECRETS_URL=${secretsUrl} ${secretsRunScript} ${service} -- \
+      sh -c 'printf %s "$GRAMMARLY_COOKIES"' > "$COOKIES_FILE"
     exec grammarly-mcp --cookies-file "$COOKIES_FILE"
   '';
 
@@ -148,12 +163,12 @@ let
   # merged into ~/.claude.json without clobbering that file's mutable
   # runtime state (OAuth tokens, project history, usage counters).
   claudeMcpServers = {
-    forgejo = mkInfisicalClaudeMcp {
-      path = "/mcp/forgejo";
+    forgejo = mkSecretsClaudeMcp {
+      service = "mcp-forgejo";
       binary = "forgejo-mcp";
     };
-    todo = mkInfisicalClaudeMcp {
-      path = "/mcp/todo";
+    todo = mkSecretsClaudeMcp {
+      service = "mcp-todo";
       binary = "todo-mcp";
     };
     victorialogs = {
@@ -170,26 +185,26 @@ let
       command = "jobhunt-mcp";
       env.JOBHUNT_URL = "https://jobhunt.virtualdino.com";
     };
-    prowlarr = mkInfisicalClaudeMcp {
-      path = "/mcp/prowlarr";
+    prowlarr = mkSecretsClaudeMcp {
+      service = "mcp-prowlarr";
       binary = "prowlarr-mcp";
     };
-    proxmox = mkInfisicalClaudeMcp {
-      path = "/mcp/proxmox";
+    proxmox = mkSecretsClaudeMcp {
+      service = "mcp-proxmox";
       binary = "proxmox-mcp";
     };
-    radarr = mkInfisicalClaudeMcp {
-      path = "/mcp/radarr";
+    radarr = mkSecretsClaudeMcp {
+      service = "mcp-radarr";
       binary = "radarr-mcp";
     };
-    sonarr = mkInfisicalClaudeMcp {
-      path = "/mcp/sonarr";
+    sonarr = mkSecretsClaudeMcp {
+      service = "mcp-sonarr";
       binary = "sonarr-mcp";
     };
     grammarly = {
       type = "stdio";
       command = "sh";
-      args = [ "-c" (mkInfisicalGrammarlyCmd "/mcp/grammarly") ];
+      args = [ "-c" (mkSecretsGrammarlyCmd "mcp-grammarly") ];
     };
     linkedin = mkInfisicalClaudeMcp {
       path = "/mcp/linkedin";
@@ -894,11 +909,11 @@ in
       mcp = {
         forgejo = {
           type = "local";
-          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/forgejo"; binary = "forgejo-mcp"; }) ];
+          command = [ "sh" "-c" (mkSecretsRunCmd { service = "mcp-forgejo"; binary = "forgejo-mcp"; }) ];
         };
         todo = {
           type = "local";
-          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/todo"; binary = "todo-mcp"; }) ];
+          command = [ "sh" "-c" (mkSecretsRunCmd { service = "mcp-todo"; binary = "todo-mcp"; }) ];
         };
         victorialogs = {
           type = "local";
@@ -919,23 +934,23 @@ in
         };
         prowlarr = {
           type = "local";
-          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/prowlarr"; binary = "prowlarr-mcp"; }) ];
+          command = [ "sh" "-c" (mkSecretsRunCmd { service = "mcp-prowlarr"; binary = "prowlarr-mcp"; }) ];
         };
         proxmox = {
           type = "local";
-          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/proxmox"; binary = "proxmox-mcp"; }) ];
+          command = [ "sh" "-c" (mkSecretsRunCmd { service = "mcp-proxmox"; binary = "proxmox-mcp"; }) ];
         };
         radarr = {
           type = "local";
-          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/radarr"; binary = "radarr-mcp"; }) ];
+          command = [ "sh" "-c" (mkSecretsRunCmd { service = "mcp-radarr"; binary = "radarr-mcp"; }) ];
         };
         sonarr = {
           type = "local";
-          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/sonarr"; binary = "sonarr-mcp"; }) ];
+          command = [ "sh" "-c" (mkSecretsRunCmd { service = "mcp-sonarr"; binary = "sonarr-mcp"; }) ];
         };
         grammarly = {
           type = "local";
-          command = [ "sh" "-c" (mkInfisicalGrammarlyCmd "/mcp/grammarly") ];
+          command = [ "sh" "-c" (mkSecretsGrammarlyCmd "mcp-grammarly") ];
         };
         linkedin = {
           type = "local";
