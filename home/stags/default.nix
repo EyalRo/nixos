@@ -786,8 +786,7 @@ in
     tailscale-systray
     wl-clipboard
     cliphist
-    infisical
-    # MCP servers — secrets read from Infisical (see mkInfisicalRunCmd below)
+    # MCP servers — secrets read from /mnt/stags/.config/mcp-tokens/<service>
     forgejo-mcp
     jobhunt-mcp
     todo-mcp
