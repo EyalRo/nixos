@@ -5,8 +5,8 @@ let
     domain = "forgejo.virtualdino.com";
     owner = "stags";
     repo = "mcp";
-    rev = "5a821a58d3a11023955d42589d4e973732371089";
-    hash = "sha256-LoOEw08bFXDDcOq4lnH4u5cZfxAoGBxR1+ltw6XoU3Q=";
+    rev = "69ca03153fcc6b5dc4fbd1746e9395201df7c9a6";
+    hash = "sha256-qWycYfN8N0col4w/2YRKPGYsEaCjuA7Xg1mHZ0RPx0c=";
   };
 
   # All Go servers share the same dep set (mcp-go + transitive)
@@ -53,5 +53,8 @@ in
   };
   linkedin-mcp = pkgs.writeShellScriptBin "linkedin-mcp" ''
     exec ${pkgs.nodejs}/bin/npx -y @pegasusheavy/linkedin-mcp "$@"
+  '';
+  homepage-secrets-mcp = pkgs.writeShellScriptBin "homepage-secrets-mcp" ''
+    exec ${pkgs.deno}/bin/deno run --allow-net --allow-env ${mcpSrc}/homepage-secrets-mcp/mod.ts "$@"
   '';
 }
