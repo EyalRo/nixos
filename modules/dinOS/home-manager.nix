@@ -3,7 +3,6 @@
 let
   defaultTheme = ./starship/default.toml;
   developTheme = ./starship/develop.toml;
-  gitTheme = ./starship/git.toml;
   configDir = config.xdg.configHome;
 in {
   home.packages = with pkgs; [
@@ -24,20 +23,10 @@ in {
     interactiveShellInit = ''
       set -g fish_greeting ""
 
-      # Dynamically switch starship theme based on git repo detection.
-      # Only switches when using default/git themes; preserves nix develop override.
-      function _starship_switch_theme --on-variable PWD
-        set -l base (basename "$STARSHIP_CONFIG" 2>/dev/null)
-        if test -z "$base"; or test "$base" = "default.toml"; or test "$base" = "git.toml"
-          if git rev-parse --is-inside-work-tree >/dev/null 2>&1
-            set -gx STARSHIP_CONFIG "${configDir}/starship/git.toml"
-          else
-            set -gx STARSHIP_CONFIG "${configDir}/starship/default.toml"
-          end
-        end
+      # Default to the green Tokyo theme unless already set (dev shell overrides).
+      if not set -q STARSHIP_CONFIG
+        set -gx STARSHIP_CONFIG "${configDir}/starship/default.toml"
       end
-      # Initialize for the starting directory
-      _starship_switch_theme
 
       # Synology NAS: use xterm-256color to avoid terminfo issues
       function ssh
@@ -67,7 +56,6 @@ in {
   # default.toml must stay writable so noctalia's apply.sh can append the palette
   # section. Seed it only when it doesn't already exist (noctalia owns it after that).
   xdg.configFile."starship/develop.toml".source = developTheme;
-  xdg.configFile."starship/git.toml".source = gitTheme;
   home.activation.seedStarshipDefaultTheme = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -f "${configDir}/starship/default.toml" ]; then
       $DRY_RUN_CMD mkdir -p "${configDir}/starship"
