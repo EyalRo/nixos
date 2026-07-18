@@ -47,9 +47,9 @@
         tailscale = pkgs-unstable-no-overlays.tailscale;
         telegram-desktop = final.callPackage ./pkgs/telegram-desktop-bin { inherit (prev) telegram-desktop fetchFromGitHub; };
         inherit (final.callPackage ./pkgs/mcp { })
-          forgejo-mcp jobhunt-mcp todo-mcp victorialogs-mcp mediawatch-mcp
+          forgejo-mcp todo-mcp victorialogs-mcp mediawatch-mcp
           prowlarr-mcp proxmox-mcp radarr-mcp sonarr-mcp
-          grammarly-mcp linkedin-mcp;
+          grammarly-mcp;
       };
       specialArgs = { inherit inputs; };
       pkgs = import nixpkgs {

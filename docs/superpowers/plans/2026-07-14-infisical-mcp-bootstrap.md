@@ -1,5 +1,14 @@
 # Infisical Bootstrap + MCP Server Migration Implementation Plan
 
+**Superseded and reversed (2026-07-18):** everything this plan set up has
+since been undone. `Homepage.SecretsStore` replaced Infisical as the actual
+secrets backend (`proxmox/docs/superpowers/specs/2026-07-14-secrets-service-design.md`),
+the 7 MCP servers with real tokens were migrated there, and `linkedin-mcp` —
+the one server this plan bootstrapped that never had a real token — was
+removed outright along with the `mkInfisicalRunCmd`/`mkInfisicalClaudeMcp`
+helpers this plan introduced. Infisical (CT 206) itself is being
+decommissioned. Kept for historical context only; do not execute.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Stand up the `homelab` project in the self-hosted Infisical instance and migrate the local MCP servers (used by both Claude Code and OpenCode on this workstation) from reading credentials off flat files under `/mnt/stags/.config/mcp-tokens/` to fetching them from Infisical via `infisical run`.

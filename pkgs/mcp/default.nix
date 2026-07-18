@@ -36,7 +36,6 @@ let
 in
 {
   forgejo-mcp = mkGoMcp { name = "forgejo-mcp"; };
-  jobhunt-mcp = mkGoMcp { name = "jobhunt-mcp"; };
   todo-mcp = mkGoMcp { name = "todo-mcp"; };
   victorialogs-mcp = mkGoMcp { name = "victorialogs-mcp"; };
   mediawatch-mcp = mkGoMcp { name = "mediawatch-mcp"; };
@@ -51,7 +50,4 @@ in
     vendorHash = "sha256-3GXkOgSWHpQnEFSI5TG4CRuY/vBgy1eCYKwK4iPYE8M=";
     postInstall = "mv $out/bin/cmd $out/bin/grammarly-mcp";
   };
-  linkedin-mcp = pkgs.writeShellScriptBin "linkedin-mcp" ''
-    exec ${pkgs.nodejs}/bin/npx -y @pegasusheavy/linkedin-mcp "$@"
-  '';
 }

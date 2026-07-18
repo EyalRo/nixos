@@ -105,38 +105,9 @@ let
     os.replace(tmp_path, target_path)
   '';
 
-  infisicalTokensPath = "/mnt/stags/.config/mcp-tokens";
-  infisicalDomain = "https://infisical.virtualdino.com";
-  infisicalProjectId = "e0945d85-c9f4-4d1e-a1cf-611295ba6613"; # homelab project
-
-  # infisical isn't a home.package — invoked via `nix run` so no rebuild is
-  # needed just to get the binary. Cached in the Nix store after first fetch.
-  infisicalBin = "nix run nixpkgs#infisical --";
-
-  # Logs in as the read-only `mcp-servers` Infisical identity and re-execs
-  # `binary` with secrets from `path` injected as env vars. `path` must be
-  # a folder the mcp-servers-reader role can read (scoped to /mcp/**).
-  # --domain is required on both calls — it is not inherited between them.
-  mkInfisicalRunCmd = { path, binary, extraArgs ? "" }: ''
-    INFISICAL_CLIENT_ID=$(cat ${infisicalTokensPath}/infisical-client-id)
-    INFISICAL_CLIENT_SECRET=$(cat ${infisicalTokensPath}/infisical-client-secret)
-    INFISICAL_TOKEN=$(${infisicalBin} login --domain=${infisicalDomain} --method=universal-auth --client-id="$INFISICAL_CLIENT_ID" --client-secret="$INFISICAL_CLIENT_SECRET" --plain --silent)
-    exec ${infisicalBin} run --domain=${infisicalDomain} --token="$INFISICAL_TOKEN" --projectId=${infisicalProjectId} --env=dev --path=${path} -- ${binary} ${extraArgs}
-  '';
-
-  mkInfisicalClaudeMcp = { path, binary, extraArgs ? "" }: {
-    type = "stdio";
-    command = "sh";
-    args = [ "-c" (mkInfisicalRunCmd { inherit path binary extraArgs; }) ];
-  };
-
-  # Self-hosted GraphQL secrets service (replaces Infisical for these 7
-  # services; `linkedin` stays on mkInfisicalClaudeMcp above since it has no
-  # real token to migrate). SECRETS_URL is pinned to the direct CT160 IP for
-  # now, not secrets.virtualdino.com — DNS + first-time ACME cert issuance
-  # for that hostname aren't live yet (see proxmox repo Caddy/DNS notes).
-  # Switch this to the hostname once that's resolved.
-  secretsUrl = "http://192.168.0.60:4000/graphql";
+  # Self-hosted GraphQL secrets service (replaces Infisical, which is
+  # decommissioned — its only consumer was linkedin-mcp, since removed).
+  secretsUrl = "https://secrets.virtualdino.com/graphql";
   secretsRunScript = "/home/stags/Source/proxmox/scripts/secrets-run.sh";
 
   mkSecretsRunCmd = { service, binary, extraArgs ? "" }: ''
@@ -180,10 +151,13 @@ let
       command = "mediawatch-mcp";
       env.MEDIAWATCH_URL = "https://mediawatch.virtualdino.com";
     };
+    # jobhunt-mcp (the standalone binary) only ever implemented resume
+    # tools and was never updated after jobhunt grew a native MCP server
+    # of its own (full application/lead/scoring surface) at /mcp. Hit
+    # that directly instead of the stale local proxy.
     jobhunt = {
-      type = "stdio";
-      command = "jobhunt-mcp";
-      env.JOBHUNT_URL = "https://jobhunt.virtualdino.com";
+      type = "http";
+      url = "https://jobhunt.virtualdino.com/mcp";
     };
     prowlarr = mkSecretsClaudeMcp {
       service = "mcp-prowlarr";
@@ -205,10 +179,6 @@ let
       type = "stdio";
       command = "sh";
       args = [ "-c" (mkSecretsGrammarlyCmd "mcp-grammarly") ];
-    };
-    linkedin = mkInfisicalClaudeMcp {
-      path = "/mcp/linkedin";
-      binary = "linkedin-mcp";
     };
     cloudflare = {
       type = "sse";
@@ -831,9 +801,9 @@ in
     tailscale-systray
     wl-clipboard
     cliphist
-    # MCP servers — secrets read from /mnt/stags/.config/mcp-tokens/<service>
+    # MCP servers — secrets read from the self-hosted secrets service
+    # (secrets.virtualdino.com) via secrets-run.sh
     forgejo-mcp
-    jobhunt-mcp
     todo-mcp
     victorialogs-mcp
     mediawatch-mcp
@@ -842,7 +812,6 @@ in
     radarr-mcp
     sonarr-mcp
     grammarly-mcp
-    linkedin-mcp
   ];
 
   # Todo daemon — HTTP API on localhost:7410.
@@ -924,13 +893,14 @@ in
           command = [ "mediawatch-mcp" ];
           environment.MEDIAWATCH_URL = "https://mediawatch.virtualdino.com";
         };
-        # jobhunt: bespoke resume storage and PDF rendering.
-        # https://jobhunt.virtualdino.com, no auth (private network + Cloudflare edge).
-        # Added 2026-07 with the resume_variants REST API.
+        # jobhunt: native MCP server built into the jobhunt binary itself
+        # (full application/lead/resume/scoring surface), no auth (private
+        # network + Cloudflare edge). Superseded the standalone jobhunt-mcp
+        # resume-only proxy in 2026-07.
         jobhunt = {
-          type = "local";
-          command = [ "jobhunt-mcp" ];
-          environment.JOBHUNT_URL = "https://jobhunt.virtualdino.com";
+          type = "remote";
+          url = "https://jobhunt.virtualdino.com/mcp";
+          enabled = true;
         };
         prowlarr = {
           type = "local";
@@ -951,10 +921,6 @@ in
         grammarly = {
           type = "local";
           command = [ "sh" "-c" (mkSecretsGrammarlyCmd "mcp-grammarly") ];
-        };
-        linkedin = {
-          type = "local";
-          command = [ "sh" "-c" (mkInfisicalRunCmd { path = "/mcp/linkedin"; binary = "linkedin-mcp"; }) ];
         };
         # Cloudflare MCP servers (remote, OAuth-gated except docs).
         # Mirrors cloudflare entries in claudeSettings above. OAuth fires
