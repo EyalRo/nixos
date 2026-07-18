@@ -789,7 +789,10 @@ in
     mpvpaper
     awww
     fractal
-    tea
+    # tea (Forgejo/Gitea CLI) intentionally not installed persistently —
+    # a stored login only ever had read:issue-less scope. Invoke via
+    # `nix run nixpkgs#tea` instead, authenticated per-call with a token
+    # fetched fresh from the secrets service (see proxmox/scripts/secrets-run.sh).
     ghostty
     claude-desktop
     melia
