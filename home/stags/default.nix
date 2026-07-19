@@ -114,7 +114,7 @@ let
     forgejo = {
       type = "stdio";
       command = "sh";
-      args = [ "-c" "export FORGEJO_URL=https://forgejo.virtualdino.com; export FORGEJO_TOKEN; FORGEJO_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/forgejo 2>/dev/null); exec forgejo-mcp" ];
+      args = [ "-c" "export FORGEJO_URL=https://forgejo.virtualdino.com; exec /home/stags/Source/proxmox/scripts/secrets-run.sh mcp-forgejo -- forgejo-mcp" ];
     };
     todo = {
       type = "stdio";
@@ -870,7 +870,7 @@ in
       mcp = {
         forgejo = {
           type = "local";
-          command = [ "sh" "-c" "export FORGEJO_URL=https://forgejo.virtualdino.com; export FORGEJO_TOKEN; FORGEJO_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/forgejo 2>/dev/null); exec forgejo-mcp" ];
+          command = [ "sh" "-c" "export FORGEJO_URL=https://forgejo.virtualdino.com; exec /home/stags/Source/proxmox/scripts/secrets-run.sh mcp-forgejo -- forgejo-mcp" ];
         };
         todo = {
           type = "local";

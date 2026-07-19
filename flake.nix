@@ -19,9 +19,10 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     claude-desktop-debian.url = "github:aaddrick/claude-desktop-debian";
     claude-desktop-debian.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    pachy.url = "git+https://forgejo.virtualdino.com/stags/pachy.git";
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, impermanence, agenix, niri-flake, commafiles, noctalia, nixos-hardware, claude-desktop-debian, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, impermanence, agenix, niri-flake, commafiles, noctalia, nixos-hardware, claude-desktop-debian, pachy, ... }:
     let
       system = "x86_64-linux";
       lib = nixpkgs.lib;
@@ -46,8 +47,9 @@
         proton-drive-cli = final.callPackage ./pkgs/proton-drive-cli { };
         tailscale = pkgs-unstable-no-overlays.tailscale;
         telegram-desktop = final.callPackage ./pkgs/telegram-desktop-bin { inherit (prev) telegram-desktop fetchFromGitHub; };
+        forgejo-mcp = pachy.packages.${final.system}.forgejo-mcp;
         inherit (final.callPackage ./pkgs/mcp { })
-          forgejo-mcp jobhunt-mcp todo-mcp victorialogs-mcp mediawatch-mcp
+          jobhunt-mcp todo-mcp victorialogs-mcp mediawatch-mcp
           prowlarr-mcp proxmox-mcp radarr-mcp sonarr-mcp
           grammarly-mcp linkedin-mcp homepage-secrets-mcp;
       };
