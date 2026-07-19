@@ -165,6 +165,11 @@ let
       command = "sh";
       args = [ "-c" "export LINKEDIN_ACCESS_TOKEN; LINKEDIN_ACCESS_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/linkedin 2>/dev/null); exec linkedin-mcp" ];
     };
+    homepage-secrets = {
+      type = "stdio";
+      command = "homepage-secrets-mcp";
+      env.HOMEPAGE_URL = "https://homepage.virtualdino.com";
+    };
     cloudflare = {
       type = "sse";
       url = "https://mcp.cloudflare.com/mcp";
@@ -798,6 +803,7 @@ in
     sonarr-mcp
     grammarly-mcp
     linkedin-mcp
+    homepage-secrets-mcp
   ];
 
   # Todo daemon — HTTP API on localhost:7410.
@@ -910,6 +916,11 @@ in
         linkedin = {
           type = "local";
           command = [ "sh" "-c" "export LINKEDIN_ACCESS_TOKEN; LINKEDIN_ACCESS_TOKEN=$(cat /mnt/stags/.config/mcp-tokens/linkedin 2>/dev/null); exec linkedin-mcp" ];
+        };
+        homepage-secrets = {
+          type = "local";
+          command = [ "homepage-secrets-mcp" ];
+          environment.HOMEPAGE_URL = "https://homepage.virtualdino.com";
         };
         # Cloudflare MCP servers (remote, OAuth-gated except docs).
         # Mirrors cloudflare entries in claudeSettings above. OAuth fires

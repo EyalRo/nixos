@@ -49,7 +49,7 @@
         inherit (final.callPackage ./pkgs/mcp { })
           forgejo-mcp jobhunt-mcp todo-mcp victorialogs-mcp mediawatch-mcp
           prowlarr-mcp proxmox-mcp radarr-mcp sonarr-mcp
-          grammarly-mcp linkedin-mcp;
+          grammarly-mcp linkedin-mcp homepage-secrets-mcp;
       };
       specialArgs = { inherit inputs; };
       pkgs = import nixpkgs {
