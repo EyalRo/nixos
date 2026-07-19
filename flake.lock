@@ -1245,11 +1245,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1784414315,
-        "narHash": "sha256-zm3U8LBaO69KmRG6lEbdaBaVJfEkEfdkA4GFb+On5ZM=",
+        "lastModified": 1784428988,
+        "narHash": "sha256-PeKZBJ2VpiKzK0ujZRLJMiMix2t+uRMMaeKXZY7nAXk=",
         "ref": "refs/heads/main",
-        "rev": "23ff68cd4139e2816a853d52e3f0ad9202960a64",
-        "revCount": 56,
+        "rev": "c0a0766c75de9e1a2d5f7e12a220da052e21a821",
+        "revCount": 68,
         "type": "git",
         "url": "https://forgejo.virtualdino.com/stags/pachy.git"
       },
