@@ -5,3 +5,6 @@ result-*
 *.swp
 *.swo
 .aider*
+
+# Local git worktrees used for isolated feature work.
+/.worktrees/
