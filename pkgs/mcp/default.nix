@@ -36,7 +36,6 @@ let
 in
 {
   forgejo-mcp = mkGoMcp { name = "forgejo-mcp"; };
-  jobhunt-mcp = mkGoMcp { name = "jobhunt-mcp"; };
   todo-mcp = mkGoMcp { name = "todo-mcp"; };
   victorialogs-mcp = mkGoMcp { name = "victorialogs-mcp"; };
   mediawatch-mcp = mkGoMcp { name = "mediawatch-mcp"; };

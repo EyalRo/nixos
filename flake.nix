@@ -49,7 +49,7 @@
         telegram-desktop = final.callPackage ./pkgs/telegram-desktop-bin { inherit (prev) telegram-desktop fetchFromGitHub; };
         forgejo-mcp = pachy.packages.${final.system}.forgejo-mcp;
         inherit (final.callPackage ./pkgs/mcp { })
-          jobhunt-mcp todo-mcp victorialogs-mcp mediawatch-mcp
+          todo-mcp victorialogs-mcp mediawatch-mcp
           prowlarr-mcp proxmox-mcp radarr-mcp sonarr-mcp
           grammarly-mcp linkedin-mcp homepage-secrets-mcp;
       };

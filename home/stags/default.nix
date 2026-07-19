@@ -793,7 +793,6 @@ in
     cliphist
     # MCP servers — secrets read from /mnt/stags/.config/mcp-tokens/<service>
     forgejo-mcp
-    jobhunt-mcp
     todo-mcp
     victorialogs-mcp
     mediawatch-mcp
