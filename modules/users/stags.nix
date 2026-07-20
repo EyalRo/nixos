@@ -8,7 +8,7 @@
   users.users.stags = {
     isNormalUser = true;
     description = "stags";
-    extraGroups = [ "docker" "networkmanager" "wheel" ];
+    extraGroups = [ "docker" "kvm" "networkmanager" "wheel" ];
     home = "/home/stags";
     uid = 1026;
     createHome = true;

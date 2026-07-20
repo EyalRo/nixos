@@ -94,7 +94,6 @@ in {
   systemd.tmpfiles.rules = [
     "d /var/lib/AccountsService/users 0755 root root -"
     "C+ /var/lib/AccountsService/users/root 0644 root root - ${gdmHiddenUserConf}"
-    "C+ /var/lib/AccountsService/users/shmool 0644 root root - ${gdmHiddenUserConf}"
   ];
 
   programs.dconf = {
@@ -126,6 +125,10 @@ in {
     nerd-fonts.jetbrains-mono
     nerd-fonts.ubuntu-mono
     claude-code
+    # QEMU/KVM sandbox deps for claude-desktop's Cowork feature
+    qemu_kvm
+    OVMF
+    virtiofsd
     yt-dlp
     gst_all_1.gst-plugins-base
     gst_all_1.gst-plugins-good
