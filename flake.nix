@@ -35,19 +35,19 @@
         claude-code = final.callPackage ./pkgs/claude-code { };
         claude-desktop = final.symlinkJoin {
           name = "claude-desktop";
-          paths = [ claude-desktop-debian.packages.${final.system}.default ];
+          paths = [ claude-desktop-debian.packages.${final.stdenv.hostPlatform.system}.default ];
           nativeBuildInputs = [ final.makeWrapper ];
           postBuild = ''
             wrapProgram $out/bin/claude-desktop --set NIXOS_OZONE_WL 1
           '';
-          meta = claude-desktop-debian.packages.${final.system}.default.meta;
+          meta = claude-desktop-debian.packages.${final.stdenv.hostPlatform.system}.default.meta;
         };
         melia = final.callPackage ./pkgs/melia { };
         opencode-desktop = final.callPackage ./pkgs/opencode-desktop { };
         proton-drive-cli = final.callPackage ./pkgs/proton-drive-cli { };
         tailscale = pkgs-unstable-no-overlays.tailscale;
         telegram-desktop = final.callPackage ./pkgs/telegram-desktop-bin { inherit (prev) telegram-desktop fetchFromGitHub; };
-        forgejo-mcp = pachy.packages.${final.system}.forgejo-mcp;
+        forgejo-mcp = pachy.packages.${final.stdenv.hostPlatform.system}.forgejo-mcp;
         inherit (final.callPackage ./pkgs/mcp { })
           todo-mcp victorialogs-mcp mediawatch-mcp
           prowlarr-mcp proxmox-mcp radarr-mcp sonarr-mcp
