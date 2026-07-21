@@ -804,7 +804,7 @@ in
     tea
     ghostty
     claude-desktop
-    melia
+    geary
     opencode-desktop
     proton-drive-cli
     proton-vpn
@@ -1012,6 +1012,21 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
+  systemd.user.services.ssh-keys-from-secrets = {
+    Unit = {
+      Description = "Load SSH keys from Homepage secrets service into ssh-agent";
+      After = [ "graphical-session.target" ];
+      Wants = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "/home/stags/Source/nixos/scripts/ssh-keys-from-secrets.sh";
+      Environment = [ "SECRETS_URL=https://secrets.virtualdino.com/graphql" ];
+      RemainAfterExit = true;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
@@ -1037,20 +1052,14 @@ in
       "forgejo.virtualdino.com" = {
         HostName = "192.168.0.37";
         User = "git";
-        IdentityFile = "/mnt/stags/.ssh/id_ed25519";
-        IdentitiesOnly = "yes";
       };
       "pve-node1" = {
         HostName = "192.168.0.11";
         User = "root";
-        IdentityFile = "/mnt/stags/.ssh/id_ed25519_proxmox";
-        IdentitiesOnly = "yes";
       };
       "pve-node2" = {
         HostName = "192.168.0.12";
         User = "root";
-        IdentityFile = "/mnt/stags/.ssh/id_ed25519_proxmox";
-        IdentitiesOnly = "yes";
       };
     };
   };

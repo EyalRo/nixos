@@ -42,7 +42,6 @@
           '';
           meta = claude-desktop-debian.packages.${final.stdenv.hostPlatform.system}.default.meta;
         };
-        melia = final.callPackage ./pkgs/melia { };
         opencode-desktop = final.callPackage ./pkgs/opencode-desktop { };
         proton-drive-cli = final.callPackage ./pkgs/proton-drive-cli { };
         tailscale = pkgs-unstable-no-overlays.tailscale;
@@ -182,7 +181,7 @@
     in {
       overlays.default = overlays;
       packages.${system} = {
-        inherit (pkgs) melia opencode-desktop proton-drive-cli;
+        inherit (pkgs) opencode-desktop proton-drive-cli;
       };
       packages.default = pkgs.opencode-desktop;
       nixosModules.dinOS = ./modules/dinOS;
