@@ -1027,41 +1027,42 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
-  programs.ssh = {
-    enable = true;
-    enableDefaultConfig = false;
-    settings = {
-      "*" = {
-        AddKeysToAgent = "yes";
-        Compression = "yes";
-        ForwardAgent = "no";
-        HashKnownHosts = "yes";
-        ServerAliveInterval = "60";
-        ServerAliveCountMax = "3";
-      };
-      "github.com" = {
-        User = "git";
-        IdentityFile = "/mnt/stags/.ssh/id_ed25519_github";
-        IdentitiesOnly = "yes";
-      };
-      "nas" = {
-        HostName = "192.168.0.100";
-        Port = "5022";
-        User = "eyal";
-      };
-      "forgejo.virtualdino.com" = {
-        HostName = "192.168.0.37";
-        User = "git";
-      };
-      "pve-node1" = {
-        HostName = "192.168.0.11";
-        User = "root";
-      };
-      "pve-node2" = {
-        HostName = "192.168.0.12";
-        User = "root";
-      };
-    };
+  # SSH requires the config file to be owned by the user and not a symlink
+  # to the nix store (owned by nobody:nogroup). Use home.file with force = true
+  # to write it as a regular file instead of the default symlink behavior.
+  home.file.".ssh/config" = {
+    force = true;
+    text = ''
+      Host *
+        AddKeysToAgent yes
+        Compression yes
+        ForwardAgent no
+        HashKnownHosts yes
+        ServerAliveInterval 60
+        ServerAliveCountMax 3
+
+      Host github.com
+        User git
+        IdentityFile /mnt/stags/.ssh/id_ed25519_github
+        IdentitiesOnly yes
+
+      Host nas
+        HostName 192.168.0.100
+        Port 5022
+        User eyal
+
+      Host forgejo.virtualdino.com
+        HostName 192.168.0.37
+        User git
+
+      Host pve-node1
+        HostName 192.168.0.11
+        User root
+
+      Host pve-node2
+        HostName 192.168.0.12
+        User root
+    '';
   };
 
   dconf.settings = {
