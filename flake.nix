@@ -31,6 +31,7 @@
       };
 
       overlays = final: prev: {
+        chicago95 = final.callPackage ./pkgs/chicago95 { };
         crystal-sysinfo = final.callPackage ./pkgs/crystal-sysinfo { crystal = pkgs-unstable.crystal; };
         claude-code = final.callPackage ./pkgs/claude-code { };
         claude-desktop = final.symlinkJoin {
