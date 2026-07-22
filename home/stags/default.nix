@@ -171,6 +171,10 @@ let
       command = "homepage-secrets-mcp";
       env.HOMEPAGE_URL = "https://homepage.virtualdino.com";
     };
+    playwright = {
+      type = "stdio";
+      command = "playwright-mcp";
+    };
     cloudflare = {
       type = "sse";
       url = "https://mcp.cloudflare.com/mcp";
@@ -804,6 +808,7 @@ in
     grammarly-mcp
     linkedin-mcp
     homepage-secrets-mcp
+    playwright-mcp
   ];
 
   # Todo daemon — HTTP API on localhost:7410.
@@ -922,6 +927,10 @@ in
           type = "local";
           command = [ "homepage-secrets-mcp" ];
           environment.HOMEPAGE_URL = "https://homepage.virtualdino.com";
+        };
+        playwright = {
+          type = "local";
+          command = [ "playwright-mcp" ];
         };
         # Cloudflare MCP servers (remote, OAuth-gated except docs).
         # Mirrors cloudflare entries in claudeSettings above. OAuth fires

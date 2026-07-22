@@ -49,6 +49,7 @@
         telegram-desktop = final.callPackage ./pkgs/telegram-desktop-bin { inherit (prev) telegram-desktop fetchFromGitHub; };
         forgejo-mcp = pachy.packages.${final.stdenv.hostPlatform.system}.forgejo-mcp;
         victorialogs-mcp = pachy.packages.${final.stdenv.hostPlatform.system}.victorialogs-mcp;
+        playwright-mcp = pachy.packages.${final.stdenv.hostPlatform.system}.playwright-mcp;
         inherit (final.callPackage ./pkgs/mcp { })
           todo-mcp mediawatch-mcp
           prowlarr-mcp proxmox-mcp radarr-mcp sonarr-mcp

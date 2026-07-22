@@ -5,8 +5,8 @@ let
     domain = "forgejo.virtualdino.com";
     owner = "stags";
     repo = "mcp";
-    rev = "9c2286b1738c755afe1952c33b3825bf1ce5d2dd";
-    hash = "sha256-g/Bgd76llZfH1GSAZRDCXmk9bv6dLBBkin27yVH73kc=";
+    rev = "18186da";
+    hash = "sha256-QdsKopCSPpvb0jf1z1nKZnNJsb4yefxYuA9oOSwo3D4=";
   };
 
   # All Go servers share the same dep set (mcp-go + transitive)
