@@ -40,6 +40,27 @@ let
     EOF
   '';
 in {
+  # Power management (laptops)
+  services.power-profiles-daemon.enable = true;
+  services.upower.enable = true;
+
+  # niri Wayland compositor
+  programs.niri = {
+    enable = true;
+    package = pkgs.niri-unstable;
+  };
+  services.displayManager.sessionPackages = [ pkgs.niri ];
+
+  # Reconnect WiFi after resume
+  systemd.services.nm-wake-reconnect = {
+    description = "Reconnect WiFi after resume";
+    after = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
+    wantedBy = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
+    serviceConfig.Type = "oneshot";
+    serviceConfig.ExecStart = "${pkgs.networkmanager}/bin/nmcli networking on";
+  };
+
+  # X11 + GNOME + GDM
   services.xserver.enable = true;
   services.xserver.xkb.layout = "us,il";
   services.xserver.desktopManager.xterm.enable = false;
@@ -112,8 +133,6 @@ in {
   environment.systemPackages = with pkgs; [
     dinoWallpaper
     friendlyPalsWallpapers
-    distrobox
-    distroshelf
     fastfetch
     ghostty
     gnome-browser-connector
@@ -121,19 +140,18 @@ in {
     gnomeExtensions.appindicator
     gnomeExtensions.caffeine
     gnomeExtensions.paperwm
-    nerd-fonts.fira-code
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.ubuntu-mono
     claude-code
     # QEMU/KVM sandbox deps for claude-desktop's Cowork feature
     qemu_kvm
     OVMF
     virtiofsd
-    yt-dlp
     gst_all_1.gst-plugins-base
     gst_all_1.gst-plugins-good
     gst_all_1.gst-plugins-bad
     gst_all_1.gst-plugins-ugly
     gst_all_1.gst-libav
   ];
+
+  # Home-manager config for stags (GUI-oriented)
+  home-manager.users.stags = import ../../../home/stags;
 }

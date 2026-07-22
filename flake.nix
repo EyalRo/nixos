@@ -121,47 +121,28 @@
         modules = extraModules ++ baseModules ++ [{ nixpkgs.hostPlatform = system; }];
       };
 
-      userLayers = {
-        stags = [
-          self.nixosModules.users-stags
-          profileModules.workstation
-          profileModules.niri
-        ];
-      };
-
       profileModules = {
+        base = ./modules/dinOS/profiles/base.nix;
         kodi = ./modules/dinOS/profiles/kodi.nix;
-        niri = ./modules/dinOS/profiles/niri.nix;
         workstation = ./modules/dinOS/profiles/workstation.nix;
       };
 
-      profileDeps = {
-        niri = [ "workstation" ];
-      };
-
-      profileUsers = { };
-
-      hostUsers = {
-        ideapad3 = [ "stags" ];
-        nuc14 = [ "stags" ];
-        xps15 = [ "stags" ];
-        z590i = [ "stags" ];
-      };
-
+      # All hosts get base; additional profiles specified per-host
       hostProfiles = {
+        ideapad3 = [ "workstation" ];
+        ideapad3-g = [ ];
         nuc14 = [ "kodi" ];
+        xps15 = [ "workstation" ];
+        z590i = [ "workstation" ];
       };
 
       expandProfiles = profiles:
-        lib.unique (profiles ++ lib.concatMap (profile: profileDeps.${profile} or []) profiles);
+        lib.unique ([ "base" ] ++ profiles);
 
       mkHost = name:
         let
           requestedProfiles = hostProfiles.${name} or [];
           enabledProfiles = expandProfiles requestedProfiles;
-          profileUserLayers = lib.concatMap (profile: profileUsers.${profile} or []) enabledProfiles;
-          enabledUsers = lib.unique ((hostUsers.${name} or []) ++ profileUserLayers);
-          modulesForUsers = lib.concatMap (user: userLayers.${user} or []) enabledUsers;
           modulesForProfiles = lib.concatMap (profile: [ profileModules.${profile} ]) enabledProfiles;
         in
           mkSystem ([
@@ -170,7 +151,7 @@
               networking.hostName = lib.mkDefault name;
               system.nixos.label = builtins.concatStringsSep "-" ([ name ] ++ enabledProfiles);
             }
-          ] ++ modulesForProfiles ++ modulesForUsers);
+          ] ++ modulesForProfiles);
 
       baseConfigurations = {
         dinOS = mkSystem [
@@ -186,7 +167,6 @@
       };
       packages.default = pkgs.opencode-desktop;
       nixosModules.dinOS = ./modules/dinOS;
-      nixosModules.users-stags = ./modules/users/stags.nix;
 
       inherit baseConfigurations;
 

@@ -20,20 +20,29 @@
   security.sudo.wheelNeedsPassword = false;
 
   # Avatar configuration for stags
-  environment.etc."avatars/stags.png".source = ./stags-avatar.png;
-  environment.etc."skel/.face".source = ./stags-avatar.png;
+  environment.etc."avatars/stags.png".source = ../../users/stags-avatar.png;
+  environment.etc."skel/.face".source = ../../users/stags-avatar.png;
   systemd.tmpfiles.rules = [
     "L+ /home/stags/.face - - - - /etc/avatars/stags.png"
     "L+ /var/lib/AccountsService/icons/stags - - - - /etc/avatars/stags.png"
   ];
   
   # Add stags avatar to system faces directory for GNOME avatar picker
-  environment.systemPackages = [
+  # Terminal-only system packages
+  environment.systemPackages = with pkgs; [
     (pkgs.runCommand "stags-avatar" {} ''
       mkdir -p $out/share/pixmaps/faces
-      cp ${./stags-avatar.png} $out/share/pixmaps/faces/stags.png
+      cp ${../../users/stags-avatar.png} $out/share/pixmaps/faces/stags.png
     '')
     pkgs.nh
+    fastfetch
+    claude-code
+    distrobox
+    distroshelf
+    yt-dlp
+    nerd-fonts.fira-code
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.ubuntu-mono
   ];
   
   # GDM login screen avatar configuration
@@ -55,9 +64,7 @@ SystemAccount=false
   };
 
   services.nfs.idmapd.settings = {
-    General = {
-      Domain = "localdomain";
-    };
+    Domain = "localdomain";
   };
 
   age.identityPaths = [
@@ -147,6 +154,4 @@ SystemAccount=false
       directories = [ "" ];
     };
   };
-
-  home-manager.users.stags = import ../../home/stags;
 }

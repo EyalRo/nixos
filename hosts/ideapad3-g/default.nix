@@ -8,19 +8,6 @@
     ./hardware-configuration.nix
   ];
 
-  # stags is the sudoer admin user
-  users.users.stags = {
-    isNormalUser = true;
-    description = "stags";
-    extraGroups = [ "wheel" "networkmanager" ];
-    home = "/home/stags";
-    uid = 1026;
-    createHome = true;
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILQ3ueSjCunmENDU8CMOKwoT+igDTQcG9R9sgzMPCquo EyalRo@users.noreply.github.com"
-    ];
-  };
-
   # Guest user for auto-login
   users.users.guest = {
     isNormalUser = true;
@@ -28,8 +15,6 @@
     home = "/home/guest";
     createHome = true;
   };
-
-  security.sudo.wheelNeedsPassword = false;
 
   # XFCE desktop with auto-login as guest
   services.xserver.enable = true;
