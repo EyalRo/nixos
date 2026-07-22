@@ -64,7 +64,9 @@ SystemAccount=false
   };
 
   services.nfs.idmapd.settings = {
-    Domain = "localdomain";
+    General = {
+      Domain = "localdomain";
+    };
   };
 
   age.identityPaths = [
