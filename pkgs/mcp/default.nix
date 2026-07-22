@@ -5,8 +5,8 @@ let
     domain = "forgejo.virtualdino.com";
     owner = "stags";
     repo = "mcp";
-    rev = "69ca03153fcc6b5dc4fbd1746e9395201df7c9a6";
-    hash = "sha256-qWycYfN8N0col4w/2YRKPGYsEaCjuA7Xg1mHZ0RPx0c=";
+    rev = "9c2286b1738c755afe1952c33b3825bf1ce5d2dd";
+    hash = "sha256-g/Bgd76llZfH1GSAZRDCXmk9bv6dLBBkin27yVH73kc=";
   };
 
   # All Go servers share the same dep set (mcp-go + transitive)
@@ -36,7 +36,6 @@ let
 in
 {
   todo-mcp = mkGoMcp { name = "todo-mcp"; };
-  victorialogs-mcp = mkGoMcp { name = "victorialogs-mcp"; };
   mediawatch-mcp = mkGoMcp { name = "mediawatch-mcp"; };
   prowlarr-mcp = mkGoMcp { name = "prowlarr-mcp"; };
   proxmox-mcp = mkGoMcp { name = "proxmox-mcp"; };

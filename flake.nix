@@ -48,8 +48,9 @@
         tailscale = pkgs-unstable-no-overlays.tailscale;
         telegram-desktop = final.callPackage ./pkgs/telegram-desktop-bin { inherit (prev) telegram-desktop fetchFromGitHub; };
         forgejo-mcp = pachy.packages.${final.stdenv.hostPlatform.system}.forgejo-mcp;
+        victorialogs-mcp = pachy.packages.${final.stdenv.hostPlatform.system}.victorialogs-mcp;
         inherit (final.callPackage ./pkgs/mcp { })
-          todo-mcp victorialogs-mcp mediawatch-mcp
+          todo-mcp mediawatch-mcp
           prowlarr-mcp proxmox-mcp radarr-mcp sonarr-mcp
           grammarly-mcp linkedin-mcp homepage-secrets-mcp;
       };

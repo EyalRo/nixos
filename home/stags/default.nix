@@ -124,6 +124,7 @@ let
     victorialogs = {
       type = "stdio";
       command = "victorialogs-mcp";
+      env.VICTORIALOGS_URL = "http://192.168.0.39:9428";
     };
     mediawatch = {
       type = "stdio";
@@ -878,6 +879,7 @@ in
         victorialogs = {
           type = "local";
           command = [ "victorialogs-mcp" ];
+          environment.VICTORIALOGS_URL = "http://192.168.0.39:9428";
         };
         mediawatch = {
           type = "local";
