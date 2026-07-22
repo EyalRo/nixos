@@ -677,7 +677,7 @@ in
       plugins.source = [
         { kind = "git"; location = "https://github.com/noctalia-dev/community-plugins"; name = "community"; }
         { kind = "git"; location = "https://github.com/noctalia-dev/official-plugins"; name = "official"; }
-        { kind = "git"; location = "https://forgejo.virtualdino.com/stags/noctalia-plugins"; name = "DinOS"; }
+        { kind = "path"; location = "${inputs.pachy}/noctalia-plugins"; name = "DinOS"; }
       ];
     };
   };
