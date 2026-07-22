@@ -708,13 +708,30 @@ in
       "$wallpaperPath" 2>/dev/null || true
   '';
 
-  # Plugin enable/disable state also lives in the mutable state file and
-  # sticks around once toggled via the GUI. Unlike bar layout, there's a
-  # real IPC command for this, so force it every switch like wallpaper.
+  # Plugin sources and enable/disable state live in the mutable state file
+  # (~/.local/state/noctalia/settings.toml) and persist across switches.
+  # The GUI can modify these, so we force-sync them on every switch to match
+  # the declarative config. This ensures all sources are correct and all
+  # DinOS plugins are automatically enabled.
   home.activation.resetNoctaliaPlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg plugins enable stags/mediawatch 2>/dev/null || true
-    $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg plugins enable stags/todo 2>/dev/null || true
-    $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg plugins enable stags/life 2>/dev/null || true
+    NOCTALIA=${lib.getExe config.programs.noctalia.package}
+    DINOS_PLUGINS=${inputs.pachy}/noctalia-plugins
+    
+    # Remove all existing sources and re-add them to match declarative config
+    $DRY_RUN_CMD $NOCTALIA msg plugins source remove community 2>/dev/null || true
+    $DRY_RUN_CMD $NOCTALIA msg plugins source remove official 2>/dev/null || true
+    $DRY_RUN_CMD $NOCTALIA msg plugins source remove DinOS 2>/dev/null || true
+    
+    $DRY_RUN_CMD $NOCTALIA msg plugins source add community git https://github.com/noctalia-dev/community-plugins 2>/dev/null || true
+    $DRY_RUN_CMD $NOCTALIA msg plugins source add official git https://github.com/noctalia-dev/official-plugins 2>/dev/null || true
+    $DRY_RUN_CMD $NOCTALIA msg plugins source add DinOS path $DINOS_PLUGINS 2>/dev/null || true
+    
+    # Auto-enable all plugins from the DinOS source by parsing catalog.toml
+    if [ -f "$DINOS_PLUGINS/catalog.toml" ]; then
+      for plugin_id in $(grep -oP '(?<=^id = ")[^"]+' "$DINOS_PLUGINS/catalog.toml"); do
+        $DRY_RUN_CMD $NOCTALIA msg plugins enable "$plugin_id" 2>/dev/null || true
+      done
+    fi
   '';
 
   # See noctaliaBarDefault/spliceNoctaliaTomlSectionScript above: no IPC
