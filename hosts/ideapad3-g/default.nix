@@ -59,11 +59,25 @@
       
       # Set notification theme
       ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfce4-notifyd -p /theme -s "Chicago95" || true
-      
+
       # Set desktop background to teal (Win95 style)
       ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/color1 -s "#008080" || true
       ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/color-style -t int -s 0 || true
       ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/image-style -t int -s 0 || true
+
+      # The GTK/xfwm4/notifyd theme names above only restyle widgets and
+      # window borders. The top/bottom panel's own layout (Win95 taskbar
+      # with Start button, tray placement, etc.) is a separate panel
+      # profile bundled by Chicago95 and has to be imported explicitly, or
+      # the panels stay on XFCE's default vanilla layout.
+      ${pkgs.xfce4-panel-profiles}/bin/xfce4-panel-profiles load \
+        "${pkgs.chicago95}/share/xfce4-panel-profiles/layouts/Chicago95_Panel_Preferences.tar.bz2" || true
+
+      # Bind Super to pop up the applications menu (Win95 Start-button
+      # behavior). XFCE doesn't bind the Super key to anything by default,
+      # so without this the key does nothing.
+      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfce4-keyboard-shortcuts \
+        -p "/commands/custom/<Super>" -n -t string -s "xfce4-popup-applicationsmenu" || true
     '';
   };
 

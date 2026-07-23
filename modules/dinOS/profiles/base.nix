@@ -60,7 +60,11 @@ SystemAccount=false
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "client";
-    extraUpFlags = [ "--accept-routes" ];
+    # --operator lets the stags user (and the unprivileged tray app) control
+    # tailscaled directly. Without it, any user-space "tailscale up" is
+    # denied and falls back to sudo, which fails with a tty/askpass error in
+    # the graphical session (no controlling terminal, no polkit agent).
+    extraUpFlags = [ "--accept-routes" "--operator=stags" ];
   };
 
   services.nfs.idmapd.settings = {

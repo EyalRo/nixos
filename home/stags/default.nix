@@ -206,6 +206,38 @@ let
   });
 
   claudeMcpServersJson = pkgs.writeText "claude-code-mcp-servers.json" (builtins.toJSON claudeMcpServers);
+
+  sshConfigFile = pkgs.writeText "ssh-config" ''
+    Host *
+      AddKeysToAgent yes
+      Compression yes
+      ForwardAgent no
+      HashKnownHosts yes
+      ServerAliveInterval 60
+      ServerAliveCountMax 3
+
+    Host github.com
+      User git
+      IdentityFile /mnt/stags/.ssh/id_ed25519_github
+      IdentitiesOnly yes
+
+    Host nas
+      HostName 192.168.0.100
+      Port 5022
+      User eyal
+
+    Host forgejo.virtualdino.com
+      HostName 192.168.0.37
+      User git
+
+    Host pve-node1
+      HostName 192.168.0.11
+      User root
+
+    Host pve-node2
+      HostName 192.168.0.12
+      User root
+  '';
 in
 {
   imports = [
@@ -690,8 +722,8 @@ in
   # Noctalia keeps the active wallpaper in mutable app state
   # (~/.local/state/noctalia/settings.toml), not in the config.toml rendered
   # above, so a GUI wallpaper pick sticks around forever. Reset it to the
-  # dinOS day/night default on every switch, mirroring the GNOME background
-  # below. The hour check is just a same-switch fallback (matches noctalia's
+  # dinOS day/night default on every switch. The hour check is just a
+  # same-switch fallback (matches noctalia's
   # own default 06:30/18:30 manual sunrise/sunset) — once the app is running,
   # the hooks.darkModeChange script above takes over with real sunrise/sunset
   # times for this location. `wallpaper-set` with no connector applies to
@@ -1027,50 +1059,23 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
   };
 
-  # SSH requires the config file to be owned by the user and not a symlink
-  # to the nix store (owned by nobody:nogroup). Use home.file with force = true
-  # to write it as a regular file instead of the default symlink behavior.
-  home.file.".ssh/config" = {
-    force = true;
-    text = ''
-      Host *
-        AddKeysToAgent yes
-        Compression yes
-        ForwardAgent no
-        HashKnownHosts yes
-        ServerAliveInterval 60
-        ServerAliveCountMax 3
-
-      Host github.com
-        User git
-        IdentityFile /mnt/stags/.ssh/id_ed25519_github
-        IdentitiesOnly yes
-
-      Host nas
-        HostName 192.168.0.100
-        Port 5022
-        User eyal
-
-      Host forgejo.virtualdino.com
-        HostName 192.168.0.37
-        User git
-
-      Host pve-node1
-        HostName 192.168.0.11
-        User root
-
-      Host pve-node2
-        HostName 192.168.0.12
-        User root
-    '';
-  };
+  # SSH requires the config file to be owned by the user and writable only by
+  # them; home.file always symlinks into the nix store (owned by
+  # nobody:nogroup there), which fails ssh's strict permission check no
+  # matter what `force` is set to. Copy it in as a real file instead, same
+  # as claudeCodeSettings above.
+  home.activation.sshConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD install -Dm600 ${sshConfigFile} "$HOME/.ssh/config"
+  '';
 
   dconf.settings = {
-    "org/gnome/desktop/background" = {
-      picture-uri = "file://${wallpaperDayPath}";
-      picture-uri-dark = "file://${wallpaperNightPath}";
-      picture-options = "scaled";
-    };
+    # No org/gnome/desktop/background entry here on purpose: GNOME's own
+    # dconf-driven wallpaper was a second, competing wallpaper source next
+    # to noctalia's native day/night handling (hooks.darkModeChange +
+    # resetNoctaliaWallpaper above) — GDM's greeter would paint this one,
+    # then niri+noctalia would immediately swap to its own, producing the
+    # "one image flashes then gets replaced" symptom. Noctalia is the only
+    # thing that should ever set the desktop wallpaper.
     "org/gnome/shell" = {
       enabled-extensions = [
         "todo@stags.virtualdino.com"
