@@ -1,12 +1,20 @@
 # ideapad3-g: Guest machine with XFCE auto-login
 # Theming reference: https://github.com/grassmunk/Chicago95
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
   ];
+
+  # Temporary: SSH key propagation is stuck (this host's local nixos checkout
+  # is behind, see debugging session 2026-07-23) so allow password login as a
+  # manual fallback. No hashedPassword is declared for stags/guest anywhere in
+  # this repo, so `passwd` must be run locally/at console first — this alone
+  # doesn't open anything up until an account actually has a password set.
+  # Revert once the archdino key is confirmed working over SSH.
+  services.openssh.settings.PasswordAuthentication = lib.mkForce true;
 
   # Guest user for auto-login
   users.users.guest = {
