@@ -16,6 +16,13 @@
   # Revert once the archdino key is confirmed working over SSH.
   services.openssh.settings.PasswordAuthentication = lib.mkForce true;
 
+  # Temporary: root login over SSH with a password, so commands can be
+  # copy-pasted in directly for the stags UID reconciliation (2026-07-23)
+  # rather than done at console. NixOS defaults this to prohibit-password.
+  # Revert once that's done - this is a real loosening (LAN-reachable root
+  # password auth), not something to leave on long-term.
+  services.openssh.settings.PermitRootLogin = lib.mkForce "yes";
+
   # Guest user for auto-login
   users.users.guest = {
     isNormalUser = true;
