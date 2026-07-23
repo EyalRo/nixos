@@ -30,20 +30,12 @@
     xfce4-panel-profiles
   ];
 
-  # Apply Chicago95 theme via xfconf-query at login
-  systemd.services.chicago95-theme = {
-    description = "Apply Chicago95 XFCE theme";
-    wantedBy = [ "graphical-session.target" ];
-    after = [ "graphical-session.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      User = "guest";
-      RemainAfterExit = true;
-    };
-    script = ''
-      export DISPLAY=:0
-      export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u guest)/bus
-      
+  # Apply Chicago95 theme via XDG autostart (runs in guest's XFCE session)
+  environment.etc."xdg/autostart/chicago95-theme.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Chicago95 Theme
+    Exec=${pkgs.writeShellScript "chicago95-theme" ''
       # Wait for xfconfd to be ready
       sleep 2
       
@@ -64,8 +56,11 @@
       ${pkgs.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/color1 -s "#008080" || true
       ${pkgs.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/color-style -t int -s 0 || true
       ${pkgs.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/image-style -t int -s 0 || true
-    '';
-  };
+    ''}
+    Terminal=false
+    NoDisplay=true
+    X-GNOME-Autostart-Phase=Applications
+  '';
 
   # Plymouth boot splash with Chicago95 theme
   boot.plymouth.enable = true;
