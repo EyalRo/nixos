@@ -98,27 +98,45 @@
       ${pkgs.xfce4-panel-profiles}/bin/xfce4-panel-profiles load \
         "${pkgs.chicago95}/share/xfce4-panel-profiles/layouts/Chicago95_Panel_Preferences.tar.bz2" || true
 
-      # Chicago95's own layout declares plugin-7 as type 'indicator', from
-      # whatever xfce4-indicator-plugin version was current when this
-      # profile was captured (~2015-2016, going by the launcher .desktop
-      # filenames' unix timestamps). nixpkgs never packaged this plugin at
-      # all (checked pkgs.xfce.* and a full package search), so it was
-      # packaged from upstream source (pkgs/xfce4-indicator-plugin) -
-      # current upstream (2.5.0) registers its module as 'indicator-plugin'
-      # (X-XFCE-Module in its .desktop), not 'indicator', so the imported
-      # config needs that one string corrected or xfce4-panel can't
-      # resolve the type even with the package installed.
+      # Chicago95's own layout declares plugin-7 as type 'indicator'.
+      # nixpkgs never packaged this plugin at all (checked pkgs.xfce.* and a
+      # full package search), so it was packaged from upstream source
+      # (pkgs/xfce4-indicator-plugin). Its .desktop ships X-XFCE-Module=
+      # 'indicator-plugin', but xfce4-panel resolves a configured plugin
+      # type to a .desktop *filename* (indicator.desktop here), not that
+      # internal module field - whiskermenu/systray/etc. just happen to have
+      # matching filename and module name, which is what made that look like
+      # the rule. Renaming plugin-7 to 'indicator-plugin' (an earlier
+      # attempt at this fix) actually broke it: there's no
+      # indicator-plugin.desktop, so the panel silently skipped the slot
+      # even with the right package installed. The original 'indicator'
+      # value Chicago95 shipped was correct all along - confirmed live by
+      # testing both values directly against the wrapper-2.0 process list.
       #
       # plugin-8 'statusnotifier' is different: it's explicitly deprecated
       # upstream (its own docs say the functionality was folded into
       # xfce4-panel's systray as of 4.15, this system runs 4.20) and never
       # packaged in nixpkgs either, so it's dropped rather than built.
-      ${pkgs.xfconf}/bin/xfconf-query -c xfce4-panel -p /plugins/plugin-7 -s "indicator-plugin" || true
       ${pkgs.xfconf}/bin/xfconf-query -c xfce4-panel -p /panels/panel-0/plugin-ids \
         -n -a -t int -s 1 -t int -s 2 -t int -s 14 -t int -s 15 -t int -s 16 \
         -t int -s 9 -t int -s 13 -t int -s 3 -t int -s 4 -t int -s 6 \
         -t int -s 5 -t int -s 7 -t int -s 10 -t int -s 11 -t int -s 12 || true
       ${pkgs.xfconf}/bin/xfconf-query -c xfce4-panel -p /plugins/plugin-8 -r -R || true
+
+      # xfce4-panel-profiles' own load call above restarts the panel
+      # internally the moment it runs, so it already reflects whatever the
+      # imported profile said at that instant - but the plugin-8 removal
+      # just above only updates xfconf's stored value, it doesn't itself
+      # signal the now-running panel to re-read anything. Without a fresh
+      # restart here, the live process keeps using the pre-correction
+      # config it started with, silently keeping the dead statusnotifier
+      # slot exactly as if nothing had been fixed. `xfce4-panel -r` alone
+      # was unreliable when tested manually over SSH (no visible effect
+      # across several attempts) - kill and relaunch directly instead,
+      # which was confirmed live to actually pick up corrected xfconf state.
+      ${pkgs.procps}/bin/pkill -u guest -x xfce4-panel || true
+      sleep 1
+      ${pkgs.xfce4-panel}/bin/xfce4-panel &
 
       # Bind Super to pop up the applications menu (Win95 Start-button
       # behavior). XFCE doesn't bind the Super key to anything by default,
