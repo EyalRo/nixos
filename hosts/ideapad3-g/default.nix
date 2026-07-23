@@ -48,22 +48,22 @@
       sleep 2
       
       # Set GTK theme
-      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xsettings -p /Net/ThemeName -s "Chicago95" || true
-      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xsettings -p /Net/IconThemeName -s "Chicago95" || true
-      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xsettings -p /Gtk/CursorThemeName -s "Chicago95 Standard Cursors" || true
-      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xsettings -p /Gtk/DialogsUseHeader -s false || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xsettings -p /Net/ThemeName -s "Chicago95" || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xsettings -p /Net/IconThemeName -s "Chicago95" || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xsettings -p /Gtk/CursorThemeName -s "Chicago95 Standard Cursors" || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xsettings -p /Gtk/DialogsUseHeader -s false || true
       
       # Set window manager theme
-      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfwm4 -p /general/theme -s "Chicago95" || true
-      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfwm4 -p /general/title_font -s "Sans Bold 8" || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xfwm4 -p /general/theme -s "Chicago95" || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xfwm4 -p /general/title_font -s "Sans Bold 8" || true
       
       # Set notification theme
-      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfce4-notifyd -p /theme -s "Chicago95" || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xfce4-notifyd -p /theme -s "Chicago95" || true
       
       # Set desktop background to teal (Win95 style)
-      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/color1 -s "#008080" || true
-      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/color-style -t int -s 0 || true
-      ${pkgs.xfce.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/image-style -t int -s 0 || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/color1 -s "#008080" || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/color-style -t int -s 0 || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/image-style -t int -s 0 || true
     '';
   };
 
