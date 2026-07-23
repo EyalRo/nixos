@@ -1251,11 +1251,11 @@
         "rev": "00039c0dfd143240c089bcaa27e51e405b1e29bc",
         "revCount": 93,
         "type": "git",
-        "url": "https://forgejo.virtualdino.com/stags/pachy.git"
+        "url": "ssh://git@forgejo.virtualdino.com/stags/pachy.git"
       },
       "original": {
         "type": "git",
-        "url": "https://forgejo.virtualdino.com/stags/pachy.git"
+        "url": "ssh://git@forgejo.virtualdino.com/stags/pachy.git"
       }
     },
     "parts": {

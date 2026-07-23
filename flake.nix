@@ -19,7 +19,7 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     claude-desktop-debian.url = "github:aaddrick/claude-desktop-debian";
     claude-desktop-debian.inputs.nixpkgs.follows = "nixpkgs-unstable";
-    pachy.url = "git+https://forgejo.virtualdino.com/stags/pachy.git";
+    pachy.url = "git+ssh://git@forgejo.virtualdino.com/stags/pachy.git";
   };
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, impermanence, agenix, niri-flake, commafiles, noctalia, nixos-hardware, claude-desktop-debian, pachy, ... }:
