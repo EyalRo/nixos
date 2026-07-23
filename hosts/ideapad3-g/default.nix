@@ -36,6 +36,11 @@
     google-chrome
     chicago95
     xfce4-panel-profiles
+    # Chicago95's bundled panel layout (Chicago95_Panel_Preferences.tar.bz2)
+    # declares a whiskermenu panel plugin (the Win95 Start button) but this
+    # package was never installed, so xfce4-panel has no plugin to load into
+    # that slot - it renders broken/empty instead of failing loudly.
+    xfce4-whiskermenu-plugin
   ];
 
   # Apply Chicago95 theme via XDG autostart (runs in guest's XFCE session)
@@ -59,6 +64,15 @@
       
       # Set notification theme
       ${pkgs.xfconf}/bin/xfconf-query -c xfce4-notifyd -p /theme -s "Chicago95" || true
+
+      # guest has no password (locked account, autologin-only), so
+      # xfce4-screensaver's default lock screen is an unauthenticatable dead
+      # end, and its default lock/logout/enabled=true then force-ends the
+      # session entirely after being locked too long - reported as "getting
+      # logged out on idle". Screen dimming/blanking (saver/idle-activation)
+      # is unaffected and still kicks in normally.
+      ${pkgs.xfconf}/bin/xfconf-query -c xfce4-screensaver -p /lock/enabled -n -t bool -s false || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xfce4-screensaver -p /lock/logout/enabled -n -t bool -s false || true
 
       # Set desktop background to teal (Win95 style)
       ${pkgs.xfconf}/bin/xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/color1 -s "#008080" || true
