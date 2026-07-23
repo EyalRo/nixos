@@ -94,6 +94,18 @@
       ${pkgs.xfce4-panel-profiles}/bin/xfce4-panel-profiles load \
         "${pkgs.chicago95}/share/xfce4-panel-profiles/layouts/Chicago95_Panel_Preferences.tar.bz2" || true
 
+      # Chicago95's own layout declares a plugin-7 "indicator" slot
+      # (xfce4-indicator-plugin), but that package isn't in nixpkgs at all,
+      # so xfce4-panel can never load it - it just errors every session.
+      # systray (plugin-5, already present) already covers status-notifier
+      # items in modern XFCE, so drop the dead slot rather than chase an
+      # unpackaged dependency.
+      ${pkgs.xfconf}/bin/xfconf-query -c xfce4-panel -p /panels/panel-0/plugin-ids \
+        -n -a -t int -s 1 -t int -s 2 -t int -s 14 -t int -s 15 -t int -s 16 \
+        -t int -s 9 -t int -s 13 -t int -s 3 -t int -s 4 -t int -s 6 \
+        -t int -s 5 -t int -s 8 -t int -s 10 -t int -s 11 -t int -s 12 || true
+      ${pkgs.xfconf}/bin/xfconf-query -c xfce4-panel -p /plugins/plugin-7 -r -R || true
+
       # Bind Super to pop up the applications menu (Win95 Start-button
       # behavior). XFCE doesn't bind the Super key to anything by default,
       # so without this the key does nothing.
