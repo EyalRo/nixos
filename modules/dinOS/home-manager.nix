@@ -15,6 +15,8 @@ in {
 
   programs.home-manager.enable = true;
   programs.git.enable = true;
+  programs.git.settings.user.name = "stags";
+  programs.git.settings.user.email = "stags@isdino.com";
   programs.direnv.enable = true;
   programs.direnv.silent = true;
   programs.direnv.nix-direnv.enable = true;

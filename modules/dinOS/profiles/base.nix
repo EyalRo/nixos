@@ -14,6 +14,7 @@
     createHome = true;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILQ3ueSjCunmENDU8CMOKwoT+igDTQcG9R9sgzMPCquo EyalRo@users.noreply.github.com"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILQMFfX9yWcbng9ae6ydbH49FHpg39P7ZE+yM9IayblV stags@archdino"
     ];
   };
 
