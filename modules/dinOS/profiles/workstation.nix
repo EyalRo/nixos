@@ -117,18 +117,13 @@ in {
     "C+ /var/lib/AccountsService/users/root 0644 root root - ${gdmHiddenUserConf}"
   ];
 
-  programs.dconf = {
-    enable = true;
-    profiles.user.databases = [
-      {
-        settings."org/gnome/desktop/background" = {
-          picture-uri = "file:///run/current-system/sw/share/backgrounds/friendly-pals-day.png";
-          picture-uri-dark = "file:///run/current-system/sw/share/backgrounds/friendly-pals-night.png";
-          picture-options = "scaled";
-        };
-      }
-    ];
-  };
+  # No system-level dconf background default here on purpose: this
+  # duplicated home-manager's dconf.settings for the same keys (now
+  # removed there too) and both competed with noctalia's native day/night
+  # wallpaper handling. Being a lower-priority db underneath the user db,
+  # this one kept serving the stale value even after the user override was
+  # cleared. Noctalia is the only thing that should set the wallpaper.
+  programs.dconf.enable = true;
 
   environment.systemPackages = with pkgs; [
     dinoWallpaper
