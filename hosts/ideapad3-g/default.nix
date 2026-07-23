@@ -143,6 +143,17 @@
       # so without this the key does nothing.
       ${pkgs.xfconf}/bin/xfconf-query -c xfce4-keyboard-shortcuts \
         -p "/commands/custom/<Super>" -n -t string -s "xfce4-popup-applicationsmenu" || true
+
+      # Chrome desktop icon: this used to be a systemd.tmpfiles symlink
+      # straight into the Nix store, which can never be made executable
+      # (symlink permission bits on Linux are governed entirely by the
+      # target, and the store is read-only). xfdesktop shields any
+      # .desktop launcher that isn't executable-and-owned-by-the-session-
+      # user with a lock/shield emblem, treating it as untrusted - a real,
+      # guest-owned, executable copy avoids that instead of trying to
+      # chmod something that can't be chmod'd.
+      install -Dm755 "${pkgs.google-chrome}/share/applications/google-chrome.desktop" \
+        "$HOME/Desktop/google-chrome.desktop"
     ''}
     Terminal=false
     NoDisplay=true
@@ -157,7 +168,6 @@
   # Chrome desktop shortcut for guest user
   systemd.tmpfiles.rules = [
     "d /home/guest/Desktop 0755 guest users -"
-    "L+ /home/guest/Desktop/google-chrome.desktop - guest users - /run/current-system/sw/share/applications/google-chrome.desktop"
   ];
 
   time.timeZone = "America/Los_Angeles";
