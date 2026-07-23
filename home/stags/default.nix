@@ -792,6 +792,28 @@ in
       "$HOME/.local/state/noctalia/settings.toml" ${noctaliaThemeTemplatesToml} theme.templates 2>/dev/null || true
   '';
 
+  # The three splices above edit settings.toml on disk, but noctalia is a
+  # long-running shell (spawned once at niri login, not restarted by a
+  # switch) that keeps its own in-memory copy of settings.toml and flushes
+  # it back to disk on unrelated state changes (notifications, media,
+  # usage counts, ...). If noctalia is still running from before this
+  # switch, that stale in-memory copy clobbers our splices within about a
+  # minute of activation, silently reverting bar.default/widget.*/
+  # theme.templates and making newly-enabled plugins never show up on the
+  # bar. `config-reload` makes the running instance re-read settings.toml
+  # immediately, adopting the splices before it has a chance to overwrite
+  # them; confirmed live (2026-07-23) that without this the bar layout
+  # reverted ~40s after activation despite the splice succeeding. No-op if
+  # noctalia isn't running yet (e.g. before first login).
+  home.activation.reloadNoctaliaSettings = lib.hm.dag.entryAfter [
+    "resetNoctaliaBar"
+    "resetNoctaliaWidgets"
+    "resetNoctaliaTemplates"
+    "resetNoctaliaPlugins"
+  ] ''
+    $DRY_RUN_CMD ${lib.getExe config.programs.noctalia.package} msg config-reload 2>/dev/null || true
+  '';
+
   home.activation.cloneGnomePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     plugins_dir="$HOME/.local/share/gnome-local-plugins"
     if [ ! -d "$plugins_dir/.git" ]; then
