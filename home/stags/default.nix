@@ -686,6 +686,15 @@ in
       nightlight = {
         enabled = true;
       };
+      # Point the desktop image selector at the switch-managed background
+      # symlink farm instead of the noctalia default (~/Pictures/Wallpapers).
+      # /run/current-system/sw/share/backgrounds is rebuilt fresh from
+      # environment.systemPackages on every switch, so the picker's list
+      # resets to exactly the current generation's wallpapers automatically
+      # — no separate activation script needed to keep it in sync.
+      wallpaper = {
+        directory = "/run/current-system/sw/share/backgrounds";
+      };
       # Auto-toggle dark/light at real sunrise/sunset for this location
       # (location.address above), then swap the wallpaper to match.
       colorSchemes = {
